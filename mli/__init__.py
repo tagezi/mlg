@@ -1,5 +1,5 @@
-#     This code is a part of program Science Articles Orderliness
-#     Copyright (C) 2021  Valerii Goncharuk (aka tagezi)
+#     This code is a part of program Manual Lichen identification
+#     Copyright (C) 2022  Valerii Goncharuk (aka tagezi)
 #
 #     This program is free software: you can redistribute it and/or modify
 #     it under the terms of the GNU General Public License as published by
@@ -13,13 +13,3 @@
 #
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-import sys
-from PyQt5.QtWidgets import QApplication
-
-from gui.main_window import MainWindow
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    sheet = MainWindow()
-    sys.exit(app.exec_())

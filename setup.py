@@ -18,13 +18,13 @@ setup(
     version=__version__,  # noqa: F821
     author="Valerii Goncharuk",
     author_email="lera.goncharuk@gmail.com",
-    packages=["mlg"],
+    packages=["mli"],
     package_data={"": ["LICENSE"]},
     url="https://github.com/tagezi/mli",
     license="GPL 3.0",
     entry_points={
         "console_scripts": [
-            "mlg = mlg:__main__"]},
+            "mli = mli:__main__"]},
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: X11 Applications :: Qt",

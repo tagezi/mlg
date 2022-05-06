@@ -84,7 +84,7 @@ def get_increase_value(sColumns, tValues):
         return tValues * len(sColumns.split(', '))
 
     logging.error('The tuple must be filled or consist of one element.'
-                  'The columns: %s \n The tuple: %s', sColumns, tValues)
+                  f'The columns: {sColumns}\n The tuple: {tValues}')
     return
 
 
@@ -124,8 +124,8 @@ class SQL:
         try:
             self.oConnector = sqlite3.connect(sFileDB)
         except DatabaseError as e:
-            logging.exception('An error has occurred: %s.\n'
-                              'String of query: %s \n', e, sFileDB)
+            logging.exception(f'An error has occurred: {e}.\n'
+                              f'String of query: {sFileDB}\n')
         self.logging = start_logging()
 
     def __del__(self):
@@ -153,8 +153,8 @@ class SQL:
         try:
             oCursor.executescript(SQL)
         except DatabaseError as e:
-            logging.exception('An error has occurred: %s.\n'
-                              'String of query: %s \n', e, SQL)
+            logging.exception(f'An error has occurred: {e}.\n'
+                              f'String of query: {SQL}\n')
             return False
 
         return True
@@ -177,9 +177,9 @@ class SQL:
             else:
                 oCursor.execute(sqlString, tValues)
         except DatabaseError as e:
-            logging.exception('An error has occurred: %s.\n'
-                              'String of query: %s \n'
-                              'Parameters^ %s', e, sqlString, tValues)
+            logging.exception(f'An error has occurred: {e}.\n'
+                              f'String of query: {sqlString}\n'
+                              f'Parameters: {tValues}')
             return False
 
         return oCursor
@@ -198,8 +198,7 @@ class SQL:
         :rtype: str or bool
         """
         sSQL = ("?, " * len(sColumns.split(", ")))[:-2]
-        sqlString = "INSERT INTO " + \
-                    sTable + " (" + sColumns + ") VALUES (" + sSQL + ") "
+        sqlString = f'INSERT INTO {sTable} ({sColumns}) VALUES ({sSQL})'
         oCursor = self.execute_query(sqlString, tValues)
         if not oCursor:
             return False
@@ -222,11 +221,10 @@ class SQL:
         :rtype: bool
         """
         if sColumns is not None:
-            sqlString = 'DELETE FROM ' + sTable + ' WHERE ' + \
-                        get_columns(sColumns)
+            sqlString = f'DELETE FROM {sTable} WHERE {get_columns(sColumns)}'
             oCursor = self.execute_query(sqlString, tValues)
         else:
-            sqlString = "DELETE FROM " + sTable
+            sqlString = f'DELETE FROM {sTable}'
             oCursor = self.execute_query(sqlString)
 
         if not oCursor:
@@ -251,8 +249,7 @@ class SQL:
         """
         sSetUpdate = sSetUpdate + "=?"
         sWhereUpdate = get_columns(sWhereUpdate)
-        sqlString = "UPDATE " + sTable + " SET " + sSetUpdate + \
-                    " WHERE " + sWhereUpdate + " "
+        sqlString = f'UPDATE {sTable} SET {sSetUpdate} WHERE {sWhereUpdate}'
         oCursor = self.execute_query(sqlString, tValues)
         if not oCursor:
             return False
@@ -284,9 +281,9 @@ class SQL:
             or False, if the row not found.
         """
         if sFunc == 'Count':
-            sGet = 'Count(' + sGet + ')'
+            sGet = f'Count({sGet})'
         elif sFunc == 'DISTINCT':
-            sGet = sFunc + ' ' + sGet
+            sGet = f'{sFunc} {sGet}'
 
         if sWhere:
             if sConj:
@@ -294,10 +291,10 @@ class SQL:
             else:
                 sCol = get_columns(sWhere)
 
-            sqlString = "SELECT " + sGet + " FROM " + sTable + " WHERE " + sCol
+            sqlString = f'SELECT {sGet} FROM {sTable} WHERE {sCol}'
             oCursor = self.execute_query(sqlString, tValues)
         else:
-            oCursor = self.execute_query("SELECT " + sGet + " FROM " + sTable)
+            oCursor = self.execute_query(f'SELECT {sGet} FROM {sTable}')
 
         if not oCursor:
             return False
@@ -328,7 +325,7 @@ class SQL:
                 sWhere = get_columns(sWhere, sConj)
             else:
                 sWhere = get_columns(sWhere)
-        sqlString = "SELECT " + sID + " FROM " + sTable + " WHERE " + sWhere
+        sqlString = f'SELECT {sID} FROM {sTable} WHERE {sWhere}'
         oCursor = self.execute_query(sqlString, tValues)
         if not oCursor:
             return False
@@ -355,7 +352,7 @@ class SQL:
         :return: Tuple of all rows of table.
         :rtype: tuple or bool
         """
-        oCursor = self.execute_query("SELECT * FROM " + sTable)
+        oCursor = self.execute_query(f'SELECT * FROM {sTable}')
         if not oCursor:
             return False
 

@@ -14,12 +14,14 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from gettext import gettext as _
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow, QAction, qApp
 
 from mli.gui.file_dialogs import OpenFileDialog
 from mli.gui.help_dialog import About
 from mli.gui.setting_dialog import SettingDialog
+from mli.gui.taxon_dialogs import EditTaxonDialog, NewTaxonDialog
 from mli.lib.sql import SQL
 
 
@@ -27,7 +29,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        sTitleProgram = 'Manual Lichen Guide'
+        sTitleProgram = _('Manual Lichen identification')
         self.setWindowTitle(sTitleProgram)
 
         self.create_actions()
@@ -39,31 +41,33 @@ class MainWindow(QMainWindow):
     def create_actions(self):
         """ Method collect all actions which can do from GUI of program. """
         # File menu
-        self.oOpenDB = QAction('Open &DataBase...', self)
-        self.oPrint = QAction('P&rint...')
-        self.oSetting = QAction('&Setting...')
-        self.oExitAct = QAction(QIcon.fromTheme('SP_exit'), '&Exit', self)
+        self.oOpenDB = QAction(_('Open &DataBase...'), self)
+        self.oPrint = QAction(_('P&rint...'))
+        self.oSetting = QAction(_('&Setting...'))
+        self.oExitAct = QAction(QIcon.fromTheme('SP_exit'), _('&Exit'), self)
         self.oExitAct.setShortcut('Ctrl+Q')
-        self.oExitAct.setStatusTip('Exit application')
+        self.oExitAct.setStatusTip(_('Exit application'))
 
         # Edit
-        self.oUndo = QAction('Undo', self)
+        self.oUndo = QAction(_('Undo'), self)
         self.oUndo.setShortcut('Ctrl+Z')
-        self.oRedo = QAction('Redo', self)
+        self.oRedo = QAction(_('Redo'), self)
         self.oRedo.setShortcut('Ctrl+Z')
-        self.oFind = QAction('Find...', self)
+        self.oNewTaxon = QAction(_('&New taxon...'))
+        self.oEditTaxon = QAction(_('&Edit taxon...'))
+        self.oFind = QAction(_('Find...'), self)
         self.oFind.setShortcut('Ctrl+F')
 
         # Help
-        self.oOpenHelp = QAction('&Help', self)
-        self.oAbout = QAction('&About', self)
+        self.oOpenHelp = QAction(_('&Help'), self)
+        self.oAbout = QAction(_('&About'), self)
 
     def set_menu_bar(self):
         """ Method create Menu Bar on main window of program GUI. """
         oMenuBar = self.menuBar()
 
         # Create file menu
-        oFileMenu = oMenuBar.addMenu('&File')
+        oFileMenu = oMenuBar.addMenu(_('&File'))
         oFileMenu.addAction(self.oOpenDB)
         oFileMenu.addSeparator()
         oFileMenu.addAction(self.oPrint)
@@ -73,23 +77,26 @@ class MainWindow(QMainWindow):
         oFileMenu.addAction(self.oExitAct)
 
         # Create Edit menu
-        oEdit = oMenuBar.addMenu('&Edit')
+        oEdit = oMenuBar.addMenu(_('&Edit'))
         oEdit.addAction(self.oUndo)
         oEdit.addAction(self.oRedo)
+        oEdit.addSeparator()
+        oEdit.addAction(self.oNewTaxon)
+        oEdit.addAction(self.oEditTaxon)
         oEdit.addSeparator()
         oEdit.addAction(self.oFind)
 
         # Create View menu
-        oView = oMenuBar.addMenu('&View')
+        oView = oMenuBar.addMenu(_('&View'))
 
         # Create Run menu
-        oView = oMenuBar.addMenu('&Run')
+        oView = oMenuBar.addMenu(_('&Run'))
 
         # Create Tool menu
-        oTools = oMenuBar.addMenu('&Tools')
+        oTools = oMenuBar.addMenu(_('&Tools'))
 
         # Create Help menu
-        oHelpMenu = oMenuBar.addMenu('&Help')
+        oHelpMenu = oMenuBar.addMenu(_('&Help'))
         oHelpMenu.addAction(self.oOpenHelp)
         oHelpMenu.addAction(self.oAbout)
 
@@ -100,13 +107,25 @@ class MainWindow(QMainWindow):
     def connect_actions(self):
         """ It is PyQt5 slots or other words is connecting from GUI element to
         method or function in program. """
+        # Menu File
         self.oOpenDB.triggered.connect(self.onOpenDB)
         self.oSetting.triggered.connect(self.onOpenSetting)
         self.oExitAct.triggered.connect(qApp.quit)
+
+        # Menu Edit
+        self.oNewTaxon.triggered.connect(self.onNewTaxon)
+        self.oEditTaxon.triggered.connect(self.onEditTaxon)
+        # Menu Help
         self.oAbout.triggered.connect(self.onDisplayAbout)
 
+    def onDisplayAbout(self):
+        """ Method open dialog window with information about the program. """
+        oAbout = About(self)
+        oAbout.exec_()
+
     def onOpenDB(self):
-        dParameter = {'name': 'Open Database', 'filter': 'DB file (*.db)'}
+        dParameter = {'name': _('Open Database'),
+                      'filter': _('DB file (*.db)')}
         oOpenDBFile = OpenFileDialog(self, dParameter)
         sFileNameDB = oOpenDBFile.exec()
         if sFileNameDB is not None:
@@ -119,7 +138,10 @@ class MainWindow(QMainWindow):
         oSettingDialog = SettingDialog(self)
         oSettingDialog.exec_()
 
-    def onDisplayAbout(self):
-        """ Method open dialog window with information about the program. """
-        oAbout = About(self)
-        oAbout.exec_()
+    def onEditTaxon(self):
+        oEditTaxonDialog = EditTaxonDialog(self)
+        oEditTaxonDialog.exec_()
+
+    def onNewTaxon(self):
+        oNewTaxonDialog = NewTaxonDialog(self)
+        oNewTaxonDialog.exec_()

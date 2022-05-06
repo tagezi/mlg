@@ -1,5 +1,5 @@
-#     This code is a part of program Manual Lichen identification
-#     Copyright (C) 2022  Valerii Goncharuk (aka tagezi)
+#     This code is a part of program Science Articles Orderliness
+#     Copyright (C) 2021  Valerii Goncharuk (aka tagezi)
 #
 #     This program is free software: you can redistribute it and/or modify
 #     it under the terms of the GNU General Public License as published by
@@ -14,12 +14,29 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import sys
-from PyQt5.QtWidgets import QApplication
+def order_str_to_dict(sString):
+    lString = sString.split()
 
-from mli.gui.main_window import MainWindow
+    dElements = {'order': '', 'name': '', 'author': ''}
+    i = 0
+    for sElement in lString:
+        if i == 1:
+            dElements['order'] = sElement
+        elif i == 2:
+            dElements['name'] = sElement
+        else:
+            dElements['author'] = f"{dElements['author']} {sElement}"
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    sheet = MainWindow()
-    sys.exit(app.exec_())
+        i += 1
+
+    return dElements
+
+
+def text_to_list(sString):
+    if sString:
+        return sString.split('\n')
+    return
+
+
+if __name__ == '__main__':
+    pass

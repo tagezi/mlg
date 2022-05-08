@@ -21,7 +21,8 @@ from PyQt5.QtWidgets import QMainWindow, QAction, qApp
 from mli.gui.file_dialogs import OpenFileDialog
 from mli.gui.help_dialog import About
 from mli.gui.setting_dialog import SettingDialog
-from mli.gui.taxon_dialogs import EditTaxonDialog, NewTaxonDialog
+from mli.gui.taxon_dialogs import EditTaxonDialog, NewTaxonDialog,\
+    AddSynonymsDialog
 from mli.lib.sql import SQL
 
 
@@ -55,6 +56,7 @@ class MainWindow(QMainWindow):
         self.oRedo.setShortcut('Ctrl+Z')
         self.oNewTaxon = QAction(_('&New taxon...'))
         self.oEditTaxon = QAction(_('&Edit taxon...'))
+        self.oAddSynonyms = QAction(_('Add synonyms taxon...'))
         self.oFind = QAction(_('Find...'), self)
         self.oFind.setShortcut('Ctrl+F')
 
@@ -83,6 +85,7 @@ class MainWindow(QMainWindow):
         oEdit.addSeparator()
         oEdit.addAction(self.oNewTaxon)
         oEdit.addAction(self.oEditTaxon)
+        oEdit.addAction(self.oAddSynonyms)
         oEdit.addSeparator()
         oEdit.addAction(self.oFind)
 
@@ -115,8 +118,13 @@ class MainWindow(QMainWindow):
         # Menu Edit
         self.oNewTaxon.triggered.connect(self.onNewTaxon)
         self.oEditTaxon.triggered.connect(self.onEditTaxon)
+        self.oAddSynonyms.triggered.connect(self.onAddSynonyms)
         # Menu Help
         self.oAbout.triggered.connect(self.onDisplayAbout)
+
+    def onAddSynonyms(self):
+        oNewSynonymsDialog = AddSynonymsDialog(self)
+        oNewSynonymsDialog.exec_()
 
     def onDisplayAbout(self):
         """ Method open dialog window with information about the program. """

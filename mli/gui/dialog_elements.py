@@ -32,7 +32,7 @@ class HComboBox(QHBoxLayout):
     Also, it creates methods that change parameters inside block without direct
     access.
     """
-    def __init__(self, oParent=None):
+    def __init__(self, sLabel='', oParent=None):
         super(QHBoxLayout, self).__init__(oParent)
         oLabel = QLabel()
         oLineEdit = QLineEdit()
@@ -41,6 +41,7 @@ class HComboBox(QHBoxLayout):
         self.addWidget(oLabel)
         self.addWidget(oComboBox)
         self.set_combo_width()
+        self.set_label(sLabel)
 
     def clear_list(self):
         """ Clean up a list of QComboBox.
@@ -107,13 +108,14 @@ class HLineEdit(QHBoxLayout):
     access.
     """
 
-    def __init__(self, oParent=None):
+    def __init__(self, sLabel='', oParent=None):
         super(QHBoxLayout, self).__init__(oParent)
         oLabel = QLabel()
         oLineEdit = QLineEdit()
         self.addWidget(oLabel)
         self.addWidget(oLineEdit)
         self.set_line_width()
+        self.set_label(sLabel)
 
     def get_text(self):
         """ The function gets text from QLineEdit.
@@ -161,13 +163,14 @@ class HTextEdit(QHBoxLayout):
     access.
     """
 
-    def __init__(self, oParent=None):
+    def __init__(self, sLabel='', oParent=None):
         super(QHBoxLayout, self).__init__(oParent)
         oLabel = QLabel()
         oTextEdit = QTextEdit()
         self.addWidget(oLabel)
         self.addWidget(oTextEdit)
         self.set_textedit_size()
+        self.set_label(sLabel)
 
     def get_text(self):
         """ The function gets text from QLineEdit of QTextEdit.

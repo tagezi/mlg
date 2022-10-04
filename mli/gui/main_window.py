@@ -21,8 +21,10 @@ from PyQt5.QtWidgets import QMainWindow, QAction, qApp
 from mli.gui.file_dialogs import OpenFileDialog
 from mli.gui.help_dialog import About
 from mli.gui.setting_dialog import SettingDialog
-from mli.gui.taxon_dialogs import EditTaxonDialog, NewTaxonDialog,\
-    AddSynonymsDialog
+from mli.gui.tab_widget import CentralTabWidget
+from mli.gui.tool_dialogs import NewSubstrate, EditTaxonDialog, \
+    EditSubstrate, NewTaxonDialog, AddSynonymsDialog
+
 from mli.lib.sql import SQL
 
 
@@ -54,11 +56,15 @@ class MainWindow(QMainWindow):
         self.oUndo.setShortcut('Ctrl+Z')
         self.oRedo = QAction(_('Redo'), self)
         self.oRedo.setShortcut('Ctrl+Z')
+        self.oFind = QAction(_('Find...'), self)
+        self.oFind.setShortcut('Ctrl+F')
+
+        #Tools
         self.oNewTaxon = QAction(_('&New taxon...'))
         self.oEditTaxon = QAction(_('&Edit taxon...'))
         self.oAddSynonyms = QAction(_('Add synonyms taxon...'))
-        self.oFind = QAction(_('Find...'), self)
-        self.oFind.setShortcut('Ctrl+F')
+        self.oNewSubstrate = QAction(_('New substrate...'))
+        self.oEditSubstrate = QAction(_('Edit substrate...'))
 
         # Help
         self.oOpenHelp = QAction(_('&Help'), self)
@@ -83,10 +89,6 @@ class MainWindow(QMainWindow):
         oEdit.addAction(self.oUndo)
         oEdit.addAction(self.oRedo)
         oEdit.addSeparator()
-        oEdit.addAction(self.oNewTaxon)
-        oEdit.addAction(self.oEditTaxon)
-        oEdit.addAction(self.oAddSynonyms)
-        oEdit.addSeparator()
         oEdit.addAction(self.oFind)
 
         # Create View menu
@@ -97,6 +99,12 @@ class MainWindow(QMainWindow):
 
         # Create Tool menu
         oTools = oMenuBar.addMenu(_('&Tools'))
+        oTools.addAction(self.oNewTaxon)
+        oTools.addAction(self.oEditTaxon)
+        oTools.addAction(self.oAddSynonyms)
+        oTools.addSeparator()
+        oTools.addAction(self.oNewSubstrate)
+        oTools.addAction(self.oEditSubstrate)
 
         # Create Help menu
         oHelpMenu = oMenuBar.addMenu(_('&Help'))
@@ -115,10 +123,13 @@ class MainWindow(QMainWindow):
         self.oSetting.triggered.connect(self.onOpenSetting)
         self.oExitAct.triggered.connect(qApp.quit)
 
-        # Menu Edit
+        # Menu Tools
         self.oNewTaxon.triggered.connect(self.onNewTaxon)
         self.oEditTaxon.triggered.connect(self.onEditTaxon)
         self.oAddSynonyms.triggered.connect(self.onAddSynonyms)
+        self.oNewSubstrate.triggered.connect(self.onNewSubstrate)
+        self.oEditSubstrate.triggered.connect(self.onEditSubstrate)
+
         # Menu Help
         self.oAbout.triggered.connect(self.onDisplayAbout)
 
@@ -149,6 +160,14 @@ class MainWindow(QMainWindow):
     def onEditTaxon(self):
         oEditTaxonDialog = EditTaxonDialog(self)
         oEditTaxonDialog.exec_()
+
+    def onEditSubstrate(self):
+        oEditSubstrate = EditSubstrate(self)
+        oEditSubstrate.exec_()
+
+    def onNewSubstrate(self):
+        oNewSubstrate = NewSubstrate(self)
+        oNewSubstrate.exec_()
 
     def onNewTaxon(self):
         oNewTaxonDialog = NewTaxonDialog(self)

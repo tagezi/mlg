@@ -14,8 +14,8 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtWidgets import QDialog, QPushButton, QLabel, QMessageBox
+from PyQt5.QtCore import QSize
+from PyQt5.QtWidgets import QMessageBox
 
 from mli.version import __version__
 

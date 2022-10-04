@@ -14,17 +14,8 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from gettext import gettext as _
-from itertools import zip_longest
-
-from PyQt5 import QtGui
-from PyQt5.QtWidgets import QComboBox, QDialog, QHBoxLayout, QLabel, \
-    QLineEdit, QMessageBox, QPushButton, QTextEdit, QVBoxLayout
-
-from mli.gui.file_dialogs import OpenFileDialog
-from mli.lib.config import ConfigProgram
-from mli.lib.sql import SQL
-from mli.lib.str import text_to_list
+from PyQt5.QtWidgets import QComboBox, QHBoxLayout, QLabel, \
+    QLineEdit, QTextEdit
 
 
 class HComboBox(QHBoxLayout):

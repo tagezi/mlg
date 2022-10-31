@@ -271,7 +271,7 @@ class NewTaxonDialog(CDialog):
         oCursor = self.oConnector.sql_get_all(sDB)
         lValues = []
         for tRow in oCursor:
-            lValues.append(tRow[2])
+            lValues.append(tRow[3])
         return lValues
 
     def onClickApply(self):

@@ -19,9 +19,8 @@ from PyQt5.QtWidgets import QComboBox, QHBoxLayout, QLabel, \
 
 
 class HComboBox(QHBoxLayout):
-    """ The class creates a block that units QLabel, QComboBox and QLineEdit.
-    Also, it creates methods that change parameters inside block without direct
-    access.
+    """ Creates a block that units QLabel, QComboBox and QLineEdit. Also, it
+    creates methods that change parameters inside block without direct access.
     """
     def __init__(self, sLabel='', oParent=None):
         super(QHBoxLayout, self).__init__(oParent)
@@ -94,9 +93,8 @@ class HComboBox(QHBoxLayout):
 
 
 class HLineEdit(QHBoxLayout):
-    """ The class creates a block that units QLabel and QLineEdit.
-    Also, it creates methods that change parameters inside block without direct
-    access.
+    """ Creates a block that units QLabel and QLineEdit. Also, it creates
+    methods that change parameters inside block without direct access.
     """
 
     def __init__(self, sLabel='', oParent=None):
@@ -149,9 +147,8 @@ class HLineEdit(QHBoxLayout):
 
 
 class HTextEdit(QHBoxLayout):
-    """ The class creates a block that units QLabel and QTextEdit.
-    Also, it creates methods that change parameters inside block without direct
-    access.
+    """ Creates a block that units QLabel and QTextEdit. Also, it creates
+    methods that change parameters inside block without direct access.
     """
 
     def __init__(self, sLabel='', oParent=None):

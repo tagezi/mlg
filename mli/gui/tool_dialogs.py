@@ -76,7 +76,7 @@ def warning_taxon_exist(sTaxName):
     """
     oMsgBox = QMessageBox()
     oMsgBox.setIcon(QMessageBox.Information)
-    oMsgBox.setText(_(f'Such the taxon name <i>{sTaxName}</i> already exists. '
+    oMsgBox.setText(_(f'The taxon name <i>{sTaxName}</i> already exists. '
                       f'Do write data?'))
     oMsgBox.setWindowTitle(_('Save Confirmation'))
     oMsgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
@@ -109,6 +109,7 @@ class ADialog(QDialog):
         sDBFile = oConfigProgram.get_config_value('DB', 'filepath')
         self.oConnector = SQL(sDBFile)
         self.init_UI_button_block()
+        self.init_UI_failed()
         self.init_UI()
         self.connect_actions()
 
@@ -131,11 +132,35 @@ class ADialog(QDialog):
         self.oHLayoutButtons.addWidget(self.oButtonOk)
         self.oHLayoutButtons.addWidget(self.oButtonCancel)
 
+    def init_UI_failed(self):
+        self.oComboMainTax = HComboBox(_('Main Taxon:'))
+        self.oComboTaxLevel = HComboBox(_('Taxon level:'))
+        self.oLineEditLatName = HLineEdit(_('Latin name:'))
+        self.oLineEditAuthor = HLineEdit(_('Author & year:'))
+        self.oLineEditEnName = HLineEdit(_('English name:'))
+        self.oLineEditLocaleName = HLineEdit(_('Local name:'))
+        self.oTextEditSynonyms = HTextEdit(_('Synonyms:'))
+        self.oTextEditAuthors = HTextEdit(_('Authors:'))
+        self.oComboTaxNames = HComboBox(_('Taxon name: '))
+
+        lTaxonLevel = self.create_tax_level_list('TaxonLevel')
+        self.oComboMainTax.set_combo_list(self.onCreateTaxonList(lTaxonLevel))
+        self.oComboTaxLevel.set_combo_list(lTaxonLevel)
+        self.oComboTaxLevel.set_text(lTaxonLevel[1])
+        self.oComboTaxNames.set_combo_list(self.onCreateTaxonList(lTaxonLevel))
+
     def connect_actions(self):
         """ Connects buttons with actions they should perform. """
         self.oButtonApply.clicked.connect(self.onClickApply)
         self.oButtonOk.clicked.connect(self.onClickOk)
         self.oButtonCancel.clicked.connect(self.onCancel)
+
+    def create_tax_level_list(self, sDB, bGetAll=None):
+        oCursor = self.oConnector.sql_get_all(sDB)
+        lValues = []
+        for tRow in oCursor:
+            lValues.append(tRow[3])
+        return lValues
 
     def onCancel(self):
         """ The method closes the dialog without saving the data. """
@@ -151,14 +176,25 @@ class ADialog(QDialog):
         self.onClickApply()
         self.close()
 
-    def onCreateTaxonList(self):
-        sSQL = 'SELECT TaxonLevel.level_name, Taxon.taxon_lat_name ' \
-               'FROM Taxon JOIN TaxonLevel ' \
-               'ON Taxon.id_level=TaxonLevel.id_level;'
-        oCursor = self.oConnector.execute_query(sSQL)
+    def onCreateTaxonList(self, lTaxonLevel):
+        """ Creates a list of taxon names for further use in dialog elements.
+
+        :param lTaxonLevel: A list of taxon level.
+        :type lTaxonLevel: list
+        :return: A list in form - (Taxon Level) Taxon Name
+        :type: list[str]
+        """
         lValues = []
-        for tRow in oCursor:
-            lValues.append(f'({tRow[0]}) {tRow[1]}')
+        for sTaxonLevel in lTaxonLevel:
+
+            sSQL = 'SELECT TaxonLevel.level_name, Taxon.taxon_lat_name ' \
+                   'FROM Taxon JOIN TaxonLevel ' \
+                   'ON Taxon.id_level=TaxonLevel.id_level ' \
+                   f"WHERE TaxonLevel.level_name='{sTaxonLevel}';"
+            oCursor = self.oConnector.execute_query(sSQL)
+
+            for tRow in oCursor:
+                lValues.append(f'({tRow[0]}) {tRow[1]}')
         return lValues
 
     def check_synonyms(self, sTaxName, sSynonyms, sAuthors):
@@ -228,11 +264,6 @@ class AddSynonymsDialog(ADialog):
         self.setModal(Qt.ApplicationModal)
 
         oVLayout = QVBoxLayout()
-        self.oComboTaxNames = HComboBox(_('Taxon name: '))
-        self.oComboTaxNames.set_combo_list(self.onCreateTaxonList())
-        self.oTextEditSynonyms = HTextEdit(_('Synonyms: '))
-        self.oTextEditAuthors = HTextEdit(_('Authors: '))
-
         oVLayout.addLayout(self.oComboTaxNames)
         oVLayout.addLayout(self.oTextEditSynonyms)
         oVLayout.addLayout(self.oTextEditAuthors)
@@ -266,17 +297,6 @@ class EditTaxonDialog(ADialog):
         self.setWindowTitle(_('Add new taxon to tree'))
         self.setModal(Qt.ApplicationModal)
 
-        self.oComboTaxLevel = HComboBox(_('Taxon level: '))
-        self.oComboTaxLevel.set_combo_list(self.onCreateTaxonList())
-        self.oComboMainTax = HComboBox(_('Main Taxon: '))
-        self.oComboMainTax.set_combo_list(self.onCreateTaxonList())
-        self.oLineEditLatName = HLineEdit(_('Latin name: '))
-        self.oLineEditAuthor = HLineEdit(_('Author & year: '))
-        self.oLineEditEnName = HLineEdit(_('English name: '))
-        self.oLineEditLocaleName = HLineEdit(_('Local name: '))
-        self.oTextEditSynonyms = HTextEdit(_('Synonyms: '))
-        self.oTextEditAuthors = HTextEdit(_('Authors: '))
-
         oVLayout = QVBoxLayout()
         oVLayout.addLayout(self.oComboTaxLevel)
         oVLayout.addLayout(self.oComboMainTax)
@@ -290,11 +310,10 @@ class EditTaxonDialog(ADialog):
         self.setLayout(oVLayout)
 
     def onClickApply(self):
-        sFileName = self.oTextFiled.text()
-        self.oConfigProgram.set_config_value('DB', 'filepath', sFileName)
+        pass
 
 
-class NewTaxonDialog(CDialog):
+class NewTaxonDialog(ADialog):
     def __init__(self, oParent=None):
         super(NewTaxonDialog, self).__init__(oParent)
 
@@ -303,20 +322,9 @@ class NewTaxonDialog(CDialog):
         self.setModal(Qt.ApplicationModal)
 
         oVLayout = QVBoxLayout()
-        self.oComboTaxLevel = HComboBox(_('Taxon level:'))
-        self.oComboTaxLevel.set_combo_list(
-            sorted(self.create_tax_level_list('TaxonLevel')))
-        self.oComboMainTax = HComboBox(_('Main Taxon:'))
-        self.oComboMainTax.set_combo_list(sorted(self.onCreateTaxonList()))
-        self.oLineEditLatName = HLineEdit(_('Latin name:'))
-        self.oLineEditAuthor = HLineEdit(_('Author & year:'))
-        self.oLineEditEnName = HLineEdit(_('English name:'))
-        self.oLineEditLocaleName = HLineEdit(_('Local name:'))
-        self.oTextEditSynonyms = HTextEdit(_('Synonyms:'))
-        self.oTextEditAuthors = HTextEdit(_('Authors:'))
 
-        oVLayout.addLayout(self.oComboTaxLevel)
         oVLayout.addLayout(self.oComboMainTax)
+        oVLayout.addLayout(self.oComboTaxLevel)
         oVLayout.addLayout(self.oLineEditLatName)
         oVLayout.addLayout(self.oLineEditAuthor)
         oVLayout.addLayout(self.oLineEditEnName)
@@ -325,13 +333,6 @@ class NewTaxonDialog(CDialog):
         oVLayout.addLayout(self.oTextEditAuthors)
         oVLayout.addLayout(self.oHLayoutButtons)
         self.setLayout(oVLayout)
-
-    def create_tax_level_list(self, sDB):
-        oCursor = self.oConnector.sql_get_all(sDB)
-        lValues = []
-        for tRow in oCursor:
-            lValues.append(tRow[3])
-        return lValues
 
     def onClickApply(self):
         sTaxLevel = self.oComboTaxLevel.get_text()

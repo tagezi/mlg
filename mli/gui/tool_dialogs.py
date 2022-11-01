@@ -43,6 +43,19 @@ from mli.lib.str import text_to_list
 
 
 def zip_taxon_lists(iTaxName, lSynonyms, lAuthors):
+    """ Creates a list of lists from the taxon ID, taxon synonyms, and synonym
+    authors.
+
+    :param iTaxName: The ID of the modern taxon name.
+    :type iTaxName: int
+    :param lSynonyms: A synonym list of the modern taxon name.
+    :type lSynonyms: list
+    :param lAuthors: An author of the synonym.
+    :type lAuthors: list
+    :return: Return a list with elements of the form - taxon ID, taxon synonym,
+     and synonym author.
+    :rtype: list[int, str, str]
+    """
     lTaxName = []
     iNum = len(lSynonyms)
     while iNum:
@@ -53,6 +66,14 @@ def zip_taxon_lists(iTaxName, lSynonyms, lAuthors):
 
 
 def warning_taxon_exist(sTaxName):
+    """ Create a message dialog window with warning that the taxon name which
+    trying to add is already exists.
+
+    :param sTaxName: The taxon name which trying to add.
+    :type sTaxName: str
+    :return: agreement
+    :rtype: bool
+    """
     oMsgBox = QMessageBox()
     oMsgBox.setIcon(QMessageBox.Information)
     oMsgBox.setText(_(f'Such the taxon name <i>{sTaxName}</i> already exists. '
@@ -66,6 +87,12 @@ def warning_taxon_exist(sTaxName):
 
 
 def warning_synonym_more():
+    """ Create a message dialog window with warning that the number of synonyms
+    and authors does not match.
+
+    :return: refuse
+    :rtype: bool
+    """
     oMsgBox = QMessageBox()
     oMsgBox.setText(_('There are fewer synonyms than authors!'
                       ' Try to fix it!'))
@@ -73,9 +100,11 @@ def warning_synonym_more():
     return False
 
 
-class CDialog(QDialog):
+class ADialog(QDialog):
+    """ Creates abstract class that contain common elements."""
     def __init__(self, oParent=None):
-        super(CDialog, self).__init__(oParent)
+        """ initiating a dialog view """
+        super(ADialog, self).__init__(oParent)
         oConfigProgram = ConfigProgram()
         sDBFile = oConfigProgram.get_config_value('DB', 'filepath')
         self.oConnector = SQL(sDBFile)
@@ -84,9 +113,12 @@ class CDialog(QDialog):
         self.connect_actions()
 
     def init_UI(self):
+        """ Redundancy method """
         pass
 
     def init_UI_button_block(self):
+        """ Creates a block of buttons for further use in child dialog classes.
+        """
         self.oHLayoutButtons = QHBoxLayout()
         self.oButtonApply = QPushButton(_('Apply'), self)
         self.oButtonApply.setFixedWidth(80)
@@ -100,17 +132,22 @@ class CDialog(QDialog):
         self.oHLayoutButtons.addWidget(self.oButtonCancel)
 
     def connect_actions(self):
+        """ Connects buttons with actions they should perform. """
         self.oButtonApply.clicked.connect(self.onClickApply)
         self.oButtonOk.clicked.connect(self.onClickOk)
         self.oButtonCancel.clicked.connect(self.onCancel)
 
     def onCancel(self):
+        """ The method closes the dialog without saving the data. """
         self.close()
 
     def onClickApply(self):
+        """ Reserves the Apply dialog button method for future use. """
         pass
 
     def onClickOk(self):
+        """ The method saves the data and closes the dialog In order for the
+        data to be saved, you must override the method onClickApply."""
         self.onClickApply()
         self.close()
 
@@ -125,6 +162,19 @@ class CDialog(QDialog):
         return lValues
 
     def check_synonyms(self, sTaxName, sSynonyms, sAuthors):
+        """ Checks if there are such synonyms in the list of taxon and if the
+        number of synonyms matches the number of authors.
+
+        :param sTaxName: Latin name of taxon.
+        :type sTaxName: str
+        :param sSynonyms: A list of synonyms.
+        :type sSynonyms: str
+        :param sAuthors: A author list of synonyms.
+        :type sAuthors: str
+        :return:Returns a dictionary in the form of a taxon name, a list of
+         synonyms, and a list of authors, or False
+        :rtype: dict[int, list[str], list[str]] | bool
+        """
         iTaxName = self.oConnector.sql_get_id('Taxon', 'id_taxon',
                                               'taxon_lat_name', (sTaxName,))
         bOk = True
@@ -152,6 +202,15 @@ class CDialog(QDialog):
         return False
 
     def save_synonyms(self, iTaxName, lSynonyms, lAuthors):
+        """ Save a list of synonyms.
+
+        :param iTaxName: The ID of the modern taxon name.
+        :type iTaxName: int
+        :param lSynonyms: A synonym list of the modern taxon name.
+        :type lSynonyms: list
+        :param lAuthors: An author of the synonym.
+        :type lAuthors: list
+        """
         if lSynonyms:
             lValues = zip_taxon_lists(iTaxName, lSynonyms, lAuthors)
             for tValues in lValues:
@@ -160,7 +219,7 @@ class CDialog(QDialog):
                                            tValues)
 
 
-class AddSynonymsDialog(CDialog):
+class AddSynonymsDialog(ADialog):
     def __init__(self, oParent=None):
         super(AddSynonymsDialog, self).__init__(oParent)
 
@@ -199,7 +258,7 @@ class AddSynonymsDialog(CDialog):
         self.oTextEditAuthors.set_text('')
 
 
-class EditTaxonDialog(CDialog):
+class EditTaxonDialog(ADialog):
     def __init__(self, oParent=None):
         super(EditTaxonDialog, self).__init__(oParent)
 
@@ -324,7 +383,7 @@ class NewTaxonDialog(CDialog):
         self.save_synonyms(iTaxName, lSynonyms, lAuthors)
 
 
-class EditSubstrate(CDialog):
+class EditSubstrate(ADialog):
     def __init__(self, oParent=None):
         super(EditSubstrate, self).__init__(oParent)
 
@@ -366,7 +425,7 @@ class EditSubstrate(CDialog):
         self.oConnector.insert_row('Substrate', sColumns, tValues)
 
 
-class NewSubstrate(CDialog):
+class NewSubstrate(ADialog):
     def __init__(self, oParent=None):
         super(NewSubstrate, self).__init__(oParent)
 

@@ -1,0 +1,93 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2022-04-30 09:57+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: mli/gui/main_window.py:31
+msgid "Manual Lichen identification"
+msgstr ""
+
+#: mli/gui/main_window.py:43
+msgid "Open &DataBase..."
+msgstr ""
+
+#: mli/gui/main_window.py:44
+msgid "P&rint..."
+msgstr ""
+
+#: mli/gui/main_window.py:45
+msgid "&Setting..."
+msgstr ""
+
+#: mli/gui/main_window.py:46
+msgid "&Exit"
+msgstr ""
+
+#: mli/gui/main_window.py:48
+msgid "Exit application"
+msgstr ""
+
+#: mli/gui/main_window.py:51
+msgid "Undo"
+msgstr ""
+
+#: mli/gui/main_window.py:53
+msgid "Redo"
+msgstr ""
+
+#: mli/gui/main_window.py:55
+msgid "&Edit taxon"
+msgstr ""
+
+#: mli/gui/main_window.py:56
+msgid "Find..."
+msgstr ""
+
+#: mli/gui/main_window.py:60 mli/gui/main_window.py:96
+msgid "&Help"
+msgstr ""
+
+#: mli/gui/main_window.py:61
+msgid "&About"
+msgstr ""
+
+#: mli/gui/main_window.py:68
+msgid "&File"
+msgstr ""
+
+#: mli/gui/main_window.py:78
+msgid "&Edit"
+msgstr ""
+
+#: mli/gui/main_window.py:87
+msgid "&View"
+msgstr ""
+
+#: mli/gui/main_window.py:90
+msgid "&Run"
+msgstr ""
+
+#: mli/gui/main_window.py:93
+msgid "&Tools"
+msgstr ""
+
+#: mli/gui/main_window.py:113
+msgid "Open Database"
+msgstr ""
+
+#: mli/gui/main_window.py:114
+msgid "DB file (*.db)"
+msgstr ""
+

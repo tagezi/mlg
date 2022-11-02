@@ -143,7 +143,7 @@ class ADialog(QDialog):
         self.oTextEditAuthors = HTextEdit(_('Authors:'))
         self.oComboTaxNames = HComboBox(_('Taxon name: '))
 
-        lTaxonLevel = self.create_tax_level_list('TaxonLevel')
+        lTaxonLevel = self.create_level_list(bGetAll=True)
         self.oComboMainTax.set_combo_list(self.onCreateTaxonList(lTaxonLevel))
         self.oComboTaxLevel.set_combo_list(lTaxonLevel)
         self.oComboTaxLevel.set_text(lTaxonLevel[1])
@@ -154,13 +154,25 @@ class ADialog(QDialog):
         self.oButtonApply.clicked.connect(self.onClickApply)
         self.oButtonOk.clicked.connect(self.onClickOk)
         self.oButtonCancel.clicked.connect(self.onCancel)
+        (self.oComboMainTax.get_widget()).currentTextChanged.connect(
+            self.onCreateLevelList)
 
-    def create_tax_level_list(self, sDB, bGetAll=None):
-        oCursor = self.oConnector.sql_get_all(sDB)
-        lValues = []
+    def create_level_list(self, sTaxon='', bGetAll=None):
+        oCursor = self.oConnector.sql_get_all('TaxonLevel')
+        lLevels, lValues = [], []
         for tRow in oCursor:
             lValues.append(tRow[3])
-        return lValues
+
+        if bGetAll is None:
+            sLevelMainTaxon = sTaxon.split('(')[1].split(')')[0]
+            sRow = lValues[0]
+            while sRow != sLevelMainTaxon:
+                lValues.pop(0)
+                sRow = lValues[0]
+        lLevels = lValues
+        lLevels.pop(0)
+
+        return lLevels
 
     def onCancel(self):
         """ The method closes the dialog without saving the data. """
@@ -196,6 +208,12 @@ class ADialog(QDialog):
             for tRow in oCursor:
                 lValues.append(f'({tRow[0]}) {tRow[1]}')
         return lValues
+
+    def onCreateLevelList(self, sTaxon=''):
+        lTaxonLevel = self.create_level_list(sTaxon)
+        self.oComboTaxLevel.clear_list()
+        self.oComboTaxLevel.set_combo_list(lTaxonLevel)
+        self.oComboTaxLevel.set_text(lTaxonLevel[0])
 
     def check_synonyms(self, sTaxName, sSynonyms, sAuthors):
         """ Checks if there are such synonyms in the list of taxon and if the

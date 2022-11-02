@@ -91,6 +91,9 @@ class HComboBox(QHBoxLayout):
         oComboBox = self.itemAt(1).widget()
         oComboBox.setFixedWidth(iSize)
 
+    def get_widget(self):
+        return self.itemAt(1).widget()
+
 
 class HLineEdit(QHBoxLayout):
     """ Creates a block that units QLabel and QLineEdit. Also, it creates

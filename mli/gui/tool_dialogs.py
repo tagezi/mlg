@@ -143,11 +143,7 @@ class ADialog(QDialog):
         self.oTextEditAuthors = HTextEdit(_('Authors:'))
         self.oComboTaxNames = HComboBox(_('Taxon name: '))
 
-        lTaxonLevel = self.create_level_list(bGetAll=True)
-        self.oComboMainTax.set_combo_list(self.onCreateTaxonList(lTaxonLevel))
-        self.oComboTaxLevel.set_combo_list(lTaxonLevel)
-        self.oComboTaxLevel.set_text(lTaxonLevel[1])
-        self.oComboTaxNames.set_combo_list(self.onCreateTaxonList(lTaxonLevel))
+        self.fill_combobox()
 
     def connect_actions(self):
         """ Connects buttons with actions they should perform. """
@@ -155,7 +151,18 @@ class ADialog(QDialog):
         self.oButtonOk.clicked.connect(self.onClickOk)
         self.oButtonCancel.clicked.connect(self.onCancel)
         (self.oComboMainTax.get_widget()).currentTextChanged.connect(
-            self.onCreateLevelList)
+            self.onCurrentMainTaxonChanged)
+
+    def clean_field(self):
+        self.oComboMainTax.clear_list()
+        self.oComboTaxLevel.clear_list()
+        self.oLineEditLatName.set_text('')
+        self.oLineEditAuthor.set_text('')
+        self.oLineEditEnName.set_text('')
+        self.oLineEditLocaleName.set_text('')
+        self.oTextEditSynonyms.set_text('')
+        self.oTextEditAuthors.set_text('')
+        self.oComboTaxNames.clear_list()
 
     def create_level_list(self, sTaxon='', bGetAll=None):
         oCursor = self.oConnector.sql_get_all('TaxonLevel')
@@ -174,6 +181,35 @@ class ADialog(QDialog):
 
         return lLevels
 
+    def create_taxon_list(self, lTaxonLevel):
+        """ Creates a list of taxon names for further use in dialog elements.
+
+        :param lTaxonLevel: A list of taxon level.
+        :type lTaxonLevel: list
+        :return: A list in form - (Taxon Level) Taxon Name
+        :type: list[str]
+        """
+        lValues = []
+        for sTaxonLevel in lTaxonLevel:
+
+            sSQL = 'SELECT TaxonLevel.level_name, Taxon.taxon_lat_name ' \
+                   'FROM Taxon JOIN TaxonLevel ' \
+                   'ON Taxon.id_level=TaxonLevel.id_level ' \
+                   f"WHERE TaxonLevel.level_name='{sTaxonLevel}'"\
+                   'ORDER BY Taxon.taxon_lat_name ASC;'
+            oCursor = self.oConnector.execute_query(sSQL)
+
+            for tRow in oCursor:
+                lValues.append(f'({tRow[0]}) {tRow[1]}')
+        return lValues
+
+    def fill_combobox(self):
+        lTaxonLevel = self.create_level_list(bGetAll=True)
+        self.oComboMainTax.set_combo_list(self.create_taxon_list(lTaxonLevel))
+        self.oComboTaxLevel.set_combo_list(lTaxonLevel)
+        self.oComboTaxLevel.set_text(lTaxonLevel[1])
+        self.oComboTaxNames.set_combo_list(self.create_taxon_list(lTaxonLevel))
+
     def onCancel(self):
         """ The method closes the dialog without saving the data. """
         self.close()
@@ -188,28 +224,15 @@ class ADialog(QDialog):
         self.onClickApply()
         self.close()
 
-    def onCreateTaxonList(self, lTaxonLevel):
-        """ Creates a list of taxon names for further use in dialog elements.
+    def onCurrentMainTaxonChanged(self, sTaxon=''):
+        """ TODO: Do a name lookup on the parent taxon field.
+             Traceback (most recent call last):
+             File "/home/lera/project/mli/mli/gui/tool_dialogs.py", line 228, in onCurrentMainTaxonChanged
+             lTaxonLevel = self.create_level_list(sTaxon)
+             File "/home/lera/project/mli/mli/gui/tool_dialogs.py", line 174, in create_level_list
+             sLevelMainTaxon = sTaxon.split('(')[1].split(')')[0]
+             IndexError: list index out of range"""
 
-        :param lTaxonLevel: A list of taxon level.
-        :type lTaxonLevel: list
-        :return: A list in form - (Taxon Level) Taxon Name
-        :type: list[str]
-        """
-        lValues = []
-        for sTaxonLevel in lTaxonLevel:
-
-            sSQL = 'SELECT TaxonLevel.level_name, Taxon.taxon_lat_name ' \
-                   'FROM Taxon JOIN TaxonLevel ' \
-                   'ON Taxon.id_level=TaxonLevel.id_level ' \
-                   f"WHERE TaxonLevel.level_name='{sTaxonLevel}';"
-            oCursor = self.oConnector.execute_query(sSQL)
-
-            for tRow in oCursor:
-                lValues.append(f'({tRow[0]}) {tRow[1]}')
-        return lValues
-
-    def onCreateLevelList(self, sTaxon=''):
         lTaxonLevel = self.create_level_list(sTaxon)
         self.oComboTaxLevel.clear_list()
         self.oComboTaxLevel.set_combo_list(lTaxonLevel)
@@ -301,7 +324,7 @@ class AddSynonymsDialog(ADialog):
                            dSynonyms['listauth'])
 
         self.oComboTaxNames.clear_list()
-        self.oComboTaxNames.set_combo_list(self.onCreateTaxonList())
+        self.oComboTaxNames.set_combo_list(self.create_taxon_list())
         self.oComboTaxNames.set_text(sTaxName)
         self.oTextEditSynonyms.set_text('')
         self.oTextEditAuthors.set_text('')
@@ -340,12 +363,10 @@ class NewTaxonDialog(ADialog):
         self.setModal(Qt.ApplicationModal)
 
         oVLayout = QVBoxLayout()
-
         oVLayout.addLayout(self.oComboMainTax)
         oVLayout.addLayout(self.oComboTaxLevel)
         oVLayout.addLayout(self.oLineEditLatName)
         oVLayout.addLayout(self.oLineEditAuthor)
-        oVLayout.addLayout(self.oLineEditEnName)
         oVLayout.addLayout(self.oLineEditLocaleName)
         oVLayout.addLayout(self.oTextEditSynonyms)
         oVLayout.addLayout(self.oTextEditAuthors)
@@ -357,7 +378,6 @@ class NewTaxonDialog(ADialog):
         sMainTax = self.oComboMainTax.get_text().split()[1]
         sLatName = self.oLineEditLatName.get_text()
         sAuthor = self.oLineEditAuthor.get_text()
-        sEnName = self.oLineEditEnName.get_text()
         sLocalName = self.oLineEditLocaleName.get_text()
         sSynonyms = self.oTextEditSynonyms.get_text()
         sAuthors = self.oTextEditAuthors.get_text()
@@ -370,36 +390,23 @@ class NewTaxonDialog(ADialog):
                                                 'taxon_lat_name', (sLatName,))
 
         dSynonyms = self.check_synonyms(sLatName, sSynonyms, sAuthors)
-        if not dSynonyms:
-            return
-
-        if not bTaxonName:
-            tTaxValues = (iTaxLevel, iMainTax, sLatName, sEnName, sLocalName,)
+        if sLatName and not bTaxonName:
+            tTaxValues = (iTaxLevel, iMainTax, sLatName, sLocalName,)
             self.save_(tTaxValues, sLatName, sAuthor, dSynonyms['listsyn'],
                        dSynonyms['listauth'])
 
-            self.oComboTaxLevel.set_text(sTaxLevel)
-            self.oComboMainTax.clear_list()
-            self.oComboMainTax.set_combo_list(self.onCreateTaxonList())
-            self.oComboMainTax.set_text(sMainTax)
-            self.oComboMainTax.set_text('')
-            self.oLineEditLatName.set_text('')
-            self.oLineEditAuthor.set_text('')
-            self.oLineEditEnName.set_text('')
-            self.oLineEditLocaleName.set_text('')
-            self.oTextEditSynonyms.set_text('')
-            self.oTextEditAuthors.set_text('')
+            self.clean_field()
+            self.fill_combobox()
 
     def save_(self, tTaxonValues, sLatName, sAuthor, lSynonyms, lAuthors):
         sColumns = 'id_level, id_main_taxon, taxon_lat_name, taxon_name'
-
-        iTaxName = self.oConnector.insert_row('TaxonStructure',
-                                              sColumns, tTaxonValues)
+        iTaxonName = self.oConnector.insert_row('Taxon', sColumns,
+                                                tTaxonValues)
         self.oConnector.insert_row('TaxonOtherNames',
                                    'id_taxon, taxon_name, authors',
-                                   (iTaxName, sLatName, sAuthor))
-
-        self.save_synonyms(iTaxName, lSynonyms, lAuthors)
+                                   (iTaxonName, sLatName, sAuthor))
+        if lSynonyms:
+            self.save_synonyms(iTaxonName, lSynonyms, lAuthors)
 
 
 class EditSubstrate(ADialog):

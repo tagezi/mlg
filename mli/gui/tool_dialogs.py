@@ -33,10 +33,11 @@
 from gettext import gettext as _
 from itertools import zip_longest
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QHBoxLayout, QMessageBox, QPushButton,\
-    QVBoxLayout
+from PyQt5.QtWidgets import QDialog, QHBoxLayout, QPushButton, QVBoxLayout
 
 from mli.gui.dialog_elements import HComboBox, HTextEdit, HLineEdit
+from mli.gui.message_box import warning_synonym_exist, warning_synonym_more,\
+     warning_this_exist
 from mli.lib.config import ConfigProgram
 from mli.lib.sql import SQL
 from mli.lib.str import text_to_list
@@ -63,41 +64,6 @@ def zip_taxon_lists(iTaxName, lSynonyms, lAuthors):
         iNum -= 1
 
     return list(zip_longest(lTaxName, lSynonyms, lAuthors, fillvalue=''))
-
-
-def warning_taxon_exist(sTaxName):
-    """ Create a message dialog window with warning that the taxon name which
-    trying to add is already exists.
-
-    :param sTaxName: The taxon name which trying to add.
-    :type sTaxName: str
-    :return: agreement
-    :rtype: bool
-    """
-    oMsgBox = QMessageBox()
-    oMsgBox.setIcon(QMessageBox.Information)
-    oMsgBox.setText(_(f'The taxon name <i>{sTaxName}</i> already exists. '
-                      f'Do write data?'))
-    oMsgBox.setWindowTitle(_('Save Confirmation'))
-    oMsgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-
-    oMsgBoxButton = oMsgBox.exec()
-    if oMsgBoxButton == QMessageBox.Ok:
-        return True
-
-
-def warning_synonym_more():
-    """ Create a message dialog window with warning that the number of synonyms
-    and authors does not match.
-
-    :return: refuse
-    :rtype: bool
-    """
-    oMsgBox = QMessageBox()
-    oMsgBox.setText(_('There are fewer synonyms than authors!'
-                      ' Try to fix it!'))
-    oMsgBox.exec()
-    return False
 
 
 class ADialog(QDialog):
@@ -264,7 +230,7 @@ class ADialog(QDialog):
                                                     'id_taxon, taxon_name',
                                                     (sSynonym,))
                 if bExist:
-                    bOk = warning_taxon_exist(sTaxName)
+                    bOk = warning_synonym_exist(sTaxName)
 
         lAuthors = []
         if sAuthors:
@@ -388,6 +354,9 @@ class NewTaxonDialog(ADialog):
                                               'taxon_lat_name', (sMainTax,))
         bTaxonName = self.oConnector.sql_get_id('Taxon', 'id_taxon',
                                                 'taxon_lat_name', (sLatName,))
+
+        if bTaxonName:
+            warning_this_exist(_('taxon name'), sLatName)
 
         dSynonyms = self.check_synonyms(sLatName, sSynonyms, sAuthors)
         if sLatName and not bTaxonName:

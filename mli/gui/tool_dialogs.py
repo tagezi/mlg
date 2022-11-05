@@ -191,18 +191,11 @@ class ADialog(QDialog):
         self.close()
 
     def onCurrentMainTaxonChanged(self, sTaxon=''):
-        """ TODO: Do a name lookup on the parent taxon field.
-             Traceback (most recent call last):
-             File "/home/lera/project/mli/mli/gui/tool_dialogs.py", line 228, in onCurrentMainTaxonChanged
-             lTaxonLevel = self.create_level_list(sTaxon)
-             File "/home/lera/project/mli/mli/gui/tool_dialogs.py", line 174, in create_level_list
-             sLevelMainTaxon = sTaxon.split('(')[1].split(')')[0]
-             IndexError: list index out of range"""
-
-        lTaxonLevel = self.create_level_list(sTaxon)
-        self.oComboTaxLevel.clear_list()
-        self.oComboTaxLevel.set_combo_list(lTaxonLevel)
-        self.oComboTaxLevel.set_text(lTaxonLevel[0])
+        if sTaxon.find("(") >= 0 and sTaxon.find(")") > 1:
+            lTaxonLevel = self.create_level_list(sTaxon)
+            self.oComboTaxLevel.clear_list()
+            self.oComboTaxLevel.set_combo_list(lTaxonLevel)
+            self.oComboTaxLevel.set_text(lTaxonLevel[0])
 
     def check_synonyms(self, sTaxName, sSynonyms, sAuthors):
         """ Checks if there are such synonyms in the list of taxon and if the

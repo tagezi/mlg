@@ -22,8 +22,8 @@ from mli.gui.file_dialogs import OpenFileDialog
 from mli.gui.help_dialog import About
 from mli.gui.setting_dialog import SettingDialog
 from mli.gui.tab_widget import CentralTabWidget
-from mli.gui.tool_dialogs import NewSubstrate, EditTaxonDialog, \
-    EditSubstrate, NewTaxonDialog, AddSynonymsDialog
+from mli.gui.tool_dialogs import NewSubstrateDialog, EditTaxonDialog, \
+    EditSubstrateDialog, NewTaxonDialog, AddSynonymsDialog
 
 from mli.lib.sql import SQL
 
@@ -32,12 +32,17 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        sTitleProgram = _('Manual Lichen identification')
-        self.setWindowTitle(sTitleProgram)
+        self.setWindowTitle(_('Manual Lichen identification'))
+
+        # self.oTable = TableView(self, sDefaultTableName)
+        self.oCentralTabWidget = CentralTabWidget(self, 'Tab')
+        # self.oCentralTabWidget.add_tab(self.oTable)
+        self.setCentralWidget(self.oCentralTabWidget)
 
         self.create_actions()
         self.connect_actions()
         self.set_menu_bar()
+        self.onSetStatusBarMessage()
 
         self.showMaximized()
 
@@ -111,9 +116,9 @@ class MainWindow(QMainWindow):
         oHelpMenu.addAction(self.oOpenHelp)
         oHelpMenu.addAction(self.oAbout)
 
-    def set_status_bar(self, sMassage='Ready'):
+    def onSetStatusBarMessage(self, sMassage='Ready'):
         """ Method create Status Bar on main window of program GUI. """
-        self.oStatusBar = self.statusBar().showMessage(sMassage)
+        self.statusBar().showMessage(sMassage)
 
     def connect_actions(self):
         """ It is PyQt5 slots or other words is connecting from GUI element to
@@ -143,15 +148,7 @@ class MainWindow(QMainWindow):
         oAbout.exec_()
 
     def onOpenDB(self):
-        dParameter = {'name': _('Open Database'),
-                      'filter': _('DB file (*.db)')}
-        oOpenDBFile = OpenFileDialog(self, dParameter)
-        sFileNameDB = oOpenDBFile.exec()
-        if sFileNameDB is not None:
-            sFilePath = sFileNameDB[0]
-            self.oConnector = SQL(str(sFilePath))
-            self.oComboBoxSets.set_connector(self.oConnector)
-            self.oComboBoxSets.update_combobox()
+        pass
 
     def onOpenSetting(self):
         oSettingDialog = SettingDialog(self)
@@ -162,11 +159,11 @@ class MainWindow(QMainWindow):
         oEditTaxonDialog.exec_()
 
     def onEditSubstrate(self):
-        oEditSubstrate = EditSubstrate(self)
+        oEditSubstrate = EditSubstrateDialog(self)
         oEditSubstrate.exec_()
 
     def onNewSubstrate(self):
-        oNewSubstrate = NewSubstrate(self)
+        oNewSubstrate = NewSubstrateDialog(self)
         oNewSubstrate.exec_()
 
     def onNewTaxon(self):

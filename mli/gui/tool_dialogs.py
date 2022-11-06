@@ -35,7 +35,7 @@ from itertools import zip_longest
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QHBoxLayout, QPushButton, QVBoxLayout
 
-from mli.gui.dialog_elements import HComboBox, HTextEdit, HLineEdit
+from mli.gui.dialog_elements import HComboBox, HLineEdit, HTextEdit
 from mli.gui.message_box import warning_synonym_exist, warning_synonym_more,\
      warning_this_exist
 from mli.lib.config import ConfigProgram
@@ -66,22 +66,15 @@ def zip_taxon_lists(iTaxName, lSynonyms, lAuthors):
     return list(zip_longest(lTaxName, lSynonyms, lAuthors, fillvalue=''))
 
 
-class ADialog(QDialog):
-    """ Creates abstract class that contain common elements."""
+class ADialogButtons(QDialog):
     def __init__(self, oParent=None):
         """ initiating a dialog view """
-        super(ADialog, self).__init__(oParent)
+        super(ADialogButtons, self).__init__(oParent)
         oConfigProgram = ConfigProgram()
         sDBFile = oConfigProgram.get_config_value('DB', 'filepath')
         self.oConnector = SQL(sDBFile)
         self.init_UI_button_block()
-        self.init_UI_failed()
-        self.init_UI()
-        self.connect_actions()
-
-    def init_UI(self):
-        """ Redundancy method """
-        pass
+        self.connect_actions_button()
 
     def init_UI_button_block(self):
         """ Creates a block of buttons for further use in child dialog classes.
@@ -93,10 +86,65 @@ class ADialog(QDialog):
         self.oButtonOk.setFixedWidth(80)
         self.oButtonCancel = QPushButton(_('Cancel'), self)
         self.oButtonCancel.setFixedWidth(80)
+
         self.oHLayoutButtons.addWidget(self.oButtonApply,
                                        alignment=Qt.AlignRight)
         self.oHLayoutButtons.addWidget(self.oButtonOk)
         self.oHLayoutButtons.addWidget(self.oButtonCancel)
+
+    def connect_actions_button(self):
+        self.oButtonApply.clicked.connect(self.onClickApply)
+        self.oButtonOk.clicked.connect(self.onClickOk)
+        self.oButtonCancel.clicked.connect(self.onCancel)
+
+    def onCancel(self):
+        """ The method closes the dialog without saving the data. """
+        self.close()
+
+    def onClickApply(self):
+        """ Reserves the Apply dialog button method for future use. """
+        pass
+
+    def onClickOk(self):
+        """ The method saves the data and closes the dialog In order for the
+        data to be saved, you must override the method onClickApply."""
+        self.onClickApply()
+        self.close()
+
+
+class ASubstrateDialog(ADialogButtons):
+    def __init__(self, oParent=None):
+        super(ASubstrateDialog, self).__init__(oParent)
+        self.init_UI_failed()
+
+    def init_UI_failed(self):
+        self.oComboSubstrateLevel = HComboBox(_('Old substrate name:'))
+        self.oLineEditSubstrate = HLineEdit(_('New substrate name:'))
+
+    def onClickApply(self):
+        sSubstrate = self.oLineEditSubstrate.get_text()
+        bSubstrate = self.oConnector.sql_get_id('Substrate', 'id_substrate',
+                                                'substrate_name',
+                                                (sSubstrate,))
+
+        if not bSubstrate:
+            tValues = (sSubstrate,)
+            self.save_(tValues)
+            self.oLineEditSubstrate.set_text('')
+
+    def save_(self, tValues):
+        sColumns = 'substrate_name'
+        self.oConnector.insert_row('Substrate', sColumns, tValues)
+
+
+class ATaxonDialog(ADialogButtons):
+    """ Creates abstract class that contain common elements for Dialogs of
+        taxon."""
+    def __init__(self, oParent=None):
+        """ initiating a dialog view """
+        super(ATaxonDialog, self).__init__(oParent)
+        self.init_UI_failed()
+        self.connect_actions()
 
     def init_UI_failed(self):
         self.oComboMainTax = HComboBox(_('Main Taxon:'))
@@ -113,9 +161,6 @@ class ADialog(QDialog):
 
     def connect_actions(self):
         """ Connects buttons with actions they should perform. """
-        self.oButtonApply.clicked.connect(self.onClickApply)
-        self.oButtonOk.clicked.connect(self.onClickOk)
-        self.oButtonCancel.clicked.connect(self.onCancel)
         (self.oComboMainTax.get_widget()).currentTextChanged.connect(
             self.onCurrentMainTaxonChanged)
 
@@ -175,20 +220,6 @@ class ADialog(QDialog):
         self.oComboTaxLevel.set_combo_list(lTaxonLevel)
         self.oComboTaxLevel.set_text(lTaxonLevel[1])
         self.oComboTaxNames.set_combo_list(self.create_taxon_list(lTaxonLevel))
-
-    def onCancel(self):
-        """ The method closes the dialog without saving the data. """
-        self.close()
-
-    def onClickApply(self):
-        """ Reserves the Apply dialog button method for future use. """
-        pass
-
-    def onClickOk(self):
-        """ The method saves the data and closes the dialog In order for the
-        data to be saved, you must override the method onClickApply."""
-        self.onClickApply()
-        self.close()
 
     def onCurrentMainTaxonChanged(self, sTaxon=''):
         if sTaxon.find("(") >= 0 and sTaxon.find(")") > 1:
@@ -255,9 +286,10 @@ class ADialog(QDialog):
                                            tValues)
 
 
-class AddSynonymsDialog(ADialog):
+class AddSynonymsDialog(ATaxonDialog):
     def __init__(self, oParent=None):
         super(AddSynonymsDialog, self).__init__(oParent)
+        self.init_UI()
 
     def init_UI(self):
         self.setWindowTitle(_('Add new synonyms to taxon name'))
@@ -289,9 +321,10 @@ class AddSynonymsDialog(ADialog):
         self.oTextEditAuthors.set_text('')
 
 
-class EditTaxonDialog(ADialog):
+class EditTaxonDialog(ATaxonDialog):
     def __init__(self, oParent=None):
         super(EditTaxonDialog, self).__init__(oParent)
+        self.init_UI()
 
     def init_UI(self):
         self.setWindowTitle(_('Add new taxon to tree'))
@@ -313,9 +346,10 @@ class EditTaxonDialog(ADialog):
         pass
 
 
-class NewTaxonDialog(ADialog):
+class NewTaxonDialog(ATaxonDialog):
     def __init__(self, oParent=None):
         super(NewTaxonDialog, self).__init__(oParent)
+        self.init_UI()
 
     def init_UI(self):
         self.setWindowTitle(_('Add new taxon to tree'))
@@ -371,20 +405,19 @@ class NewTaxonDialog(ADialog):
             self.save_synonyms(iTaxonName, lSynonyms, lAuthors)
 
 
-class EditSubstrate(ADialog):
+class EditSubstrateDialog(ASubstrateDialog):
     def __init__(self, oParent=None):
-        super(EditSubstrate, self).__init__(oParent)
+        super(EditSubstrateDialog, self).__init__(oParent)
+        self.init_UI()
 
     def init_UI(self):
-        self.setWindowTitle(_('Edit new substrate...'))
+        self.setWindowTitle(_('Edit substrate...'))
         self.setModal(Qt.ApplicationModal)
 
-        oVLayout = QVBoxLayout()
-        self.oComboSubstrateLevel = HComboBox(_('Substrate:'))
         self.oComboSubstrateLevel.set_combo_list(
             sorted(self.create_substrate_list('Substrate')))
-        self.oLineEditSubstrate = HLineEdit(_('Substrate name:'))
 
+        oVLayout = QVBoxLayout()
         oVLayout.addLayout(self.oComboSubstrateLevel)
         oVLayout.addLayout(self.oLineEditSubstrate)
         oVLayout.addLayout(self.oHLayoutButtons)
@@ -397,51 +430,20 @@ class EditSubstrate(ADialog):
             lValues.append(tRow[1])
         return lValues
 
-    def onClickApply(self):
-        sSubstrate = self.oLineEditSubstrate.get_text()
-        bSubstrate = self.oConnector.sql_get_id('Substrate', 'id_substrate',
-                                                'substrate_name',
-                                                (sSubstrate,))
 
-        if not bSubstrate:
-            tValues = (sSubstrate,)
-            self.save_(tValues)
-            self.oLineEditSubstrate.set_text('')
-
-    def save_(self, tValues):
-        sColumns = 'substrate_name'
-        self.oConnector.insert_row('Substrate', sColumns, tValues)
-
-
-class NewSubstrate(ADialog):
+class NewSubstrateDialog(ASubstrateDialog):
     def __init__(self, oParent=None):
-        super(NewSubstrate, self).__init__(oParent)
+        super(NewSubstrateDialog, self).__init__(oParent)
+        self.init_UI()
 
     def init_UI(self):
         self.setWindowTitle(_('Add new substrate...'))
         self.setModal(Qt.ApplicationModal)
 
         oVLayout = QVBoxLayout()
-        self.oLineEditSubstrate = HLineEdit(_('Substrate name:'))
-
         oVLayout.addLayout(self.oLineEditSubstrate)
         oVLayout.addLayout(self.oHLayoutButtons)
         self.setLayout(oVLayout)
-
-    def onClickApply(self):
-        sSubstrate = self.oLineEditSubstrate.get_text()
-        bSubstrate = self.oConnector.sql_get_id('Substrate', 'id_substrate',
-                                                'substrate_name',
-                                                (sSubstrate,))
-
-        if not bSubstrate:
-            tValues = (sSubstrate,)
-            self.save_(tValues)
-            self.oLineEditSubstrate.set_text('')
-
-    def save_(self, tValues):
-        sColumns = 'substrate_name'
-        self.oConnector.insert_row('Substrate', sColumns, tValues)
 
 
 if __name__ == '__main__':

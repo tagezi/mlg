@@ -171,8 +171,8 @@ class ATaxonDialog(ADialogButtons):
         self.oLineEditAuthor.set_text('')
         self.oLineEditEnName.set_text('')
         self.oLineEditLocaleName.set_text('')
-        self.oTextEditSynonyms.set_text('')
-        self.oTextEditAuthors.set_text('')
+        self.oTextEditSynonyms.clear_text()
+        self.oTextEditAuthors.clear_text()
         self.oComboTaxNames.clear_list()
 
     def create_level_list(self, sTaxon='', bGetAll=None):

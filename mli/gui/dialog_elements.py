@@ -163,6 +163,11 @@ class HTextEdit(QHBoxLayout):
         self.set_textedit_size()
         self.set_label(sLabel)
 
+    def clear_text(self):
+        """ The function clears QTextEdit failed. """
+        oTextEdit = self.itemAt(1).widget()
+        oTextEdit.clear()
+
     def get_text(self):
         """ The function gets text from QLineEdit of QTextEdit.
 

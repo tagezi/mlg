@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""This module contains setup instructions for YTVD."""
+"""This module contains setup instructions for MIL."""
 import codecs
 import os
 
@@ -43,7 +43,7 @@ setup(
         "Topic :: Scientific/Engineering",
         "Topic :: Utilities",
     ],
-    description="Python 3 program for lichen identification.",
+    description="Python 3 program for manual lichen identification.",
     include_package_data=True,
     long_description_content_type="text/markdown",
     long_description=long_description,
@@ -53,5 +53,5 @@ setup(
         "Bug Reports": "https://github.com/tagezi/mli/issues",
         "Read the Docs": "https://github.com/tagezi/mli",
     },
-    keywords=["lichen", "identification", "biology", "lichenology"],
+    keywords=["lichen", "identification", "biology", "lichenology, fungi"],
 )

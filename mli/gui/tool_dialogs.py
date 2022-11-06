@@ -67,6 +67,8 @@ def zip_taxon_lists(iTaxName, lSynonyms, lAuthors):
 
 
 class ADialogButtons(QDialog):
+    """An abstract class that creates a block of Apply, OK, Cancel buttons and
+    reserves action methods for them."""
     def __init__(self, oParent=None):
         """ initiating a dialog view """
         super(ADialogButtons, self).__init__(oParent)
@@ -93,6 +95,7 @@ class ADialogButtons(QDialog):
         self.oHLayoutButtons.addWidget(self.oButtonCancel)
 
     def connect_actions_button(self):
+        """ The method of linking signals and button slots. """
         self.oButtonApply.clicked.connect(self.onClickApply)
         self.oButtonOk.clicked.connect(self.onClickOk)
         self.oButtonCancel.clicked.connect(self.onCancel)
@@ -113,28 +116,36 @@ class ADialogButtons(QDialog):
 
 
 class ASubstrateDialog(ADialogButtons):
+    """An abstract class that creates fields and functionality common to all
+    dialogs of the substrate. """
     def __init__(self, oParent=None):
         super(ASubstrateDialog, self).__init__(oParent)
         self.init_UI_failed()
 
     def init_UI_failed(self):
+        """ initiating a dialog view """
         self.oComboSubstrateLevel = HComboBox(_('Old substrate name:'))
         self.oLineEditSubstrate = HLineEdit(_('New substrate name:'))
 
     def onClickApply(self):
+        """ Realization of the abstract method of the parent class. """
         sSubstrate = self.oLineEditSubstrate.get_text()
-        bSubstrate = self.oConnector.sql_get_id('Substrate', 'id_substrate',
+        bSubstrate = self.oConnector.sql_get_id('Substrate',
+                                                'id_substrate',
                                                 'substrate_name',
                                                 (sSubstrate,))
 
         if not bSubstrate:
-            tValues = (sSubstrate,)
-            self.save_(tValues)
+            self.save_((sSubstrate,))
             self.oLineEditSubstrate.set_text('')
 
     def save_(self, tValues):
-        sColumns = 'substrate_name'
-        self.oConnector.insert_row('Substrate', sColumns, tValues)
+        """ Method for saving information about the substrate in the database.
+
+        :param tValues: Type of substrate to be entered into the database.
+        :type tValues: tuple
+        """
+        self.oConnector.insert_row('Substrate', 'substrate_name', tValues)
 
 
 class ATaxonDialog(ADialogButtons):
@@ -144,9 +155,11 @@ class ATaxonDialog(ADialogButtons):
         """ initiating a dialog view """
         super(ATaxonDialog, self).__init__(oParent)
         self.init_UI_failed()
+        self.fill_combobox()
         self.connect_actions()
 
     def init_UI_failed(self):
+        """ initiating a dialog view """
         self.oComboMainTax = HComboBox(_('Main Taxon:'))
         self.oComboTaxLevel = HComboBox(_('Taxon level:'))
         self.oLineEditLatName = HLineEdit(_('Latin name:'))
@@ -157,14 +170,13 @@ class ATaxonDialog(ADialogButtons):
         self.oTextEditAuthors = HTextEdit(_('Authors:'))
         self.oComboTaxNames = HComboBox(_('Taxon name: '))
 
-        self.fill_combobox()
-
     def connect_actions(self):
         """ Connects buttons with actions they should perform. """
         (self.oComboMainTax.get_widget()).currentTextChanged.connect(
             self.onCurrentMainTaxonChanged)
 
     def clean_field(self):
+        """ Clears all fields after use. """
         self.oComboMainTax.clear_list()
         self.oComboTaxLevel.clear_list()
         self.oLineEditLatName.set_text('')
@@ -176,6 +188,18 @@ class ATaxonDialog(ADialogButtons):
         self.oComboTaxNames.clear_list()
 
     def create_level_list(self, sTaxon='', bGetAll=None):
+        """ Generates a list of taxon levels depending on a condition. At the
+        first list initialization and using button Apply, all taxon levels are
+        collected, at choosing Main taxon, only those that are below the
+        selected taxon name.
+
+        :param sTaxon: A name of main taxon.
+        :type sTaxon: str
+        :param bGetAll: It is needed to choose all levels.
+        :type bGetAll: bool
+        :return: list of taxon levels.
+        :rtype: list[str]
+        """
         oCursor = self.oConnector.sql_get_all('TaxonLevel')
         lLevels, lValues = [], []
         for tRow in oCursor:
@@ -215,6 +239,8 @@ class ATaxonDialog(ADialogButtons):
         return lValues
 
     def fill_combobox(self):
+        """ Fills the fields with the drop-down list during the first
+        initialization and after applying the Apply button."""
         lTaxonLevel = self.create_level_list(bGetAll=True)
         self.oComboMainTax.set_combo_list(self.create_taxon_list(lTaxonLevel))
         self.oComboTaxLevel.set_combo_list(lTaxonLevel)
@@ -222,6 +248,13 @@ class ATaxonDialog(ADialogButtons):
         self.oComboTaxNames.set_combo_list(self.create_taxon_list(lTaxonLevel))
 
     def onCurrentMainTaxonChanged(self, sTaxon=''):
+        """ The slot that should fire after the taxon name in the Main taxon
+        drop-down list.
+
+        :param sTaxon: A name of main taxon.
+        :type sTaxon: str
+        """
+        # If the user enters the name by hand, there will be an error.
         if sTaxon.find("(") >= 0 and sTaxon.find(")") > 1:
             lTaxonLevel = self.create_level_list(sTaxon)
             self.oComboTaxLevel.clear_list()

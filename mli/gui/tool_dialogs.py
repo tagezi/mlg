@@ -70,7 +70,7 @@ class ADialogButtons(QDialog):
     """An abstract class that creates a block of Apply, OK, Cancel buttons and
     reserves action methods for them."""
     def __init__(self, oParent=None):
-        """ initiating a dialog view """
+        """ Initiating a class. """
         super(ADialogButtons, self).__init__(oParent)
         oConfigProgram = ConfigProgram()
         sDBFile = oConfigProgram.get_config_value('DB', 'filepath')
@@ -119,6 +119,7 @@ class ASubstrateDialog(ADialogButtons):
     """An abstract class that creates fields and functionality common to all
     dialogs of the substrate. """
     def __init__(self, oParent=None):
+        """ Initiating a class. """
         super(ASubstrateDialog, self).__init__(oParent)
         self.init_UI_failed()
 
@@ -152,7 +153,7 @@ class ATaxonDialog(ADialogButtons):
     """ Creates abstract class that contain common elements for Dialogs of
         taxon."""
     def __init__(self, oParent=None):
-        """ initiating a dialog view """
+        """ Initiating a class. """
         super(ATaxonDialog, self).__init__(oParent)
         self.init_UI_failed()
         self.fill_combobox()
@@ -321,10 +322,12 @@ class ATaxonDialog(ADialogButtons):
 
 class AddSynonymsDialog(ATaxonDialog):
     def __init__(self, oParent=None):
+        """ Initiating a class. """
         super(AddSynonymsDialog, self).__init__(oParent)
         self.init_UI()
 
     def init_UI(self):
+        """ Creating a dialog window. """
         self.setWindowTitle(_('Add new synonyms to taxon name'))
         self.setModal(Qt.ApplicationModal)
 
@@ -336,6 +339,7 @@ class AddSynonymsDialog(ATaxonDialog):
         self.setLayout(oVLayout)
 
     def onClickApply(self):
+        """ Actions to be taken when adding a new taxon synonyms. """
         sTaxName = self.oComboTaxNames.get_text().split(') ')[1]
         sSynonyms = self.oTextEditSynonyms.get_text()
         sAuthors = self.oTextEditAuthors.get_text()
@@ -356,10 +360,12 @@ class AddSynonymsDialog(ATaxonDialog):
 
 class EditTaxonDialog(ATaxonDialog):
     def __init__(self, oParent=None):
+        """ Initiating a class. """
         super(EditTaxonDialog, self).__init__(oParent)
         self.init_UI()
 
     def init_UI(self):
+        """ Creating a dialog window. """
         self.setWindowTitle(_('Add new taxon to tree'))
         self.setModal(Qt.ApplicationModal)
 
@@ -380,11 +386,14 @@ class EditTaxonDialog(ATaxonDialog):
 
 
 class NewTaxonDialog(ATaxonDialog):
+    """ Dialog window which adds information on new taxon. """
     def __init__(self, oParent=None):
+        """ Initiating a class. """
         super(NewTaxonDialog, self).__init__(oParent)
         self.init_UI()
 
     def init_UI(self):
+        """ Creating a dialog window. """
         self.setWindowTitle(_('Add new taxon to tree'))
         self.setModal(Qt.ApplicationModal)
 
@@ -400,6 +409,7 @@ class NewTaxonDialog(ATaxonDialog):
         self.setLayout(oVLayout)
 
     def onClickApply(self):
+        """ Actions to be taken when adding a new taxon. """
         sTaxLevel = self.oComboTaxLevel.get_text()
         sMainTax = self.oComboMainTax.get_text().split()[1]
         sLatName = self.oLineEditLatName.get_text()
@@ -417,6 +427,7 @@ class NewTaxonDialog(ATaxonDialog):
 
         if bTaxonName:
             warning_this_exist(_('taxon name'), sLatName)
+            return
 
         dSynonyms = self.check_synonyms(sLatName, sSynonyms, sAuthors)
         if sLatName and not bTaxonName:
@@ -428,6 +439,20 @@ class NewTaxonDialog(ATaxonDialog):
             self.fill_combobox()
 
     def save_(self, tTaxonValues, sLatName, sAuthor, lSynonyms, lAuthors):
+        """ Saving information about the taxon in the database.
+
+        :param tTaxonValues: Information on taxon in view: index of a taxon
+            level, a main taxon, a Latin name, a local name.
+        :type tTaxonValues: tuple[str]
+        :param sLatName: A Latin name of the taxon.
+        :type sLatName: str
+        :param sAuthor: An author of the taxon.
+        :type sAuthor: str
+        :param lSynonyms: A list of taxon synonyms.
+        :type lSynonyms: list[str]
+        :param lAuthors: A list of authors of taxon synonyms.
+        :type lAuthors: list[str]
+        """
         sColumns = 'id_level, id_main_taxon, taxon_lat_name, taxon_name'
         iTaxonName = self.oConnector.insert_row('Taxon', sColumns,
                                                 tTaxonValues)
@@ -439,11 +464,14 @@ class NewTaxonDialog(ATaxonDialog):
 
 
 class EditSubstrateDialog(ASubstrateDialog):
+    """ Dialog window which allows user to change substrate type. """
     def __init__(self, oParent=None):
+        """ Initiating a class. """
         super(EditSubstrateDialog, self).__init__(oParent)
         self.init_UI()
 
     def init_UI(self):
+        """ Creating a dialog window. """
         self.setWindowTitle(_('Edit substrate...'))
         self.setModal(Qt.ApplicationModal)
 
@@ -457,6 +485,13 @@ class EditSubstrateDialog(ASubstrateDialog):
         self.setLayout(oVLayout)
 
     def create_substrate_list(self, sDB):
+        """ Filling the drop-down list with substrate types.
+
+        :param sDB: A name table when information on substrate is saved.
+        :type sDB: str
+        :return: A list of substrate types.
+        :rtype: list[str]
+        """
         oCursor = self.oConnector.sql_get_all(sDB)
         lValues = []
         for tRow in oCursor:
@@ -465,11 +500,14 @@ class EditSubstrateDialog(ASubstrateDialog):
 
 
 class NewSubstrateDialog(ASubstrateDialog):
+    """ Dialog window which adds new substrate type. """
     def __init__(self, oParent=None):
+        """ Initiating a class. """
         super(NewSubstrateDialog, self).__init__(oParent)
         self.init_UI()
 
     def init_UI(self):
+        """ Creating a dialog window. """
         self.setWindowTitle(_('Add new substrate...'))
         self.setModal(Qt.ApplicationModal)
 

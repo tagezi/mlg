@@ -68,12 +68,12 @@ def zip_taxon_lists(iTaxName, lSynonyms, lAuthors, lYears):
                             lAuthors, lYears, fillvalue=''))
 
 
-class ADialogButtons(QDialog):
+class AToolDialogButtons(QDialog):
     """An abstract class that creates a block of Apply, OK, Cancel buttons and
     reserves action methods for them."""
     def __init__(self, oParent=None):
         """ Initiating a class. """
-        super(ADialogButtons, self).__init__(oParent)
+        super(AToolDialogButtons, self).__init__(oParent)
         oConfigProgram = ConfigProgram()
         sDBFile = oConfigProgram.get_config_value('DB', 'filepath')
         self.oConnector = SQL(sDBFile)
@@ -117,7 +117,7 @@ class ADialogButtons(QDialog):
         self.close()
 
 
-class ASubstrateDialog(ADialogButtons):
+class ASubstrateDialog(AToolDialogButtons):
     """An abstract class that creates fields and functionality common to all
     dialogs of the substrate. """
     def __init__(self, oParent=None):
@@ -151,7 +151,7 @@ class ASubstrateDialog(ADialogButtons):
         self.oConnector.insert_row('Substrate', 'substrate_name', tValues)
 
 
-class ATaxonDialog(ADialogButtons):
+class ATaxonDialog(AToolDialogButtons):
     """ Creates abstract class that contain common elements for Dialogs of
         taxon."""
     def __init__(self, oParent=None):

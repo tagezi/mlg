@@ -18,6 +18,15 @@ from gettext import gettext as _
 from PyQt5.QtWidgets import QMessageBox
 
 
+def warning_lat_name():
+    """ Create a message dialog window with warning that a Latin name of taxon
+    isn't specified.
+    """
+    oMsgBox = QMessageBox()
+    oMsgBox.setText(_('Specify a Latin name of the taxon!'))
+    oMsgBox.exec()
+
+
 def warning_synonym_exist(sTaxName):
     """ Create a message dialog window with warning that the taxon name which
     trying to add is already exists.
@@ -42,15 +51,11 @@ def warning_synonym_exist(sTaxName):
 def warning_synonym_more():
     """ Create a message dialog window with warning that the number of synonyms
     and authors does not match.
-
-    :return: refuse
-    :rtype: bool
     """
     oMsgBox = QMessageBox()
     oMsgBox.setText(_('There are fewer synonyms than authors!'
                       ' Try to fix it!'))
     oMsgBox.exec()
-    return False
 
 
 def warning_this_exist(sThis, sThisName):

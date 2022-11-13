@@ -172,14 +172,16 @@ class HLineEdit(QHBoxLayout):
     methods that change parameters inside block without direct access.
     """
 
-    def __init__(self, sLabel='', oParent=None):
+    def __init__(self, sLabel='', iSize=300, oParent=None):
         super(QHBoxLayout, self).__init__(oParent)
         oLabel = QLabel()
         oLineEdit = QLineEdit()
+        oLineEdit.setStyleSheet('QLineEdit {margin-top:5px}')
         self.addWidget(oLabel)
         self.addWidget(oLineEdit)
         self.set_line_width()
         self.set_label(sLabel)
+        self.set_line_width(iSize)
 
     def get_text(self):
         """ The function gets text from QLineEdit.
@@ -281,14 +283,15 @@ class VTextEdit(QVBoxLayout):
     methods that change parameters inside block without direct access.
     """
 
-    def __init__(self, sLabel='', oParent=None):
-        super(QHBoxLayout, self).__init__(oParent)
+    def __init__(self, sLabel='', iSize=300, iHeight=120, oParent=None):
+        super(QVBoxLayout, self).__init__(oParent)
         oLabel = QLabel()
         oTextEdit = QTextEdit()
         self.addWidget(oLabel)
         self.addWidget(oTextEdit)
         self.set_textedit_size()
         self.set_label(sLabel)
+        self.set_textedit_size(iSize, iHeight)
 
     def clear_text(self):
         """ The function clears QTextEdit failed. """

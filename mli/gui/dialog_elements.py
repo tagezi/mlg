@@ -14,7 +14,7 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from PyQt5.QtWidgets import QComboBox, QHBoxLayout, QLabel, \
+from PyQt5.QtWidgets import QComboBox, QHBoxLayout, QVBoxLayout,  QLabel, \
     QLineEdit, QTextEdit
 
 
@@ -95,6 +95,78 @@ class HComboBox(QHBoxLayout):
         return self.itemAt(1).widget()
 
 
+class VComboBox(QVBoxLayout):
+    """ Creates a block that units QLabel, QComboBox and QLineEdit. Also, it
+    creates methods that change parameters inside block without direct access.
+    """
+    def __init__(self, sLabel='', iSize=300, oParent=None):
+        super(QVBoxLayout, self).__init__(oParent)
+        oLabel = QLabel()
+        oLineEdit = QLineEdit()
+        oComboBox = QComboBox()
+        oComboBox.setLineEdit(oLineEdit)
+        oComboBox.setStyleSheet('QComboBox {margin-left:5px}')
+        self.addWidget(oLabel)
+        self.addWidget(oComboBox)
+        self.set_combo_width()
+        self.set_label(sLabel)
+        self.set_combo_width(iSize)
+
+    def clear_list(self):
+        """ Clean up a list of QComboBox. """
+        oComboBox = self.itemAt(1).widget()
+        oComboBox.clear()
+
+    def get_text(self):
+        """ The function gets text from QLineEdit of QComboBox.
+
+        :return: Selected text from QComboBox.
+        :rtype: str
+        """
+        oComboBox = self.itemAt(1).widget()
+        return oComboBox.currentText()
+
+    def set_text(self, sString=''):
+        """ Set up text into QLineEdit of the block.
+
+        :param sString: A string which display by default in QLineEdit.
+        :type sString: str
+        """
+        oComboBox = self.itemAt(1).widget()
+        oLineEdit = oComboBox.lineEdit()
+        oLineEdit.setText(sString)
+
+    def set_label(self, sString=''):
+        """ Set up text into Label of block.
+
+        :param sString: A string which needs to display as Label in the block.
+        :type sString: str
+        """
+        oLabel = self.itemAt(0).widget()
+        oLabel.setText(sString)
+
+    def set_combo_list(self, lItems=None):
+        """ Set up a list of QComboBox.
+
+        :param lItems: A list of elements for QComboBox.
+        :type lItems: list
+        """
+        oComboBox = self.itemAt(1).widget()
+        oComboBox.addItems(lItems)
+
+    def set_combo_width(self, iSize=300):
+        """ Set up width of QComboBox.
+
+        :param iSize: A number which point to width of QComboBox.
+        :type iSize: int
+        """
+        oComboBox = self.itemAt(1).widget()
+        oComboBox.setFixedWidth(iSize)
+
+    def get_widget(self):
+        return self.itemAt(1).widget()
+
+
 class HLineEdit(QHBoxLayout):
     """ Creates a block that units QLabel and QLineEdit. Also, it creates
     methods that change parameters inside block without direct access.
@@ -149,7 +221,62 @@ class HLineEdit(QHBoxLayout):
         oLineEdit.setFixedWidth(iSize)
 
 
-class HTextEdit(QHBoxLayout):
+class VLineEdit(QVBoxLayout):
+    """ Creates a block that units QLabel and QLineEdit. Also, it creates
+    methods that change parameters inside block without direct access.
+    """
+
+    def __init__(self, sLabel='', iSize=300, oParent=None):
+        super(QVBoxLayout, self).__init__(oParent)
+        oLabel = QLabel()
+        oLineEdit = QLineEdit()
+        oLineEdit.setStyleSheet('QLineEdit {margin-left:5px}')
+        self.addWidget(oLabel)
+        self.addWidget(oLineEdit)
+        self.set_line_width(iSize)
+        self.set_label(sLabel)
+
+    def get_text(self):
+        """ The function gets text from QLineEdit.
+
+        :return: Selected text from QLineEdit.
+        :rtype: str
+        """
+        oLineEdit = self.itemAt(1).widget()
+        return oLineEdit.text().strip()
+
+    def set_text(self, sString=''):
+        """ Set up text into QLineEdit of the block.
+
+        :param sString: A string which display by default in QLineEdit.
+        :type sString: str
+        :return: None
+        """
+        oLineEdit = self.itemAt(1).widget()
+        oLineEdit.setText(sString)
+
+    def set_label(self, sString=''):
+        """ Set up text into Label of block.
+
+        :param sString: A string which needs to display as Label in the block.
+        :type sString: str
+        :return: None
+        """
+        oLabel = self.itemAt(0).widget()
+        oLabel.setText(sString)
+
+    def set_line_width(self, iSize=300):
+        """ Set up width of QLineEdit.
+
+        :param iSize: A number which point to width of QComboBox.
+        :type iSize: int
+        :return: None
+        """
+        oLineEdit = self.itemAt(1).widget()
+        oLineEdit.setFixedWidth(iSize)
+
+
+class VTextEdit(QVBoxLayout):
     """ Creates a block that units QLabel and QTextEdit. Also, it creates
     methods that change parameters inside block without direct access.
     """

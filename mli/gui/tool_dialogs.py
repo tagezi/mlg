@@ -396,27 +396,116 @@ class EditTaxonDialog(ATaxonDialog):
     def __init__(self, oParent=None):
         """ Initiating a class. """
         super(EditTaxonDialog, self).__init__(oParent)
+
+        self.iOldMainTaxonID = None
+        self.sOldMainTaxonName = None
+        self.iOldTaxonLevelID = None
+        self.sOldTaxonLevelName = None
+        self.iOldTaxonID = None
+        self.sOldAuthor = None
+        self.sOldYear = None
+        self.sOldTaxonLocalName = None
+        self.iOldOtherNameID = None
+        self.iOldOtherName = None
+        self.iOldOtherNameAuthor = None
+        self.iOldOtherNameYear = None
+
         self.init_UI()
 
     def init_UI(self):
         """ Creating a dialog window. """
-        self.setWindowTitle(_('Add new taxon to tree'))
+        self.setWindowTitle(_('Editing an existing taxon'))
         self.setModal(Qt.ApplicationModal)
 
         oVLayout = QVBoxLayout()
-        oVLayout.addLayout(self.oComboTaxLevel)
+        oVLayout.addLayout(self.oComboTaxNames)
         oVLayout.addLayout(self.oComboMainTax)
-        oVLayout.addLayout(self.oLineEditAuthor)
-        oVLayout.addLayout(self.oLineEditAuthor)
-        oVLayout.addLayout(self.oLineEditEnName)
-        oVLayout.addLayout(self.oLineEditLocaleName)
-        oVLayout.addLayout(self.oTextEditSynonyms)
-        oVLayout.addLayout(self.oTextEditAuthors)
+        oVLayout.addLayout(self.oHLayoutTaxon)
         oVLayout.addLayout(self.oHLayoutButtons)
         self.setLayout(oVLayout)
 
+    def connect_actions(self):
+        super().connect_actions()
+        (self.oComboTaxNames.get_widget()).currentTextChanged.connect(
+            self.onCurrentTaxonNamesChanged)
+
     def onClickApply(self):
-        pass
+        sOldTaxonName = self.oComboTaxNames.get_text()
+        sMainTaxon = self.oComboMainTax.get_text()
+        sTaxonLevel = self.oComboTaxLevel.get_text()
+        sLatName = self.oLineEditLatName.get_text()
+        sAuthor = self.oLineEditAuthor.get_text()
+        sYear = self.oLineEditYear.get_text()
+        sLocaleName = self.oLineEditLocaleName.get_text()
+
+        if not sLatName and not sLatName.isalpha() and not sLatName.isascii():
+            warning_lat_name()
+            return
+
+        if sOldTaxonName != sLatName:
+            self.save_('taxon_lat_name', sLatName, self.iOldTaxonID)
+        sMainTaxon = sMainTaxon.split()[1]
+
+        if sMainTaxon != self.sOldMainTaxonName:
+            iMainTaxonID = self.oConnector.sql_get_id('Taxon', 'id_taxon',
+                                                      'taxon_lat_name',
+                                                      (sMainTaxon,))
+            self.save_('id_main_taxon', iMainTaxonID, self.iOldTaxonID)
+
+        if sTaxonLevel != self.sOldTaxonLevelName:
+            iLevelID = self.oConnector.sql_get_id('TaxonLevel', 'id_level',
+                                                  'level_name', (sTaxonLevel,))
+            self.save_('id_level', iLevelID, self.iOldTaxonID)
+
+        if sAuthor != self.sOldAuthor:
+            self.save_('author', sAuthor, self.iOldTaxonID)
+
+        if sYear != self.sOldYear:
+            self.save_('year', sYear, self.iOldTaxonID)
+
+        if sLocaleName != self.sOldTaxonLocalName:
+            self.save_('taxon_local_name', sLocaleName, self.iOldTaxonID)
+
+    def onCurrentTaxonNamesChanged(self, sTaxonName):
+        sName = sTaxonName.split(') ')[1]
+        sSQL = "SELECT Taxon.id_main_taxon, MTaxonLevel.level_name, " \
+               "MainTaxon.taxon_lat_name AS Main_Taxon_name, " \
+               "Taxon.id_level, TaxonLevel.level_name, Taxon.id_taxon, " \
+               "Taxon.taxon_lat_name, Taxon.author, Taxon.year, " \
+               "Taxon.taxon_local_name " \
+               "FROM Taxon " \
+               "JOIN Taxon MainTaxon " \
+               "ON MainTaxon.id_taxon=Taxon.id_main_taxon " \
+               "JOIN TaxonLevel ON Taxon.id_level=TaxonLevel.id_level " \
+               "JOIN TaxonLevel MTaxonLevel " \
+               "ON MTaxonLevel.id_level=MainTaxon.id_level " \
+               f"WHERE Taxon.taxon_lat_name='{sName}'"
+        oCursor = self.oConnector.execute_query(sSQL)
+
+        tRow = oCursor.fetchone()
+        self.iOldMainTaxonID = tRow[0]
+        sOldMainTaxonLevelName = tRow[1]
+        self.sOldMainTaxonName = tRow[2]
+        self.iOldTaxonLevelID = tRow[3]
+        self.sOldTaxonLevelName = tRow[4]
+        self.iOldTaxonID = tRow[5]
+        sOldTaxonLatName = tRow[6]
+        self.sOldAuthor = tRow[7]
+        self.sOldYear = tRow[8]
+        self.sOldTaxonLocalName = tRow[9]
+
+        sMainTaxon = f'({sOldMainTaxonLevelName}) {self.sOldMainTaxonName}'
+        self.oComboMainTax.set_text(sMainTaxon)
+        self.oComboTaxLevel.set_text(self.sOldTaxonLevelName)
+        self.oLineEditLatName.set_text(sOldTaxonLatName)
+        self.oLineEditAuthor.set_text(self.sOldAuthor)
+        self.oLineEditLocaleName.set_text(self.sOldTaxonLocalName)
+
+    def save_(self, sSetCol, sUpdate, sWhere,
+              sTable='Taxon', sWhereCol='id_taxon'):
+
+        tValues = (sUpdate, sWhere,)
+        bOk = self.oConnector.update(sTable, sSetCol, sWhereCol, tValues)
 
 
 class NewTaxonDialog(ATaxonDialog):

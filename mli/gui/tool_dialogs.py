@@ -368,8 +368,7 @@ class AddSynonymsDialog(ATaxonDialog):
 
         oVLayout = QVBoxLayout()
         oVLayout.addLayout(self.oComboTaxNames)
-        oVLayout.addLayout(self.oTextEditSynonyms)
-        oVLayout.addLayout(self.oTextEditAuthors)
+        oVLayout.addLayout(self.oHLayoutSynonyms)
         oVLayout.addLayout(self.oHLayoutButtons)
         self.setLayout(oVLayout)
 
@@ -378,19 +377,19 @@ class AddSynonymsDialog(ATaxonDialog):
         sTaxName = self.oComboTaxNames.get_text().split(') ')[1]
         sSynonyms = self.oTextEditSynonyms.get_text()
         sAuthors = self.oTextEditAuthors.get_text()
-        dSynonyms = self.check_synonyms(sTaxName, sSynonyms, sAuthors)
+        sYears = self.oTextEditYears.get_text()
+        dSynonyms = self.check_synonyms(sTaxName, sSynonyms, sAuthors, sYears)
         if not dSynonyms:
             return
 
-        self.save_synonyms(dSynonyms['taxname'],
-                           dSynonyms['listsyn'],
-                           dSynonyms['listauth'])
+        self.save_synonyms(dSynonyms['tax_name'],
+                           dSynonyms['list_syn'],
+                           dSynonyms['list_auth'],
+                           dSynonyms['list_year'])
 
-        self.oComboTaxNames.clear_list()
-        self.oComboTaxNames.set_combo_list(self.create_taxon_list())
-        self.oComboTaxNames.set_text(sTaxName)
-        self.oTextEditSynonyms.set_text('')
-        self.oTextEditAuthors.set_text('')
+        self.oTextEditSynonyms.clear_text()
+        self.oTextEditAuthors.clear_text()
+        self.oTextEditYears.clear_text()
 
 
 class EditTaxonDialog(ATaxonDialog):

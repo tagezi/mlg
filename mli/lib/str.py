@@ -1,4 +1,4 @@
-#     This code is a part of program Science Articles Orderliness
+#     This code is a part of program Manual Lichen identification
 #     Copyright (C) 2021  Valerii Goncharuk (aka tagezi)
 #
 #     This program is free software: you can redistribute it and/or modify
@@ -13,6 +13,19 @@
 #
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+from os.path import join, normcase
+
+
+def get_file_patch(sDir, sFile):
+    """ Concatenates file path and file name based on OS rules.
+
+        :param sDir: String with a patch to a file.
+        :param sFile: String with a filename.
+        :return: Patch to file based on OS rules.
+        """
+    return normcase(join(sDir, sFile))
+
 
 def order_str_to_dict(sString):
     lString = sString.split()

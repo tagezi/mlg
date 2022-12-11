@@ -14,22 +14,6 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#     This code is a part of program Science Articles Orderliness
-#     Copyright (C) 2021  Valerii Goncharuk (aka tagezi)
-#
-#     This program is free software: you can redistribute it and/or modify
-#     it under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     This program is distributed in the hope that it will be useful,
-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#     GNU General Public License for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 from gettext import gettext as _
 from itertools import zip_longest
 from PyQt5.QtCore import Qt
@@ -44,7 +28,7 @@ from mli.lib.sql import SQL
 from mli.lib.str import text_to_list
 
 
-def zip_taxon_lists(iTaxName, lSynonyms, lAuthors, lYears):
+def zip_taxon_lists(iTaxName, lSynonyms, lAuthors, lYears, iStatus):
     """ Creates a list of lists from the taxon ID, taxon synonyms, and synonym
     authors.
 
@@ -54,18 +38,23 @@ def zip_taxon_lists(iTaxName, lSynonyms, lAuthors, lYears):
     :type lSynonyms: list
     :param lAuthors: An author of the synonym.
     :type lAuthors: list
+    :param lYears: An year of publication new taxon name.
+    :type lYears: list
+    :param iStatus: index of status SYNONYM in database.
+    :type iStatus: int
     :return: Return a list with elements of the form - taxon ID, taxon synonym,
      and synonym author.
-    :rtype: list[int, str, str]
+    :rtype: list[int, str, str, int, int]
     """
-    lTaxName = []
+    lTaxName, lStatus = [], []
     iNum = len(lSynonyms)
     while iNum:
         lTaxName.append(iTaxName)
+        lStatus.append(iStatus)
         iNum -= 1
 
     return list(zip_longest(lTaxName, lSynonyms,
-                            lAuthors, lYears, fillvalue=''))
+                            lAuthors, lYears, lStatus, fillvalue=''))
 
 
 class AToolDialogButtons(QDialog):
@@ -176,11 +165,12 @@ class ATaxonDialog(AToolDialogButtons):
         self.oTextEditAuthors = VTextEdit(_('Authors:'), 145)
         self.oTextEditYears = VTextEdit(_('Years:'), 50)
         self.oComboTaxNames = VComboBox(_('Taxon name: '))
+        self.oComboBoxSynonym = VComboBox(_('Synonym:'))
 
-        oHLayoutLatAuthor = QHBoxLayout()
-        oHLayoutLatAuthor.addLayout(self.oLineEditAuthor)
-        oHLayoutLatAuthor.addStretch(5)
-        oHLayoutLatAuthor.addLayout(self.oLineEditYear)
+        self.oHLayoutAuthor = QHBoxLayout()
+        self.oHLayoutAuthor.addLayout(self.oLineEditAuthor)
+        self.oHLayoutAuthor.addStretch(5)
+        self.oHLayoutAuthor.addLayout(self.oLineEditYear)
 
         oVLayoutLevel = QVBoxLayout()
         oVLayoutLevel.addLayout(self.oComboTaxLevel)
@@ -188,7 +178,7 @@ class ATaxonDialog(AToolDialogButtons):
 
         oVLayoutTaxon = QVBoxLayout()
         oVLayoutTaxon.addLayout(self.oLineEditLatName)
-        oVLayoutTaxon.addLayout(oHLayoutLatAuthor)
+        oVLayoutTaxon.addLayout(self.oHLayoutAuthor)
         oVLayoutTaxon.addLayout(self.oLineEditLocaleName)
 
         self.oHLayoutTaxon = QHBoxLayout()
@@ -315,9 +305,9 @@ class ATaxonDialog(AToolDialogButtons):
         if sSynonyms:
             lSynonyms.extend(text_to_list(sSynonyms))
             for sSynonym in lSynonyms:
-                bExist = self.oConnector.sql_get_id('TaxonOtherNames',
-                                                    'id_other_names',
-                                                    'id_taxon, taxon_name',
+                bExist = self.oConnector.sql_get_id('Taxon',
+                                                    'id_taxon',
+                                                    'taxon_lat_name',
                                                     (sSynonym,))
                 if bExist:
                     bOk = warning_synonym_exist(sTaxName)
@@ -350,12 +340,17 @@ class ATaxonDialog(AToolDialogButtons):
         :type lYears: list
         """
         if lSynonyms:
-            lValues = zip_taxon_lists(iTaxName, lSynonyms, lAuthors, lYears)
-            for tValues in lValues:
-                self.oConnector.insert_row('TaxonOtherNames',
-                                           'id_taxon, taxon_name,'
-                                           ' author, year',
-                                           tValues)
+            iStatus = self.oConnector.sql_get_id('TaxonStatus',
+                                                 'id_status',
+                                                 'status_name',
+                                                 ('ACCEPTED',))
+            lValues = zip_taxon_lists(iTaxName, lSynonyms,
+                                      lAuthors, lYears, iStatus)
+            self.oConnector.insert_row('Taxon',
+                                       'id_level, id_main_taxon, '
+                                       'taxon_lat_name, author, year'
+                                       'id_status',
+                                       lValues)
 
 
 class AddSynonymsDialog(ATaxonDialog):
@@ -395,6 +390,71 @@ class AddSynonymsDialog(ATaxonDialog):
         self.oTextEditYears.clear_text()
 
 
+class EditSynonymDialog(ATaxonDialog):
+    def __init__(self, oParent=None):
+        """ Initiating a class. """
+        super(EditSynonymDialog, self).__init__(oParent)
+        self.init_UI()
+        self.connect_actions()
+
+    def init_UI(self):
+        """ Creating a dialog window. """
+        self.setWindowTitle(_('Editing an existing taxon'))
+        self.setModal(Qt.ApplicationModal)
+
+        self.oComboMainTaxonNames = VComboBox(_('New main taxon:'))
+        self.oEditLineSynonym = VLineEdit(_('New synonym name:'))
+        self.oLineEditAuthor = HLineEdit(_('Author:'), 145)
+        self.oLineEditYear = HLineEdit(_('Year:'), 50)
+
+        oVLayout = QVBoxLayout()
+        oVLayout.addLayout(self.oComboTaxNames)
+        oVLayout.addLayout(self.oComboBoxSynonym)
+        oVLayout.addLayout(self.oComboMainTaxonNames)
+        oVLayout.addLayout(self.oEditLineSynonym)
+        oHLayout = QHBoxLayout()
+        oHLayout.addLayout(self.oLineEditAuthor)
+        oHLayout.addLayout(self.oLineEditYear)
+        oVLayout.addLayout(oHLayout)
+        oVLayout.addLayout(self.oHLayoutButtons)
+        self.setLayout(oVLayout)
+
+    def connect_actions(self):
+        super().connect_actions()
+        (self.oComboTaxNames.get_widget()).currentTextChanged.connect(
+            self.onCurrentTaxonNamesChanged)
+        self.oComboBoxSynonym.get_widget().currentTextChanged.connect(
+            self.onCurrentSynonymChanged)
+
+    def onClickApply(self):
+        pass
+
+    def onCurrentSynonymChanged(self, sSynonym):
+        oCursor = self.oConnector.select('TaxonSynonym',
+                                         'id_other_names, taxon_name,'
+                                         ' author, year',
+                                         'id_taxon, taxon_name',
+                                         (self.iTaxonID, sSynonym,))
+        self.lSynonym = oCursor.fetchone()
+
+    def onCurrentTaxonNamesChanged(self, sTaxonName):
+        sValue = sTaxonName.split(') ')[1]
+        self.iTaxonID = self.oConnector.sql_get_id('Taxon', 'id_taxon',
+                                                   'taxon_lat_name',
+                                                   (sValue,))
+        oCursor = self.oConnector.select('TaxonSynonym', 'taxon_name',
+                                         'id_taxon', (self.iTaxonID,))
+        tSynonyms = oCursor.fetchall()
+        lSynonyms = []
+        for lRow in tSynonyms:
+            lSynonyms.append(lRow[0])
+
+        self.oComboBoxSynonym.set_combo_list(lSynonyms)
+
+    def save_(self):
+        pass
+
+
 class EditTaxonDialog(ATaxonDialog):
     def __init__(self, oParent=None):
         """ Initiating a class. """
@@ -417,7 +477,7 @@ class EditTaxonDialog(ATaxonDialog):
 
     def init_UI(self):
         """ Creating a dialog window. """
-        self.setWindowTitle(_('Editing an existing taxon'))
+        self.setWindowTitle(_('Editing synonyms of a taxon'))
         self.setModal(Qt.ApplicationModal)
 
         oVLayout = QVBoxLayout()
@@ -508,7 +568,7 @@ class EditTaxonDialog(ATaxonDialog):
               sTable='Taxon', sWhereCol='id_taxon'):
 
         tValues = (sUpdate, sWhere,)
-        bOk = self.oConnector.update(sTable, sSetCol, sWhereCol, tValues)
+        self.oConnector.update(sTable, sSetCol, sWhereCol, tValues)
 
 
 class NewTaxonDialog(ATaxonDialog):

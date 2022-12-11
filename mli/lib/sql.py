@@ -14,31 +14,15 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#     This code is a part of program Science Articles Orderliness
-#   Copyright (C) 2021  Valerii Goncharuk (aka tagezi)
-#
-#   This program is free software: you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation, either version 3 of the License, or
-#   (at your option) any later version.
-#
-#   This program is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 """ The module provides an API for working with the database. It creates a
     multi-level API that can be used in other modules to create requests using
     a minimum of transmitted data.
 
     :function: get_columns(sColumns, sConj='AND')
-    :class: SQLmain
+    :class: SQL
 
     Using:
-    Foo = SQLmain(_DataBaseFile_)
+    Foo = SQL(_DataBaseFile_)
     """
 
 import logging
@@ -63,29 +47,6 @@ def get_columns(sColumns, sConj='AND'):
     :rtype: str
     """
     return sColumns.replace(', ', '=? ' + sConj + ' ') + "=?"
-
-
-def get_increase_value(sColumns, tValues):
-    """ Checks counting elements of values, and if them fewer,
-     then makes them equal.
-
-     :Note: In the rison that tuple can't be multiplied on flot, the process
-     of increasing the tuple becomes somewhat resource-intensive. So,
-     tValues should be consisting of one element.
-
-    :param sColumns: Colum(s) in query.
-    :type sColumns: str
-    :param tValues: Values should be specified in the request.
-    :type tValues: tuple
-    :return: A tuple with values, which equal to sColumns.
-    :rtype: tuple
-    """
-    if len(sColumns.split(',')) > len(tValues) == 1:
-        return tValues * len(sColumns.split(', '))
-
-    logging.error('The tuple must be filled or consist of one element.'
-                  f'The columns: {sColumns}\n The tuple: {tValues}')
-    return
 
 
 class SQL:
@@ -137,33 +98,33 @@ class SQL:
         """ Method exports from db to sql script. """
         return self.oConnector.iterdump()
 
-    def execute_script(self, SQL):
+    def execute_script(self, sSQL):
         """ Method executes sql script.
 
         The main difference from the method is the ability to execute
         several commands at the same time. For example, using this method,
         you can restore the database from sql dump.
 
-        :param SQL: SQL Script as string.
-        :type SQL: str
+        :param sSQL: SQL Script as string.
+        :type sSQL: str
         :return: True if script execution is successful, otherwise False.
         :rtype: bool
         """
         oCursor = self.oConnector.cursor()
         try:
-            oCursor.executescript(SQL)
+            oCursor.executescript(sSQL)
         except DatabaseError as e:
             logging.exception(f'An error has occurred: {e}.\n'
-                              f'String of query: {SQL}\n')
+                              f'String of query: {sSQL}\n')
             return False
 
         return True
 
-    def execute_query(self, sqlString, tValues=None):
+    def execute_query(self, sSQL, tValues=None):
         """ Method executes sql script.
 
-        :param sqlString: SQL query.
-        :type sqlString: str
+        :param sSQL: SQL query.
+        :type sSQL: str
         :param tValues: value(s) that need to safe inserting into query
             (by default, None).
         :type tValues: tuple or None
@@ -173,12 +134,12 @@ class SQL:
         oCursor = self.oConnector.cursor()
         try:
             if tValues is None:
-                oCursor.execute(sqlString)
+                oCursor.execute(sSQL)
             else:
-                oCursor.execute(sqlString, tValues)
+                oCursor.execute(sSQL, tValues)
         except DatabaseError as e:
             logging.exception(f'An error has occurred: {e}.\n'
-                              f'String of query: {sqlString}\n'
+                              f'String of query: {sSQL}\n'
                               f'Parameters: {tValues}')
             return False
 
@@ -200,11 +161,11 @@ class SQL:
         sSQL = ("?, " * len(sColumns.split(", ")))[:-2]
         sqlString = f'INSERT INTO {sTable} ({sColumns}) VALUES ({sSQL})'
         oCursor = self.execute_query(sqlString, tValues)
-        if not oCursor:
-            return False
+        if oCursor:
+            self.oConnector.commit()
+            return oCursor.lastrowid
 
-        self.oConnector.commit()
-        return oCursor.lastrowid
+        return False
 
     def delete_row(self, sTable, sColumns=None, tValues=None):
         """ Deletes row in the database table by value(s).
@@ -221,17 +182,17 @@ class SQL:
         :rtype: bool
         """
         if sColumns is not None:
-            sqlString = f'DELETE FROM {sTable} WHERE {get_columns(sColumns)}'
-            oCursor = self.execute_query(sqlString, tValues)
+            sSQL = f'DELETE FROM {sTable} WHERE {get_columns(sColumns)}'
+            oCursor = self.execute_query(sSQL, tValues)
         else:
-            sqlString = f'DELETE FROM {sTable}'
-            oCursor = self.execute_query(sqlString)
+            sSQL = f'DELETE FROM {sTable}'
+            oCursor = self.execute_query(sSQL)
 
-        if not oCursor:
-            return False
+        if oCursor:
+            self.oConnector.commit()
+            return True
 
-        self.oConnector.commit()
-        return True
+        return False
 
     def update(self, sTable, sSetUpdate, sWhereUpdate, tValues):
         """ Updates value(s) in the record of the database table.
@@ -249,13 +210,13 @@ class SQL:
         """
         sSetUpdate = sSetUpdate + "=?"
         sWhereUpdate = get_columns(sWhereUpdate)
-        sqlString = f'UPDATE {sTable} SET {sSetUpdate} WHERE {sWhereUpdate}'
-        oCursor = self.execute_query(sqlString, tValues)
-        if not oCursor:
-            return False
+        sSQL = f'UPDATE {sTable} SET {sSetUpdate} WHERE {sWhereUpdate}'
+        oCursor = self.execute_query(sSQL, tValues)
+        if oCursor:
+            self.oConnector.commit()
+            return True
 
-        self.oConnector.commit()
-        return True
+        return False
 
     def select(self, sTable, sGet, sWhere='', tValues='', sConj='', sFunc=''):
         """ Looks for row by value(s) in table column(s).
@@ -291,15 +252,15 @@ class SQL:
             else:
                 sCol = get_columns(sWhere)
 
-            sqlString = f'SELECT {sGet} FROM {sTable} WHERE {sCol}'
-            oCursor = self.execute_query(sqlString, tValues)
+            sSQL = f'SELECT {sGet} FROM {sTable} WHERE {sCol}'
+            oCursor = self.execute_query(sSQL, tValues)
         else:
             oCursor = self.execute_query(f'SELECT {sGet} FROM {sTable}')
 
-        if not oCursor:
-            return False
+        if oCursor:
+            return oCursor
 
-        return oCursor
+        return False
 
     # Average API level
     def sql_get_values(self, sTable, sID, sWhere, tValues, sConj=''):
@@ -325,24 +286,21 @@ class SQL:
                 sWhere = get_columns(sWhere, sConj)
             else:
                 sWhere = get_columns(sWhere)
-        sqlString = f'SELECT {sID} FROM {sTable} WHERE {sWhere}'
-        oCursor = self.execute_query(sqlString, tValues)
-        if not oCursor:
-            return False
-        else:
+        sSQL = f'SELECT {sID} FROM {sTable} WHERE {sWhere}'
+        oCursor = self.execute_query(sSQL, tValues)
+        if oCursor:
             lRows = oCursor.fetchall()
-
-            if not lRows:
-                return 0
-            else:
+            if lRows:
                 return lRows
+
+        return False
 
     def sql_get_id(self, sTable, sID, sWhere, tValues, sConj=''):
         lRows = self.sql_get_values(sTable, sID, sWhere, tValues, sConj)
-        if not lRows:
-            return 0
-        else:
+        if lRows:
             return lRows[0][0]
+
+        return False
 
     def sql_get_all(self, sTable):
         """ Gets all records in database table.
@@ -353,10 +311,10 @@ class SQL:
         :rtype: tuple or bool
         """
         oCursor = self.execute_query(f'SELECT * FROM {sTable}')
-        if not oCursor:
-            return False
+        if oCursor:
+            return oCursor.fetchall()
 
-        return oCursor.fetchall()
+        return False
 
     def sql_count(self, sTable):
         """ Counts number of records in database table.
@@ -368,11 +326,11 @@ class SQL:
         """
         # sTable, sGet, sWhere, tValues, sFunc=None
         oCursor = self.select(sTable, sGet='*', sFunc='Count')
-        if not oCursor:
-            return False
+        if oCursor:
+            row = oCursor.fetchall()
+            return row[0][0]
 
-        row = oCursor.fetchall()
-        return row[0][0]
+        return False
 
     def sql_table_clean(self, lTable):
         """ Cleans up the table.
@@ -394,3 +352,47 @@ class SQL:
                 return False
 
         return True
+
+    # Top API level
+    def get_all_by_level(self, iLevel):
+        return self.execute_query(
+            'SELECT id_taxon, taxon_lat_name '
+            'FROM Taxon WHERE  id_level=? '
+            'ORDER BY taxon_lat_name ASC', (iLevel,))
+
+    def get_garbage(self):
+        iLevel = 21
+        sSQL = "SELECT Taxon.id_taxon, MainTaxon.taxon_lat_name, " \
+               "Taxon.taxon_lat_name " \
+               "FROM Taxon " \
+               "JOIN Taxon MainTaxon " \
+               "ON Taxon.id_main_taxon=MainTaxon.id_taxon " \
+               f"WHERE Taxon.id_level={iLevel};"
+        lRow = self.execute_query(sSQL).fetchall()
+        if lRow:
+            return lRow
+
+        return False
+
+    def get_level_id(self, sColumns, tValues):
+        return self.sql_get_values('TaxonLevel', 'id_level', sColumns, tValues)
+
+    def get_level_name(self, sColumns, iValues):
+        return self.sql_get_values('TaxonLevel', sColumns,
+                                   'id_level', (iValues,))
+
+    def get_id_by_name_author(self, tValue, sTable='Taxon'):
+        if tValue[1]:
+            return self.sql_get_id(sTable, 'id_taxon',
+                                   'taxon_lat_name, author', tValue)
+        else:
+            return self.sql_get_id(sTable, 'id_taxon',
+                                   'taxon_lat_name', (tValue[0],))
+
+    def get_id_by_name_status(self, tValue, sTable='Taxon'):
+        return self.sql_get_id(sTable, 'id_taxon',
+                               'taxon_lat_name, id_status', tValue)
+
+    def get_synonym_id(self, sValue, sTable='TaxonSynonym'):
+        return self.sql_get_id(sTable, 'id_other_names',
+                               'taxon_name', (sValue,))

@@ -1,4 +1,4 @@
-#     This code is a part of program Science Articles Orderliness
+#     This code is a part of program Manual Lichen identification
 #     Copyright (C) 2021  Valerii Goncharuk (aka tagezi)
 #
 #     This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@
 import unittest
 
 from ut_pep8 import TestPEP8
+from ut_sql import TestSQLite
 
 
 def suite():
@@ -27,6 +28,17 @@ def suite():
     """
     oSuite = unittest.TestSuite()
     oSuite.addTest(unittest.makeSuite(TestPEP8))
+    oSuite.addTest(TestSQLite('test_sql_get_columns'))
+    oSuite.addTest(TestSQLite('test_sql__init__'))
+    oSuite.addTest(TestSQLite('test_sql_execute'))
+    oSuite.addTest(TestSQLite('test_sql_insert_row'))
+    oSuite.addTest(TestSQLite('test_sql_select'))
+    oSuite.addTest(TestSQLite('test_sql_sql_count'))
+    oSuite.addTest(TestSQLite('test_sql_delete_row'))
+    oSuite.addTest(TestSQLite('test_sql_sql_get_all'))
+    oSuite.addTest(TestSQLite('test_sql_sql_get_id'))
+    oSuite.addTest(TestSQLite('test_sql_sql_table_clean'))
+    oSuite.addTest(TestSQLite('test_sql_export_db'))
 
     return oSuite
 

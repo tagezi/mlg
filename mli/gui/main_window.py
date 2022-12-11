@@ -23,7 +23,7 @@ from mli.gui.help_dialog import About
 from mli.gui.setting_dialog import SettingDialog
 from mli.gui.tab_widget import CentralTabWidget
 from mli.gui.tool_dialogs import NewSubstrateDialog, EditTaxonDialog, \
-    EditSubstrateDialog, NewTaxonDialog, AddSynonymsDialog
+    EditSubstrateDialog, EditSynonymDialog, NewTaxonDialog, AddSynonymsDialog
 
 from mli.lib.sql import SQL
 
@@ -68,6 +68,7 @@ class MainWindow(QMainWindow):
         self.oNewTaxon = QAction(_('&New taxon...'))
         self.oEditTaxon = QAction(_('&Edit taxon...'))
         self.oAddSynonyms = QAction(_('Add synonyms taxon...'))
+        self.oEditSynonym = QAction(_('Edit synonym taxon...'))
         self.oNewSubstrate = QAction(_('New substrate...'))
         self.oEditSubstrate = QAction(_('Edit substrate...'))
 
@@ -107,6 +108,7 @@ class MainWindow(QMainWindow):
         oTools.addAction(self.oNewTaxon)
         oTools.addAction(self.oEditTaxon)
         oTools.addAction(self.oAddSynonyms)
+        oTools.addAction(self.oEditSynonym)
         oTools.addSeparator()
         oTools.addAction(self.oNewSubstrate)
         oTools.addAction(self.oEditSubstrate)
@@ -132,6 +134,7 @@ class MainWindow(QMainWindow):
         self.oNewTaxon.triggered.connect(self.onNewTaxon)
         self.oEditTaxon.triggered.connect(self.onEditTaxon)
         self.oAddSynonyms.triggered.connect(self.onAddSynonyms)
+        self.oEditSynonym.triggered.connect(self.onEditSynonym)
         self.oNewSubstrate.triggered.connect(self.onNewSubstrate)
         self.oEditSubstrate.triggered.connect(self.onEditSubstrate)
 
@@ -161,6 +164,10 @@ class MainWindow(QMainWindow):
     def onEditSubstrate(self):
         oEditSubstrate = EditSubstrateDialog(self)
         oEditSubstrate.exec_()
+
+    def onEditSynonym(self):
+        oEditSynonym = EditSynonymDialog(self)
+        oEditSynonym.exec_()
 
     def onNewSubstrate(self):
         oNewSubstrate = NewSubstrateDialog(self)

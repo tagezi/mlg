@@ -16,13 +16,14 @@
 
 
 from configparser import ConfigParser, NoSectionError
+from os.path import normcase
 
 
 class ConfigProgram(ConfigParser):
     def __init__(self, sFilePath='../config.ini'):
         super().__init__()
 
-        self.sFilePath = sFilePath
+        self.sFilePath = normcase(sFilePath)
         self.read(self.sFilePath)
         self.lSections = self.sections()
 

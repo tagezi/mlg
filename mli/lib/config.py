@@ -19,10 +19,10 @@ from configparser import ConfigParser, NoSectionError
 
 
 class ConfigProgram(ConfigParser):
-    def __init__(self):
+    def __init__(self, sFilePath='../config.ini'):
         super().__init__()
 
-        self.sFilePath = '../config.ini'
+        self.sFilePath = sFilePath
         self.read(self.sFilePath)
         self.lSections = self.sections()
 

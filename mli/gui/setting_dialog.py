@@ -81,4 +81,3 @@ class SettingDialog(QDialog):
 
 if __name__ == '__main__':
     pass
-

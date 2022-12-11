@@ -64,7 +64,7 @@ class MainWindow(QMainWindow):
         self.oFind = QAction(_('Find...'), self)
         self.oFind.setShortcut('Ctrl+F')
 
-        #Tools
+        # Tools
         self.oNewTaxon = QAction(_('&New taxon...'))
         self.oEditTaxon = QAction(_('&Edit taxon...'))
         self.oAddSynonyms = QAction(_('Add synonyms taxon...'))

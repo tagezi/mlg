@@ -71,6 +71,7 @@ def zip_taxon_lists(iTaxName, lSynonyms, lAuthors, lYears):
 class AToolDialogButtons(QDialog):
     """An abstract class that creates a block of Apply, OK, Cancel buttons and
     reserves action methods for them."""
+
     def __init__(self, oParent=None):
         """ Initiating a class. """
         super(AToolDialogButtons, self).__init__(oParent)
@@ -120,6 +121,7 @@ class AToolDialogButtons(QDialog):
 class ASubstrateDialog(AToolDialogButtons):
     """An abstract class that creates fields and functionality common to all
     dialogs of the substrate. """
+
     def __init__(self, oParent=None):
         """ Initiating a class. """
         super(ASubstrateDialog, self).__init__(oParent)
@@ -154,6 +156,7 @@ class ASubstrateDialog(AToolDialogButtons):
 class ATaxonDialog(AToolDialogButtons):
     """ Creates abstract class that contain common elements for Dialogs of
         taxon."""
+
     def __init__(self, oParent=None):
         """ Initiating a class. """
         super(ATaxonDialog, self).__init__(oParent)
@@ -510,6 +513,7 @@ class EditTaxonDialog(ATaxonDialog):
 
 class NewTaxonDialog(ATaxonDialog):
     """ Dialog window which adds information on new taxon. """
+
     def __init__(self, oParent=None):
         """ Initiating a class. """
         super(NewTaxonDialog, self).__init__(oParent)
@@ -589,6 +593,7 @@ class NewTaxonDialog(ATaxonDialog):
 
 class EditSubstrateDialog(ASubstrateDialog):
     """ Dialog window which allows user to change substrate type. """
+
     def __init__(self, oParent=None):
         """ Initiating a class. """
         super(EditSubstrateDialog, self).__init__(oParent)
@@ -625,6 +630,7 @@ class EditSubstrateDialog(ASubstrateDialog):
 
 class NewSubstrateDialog(ASubstrateDialog):
     """ Dialog window which adds new substrate type. """
+
     def __init__(self, oParent=None):
         """ Initiating a class. """
         super(NewSubstrateDialog, self).__init__(oParent)

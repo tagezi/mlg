@@ -49,6 +49,29 @@ def get_columns(sColumns, sConj='AND'):
     return sColumns.replace(', ', '=? ' + sConj + ' ') + "=?"
 
 
+def get_increase_value(sColumns, tValues):
+    """ Checks counting elements of values, and if them fewer,
+     then makes them equal.
+
+     :Note: In the rison that tuple can't be multiplied on flot, the process
+     of increasing the tuple becomes somewhat resource-intensive. So,
+     tValues should be consisting of one element.
+
+    :param sColumns: Colum(s) in query.
+    :type sColumns: str
+    :param tValues: Values should be specified in the request.
+    :type tValues: tuple or list
+    :return: A tuple with values, which equal to sColumns.
+    :rtype: list
+    """
+    if len(sColumns.split(',')) > len(tValues) == 1:
+        return tValues * len(sColumns.split(', '))
+
+    logging.error('The tuple must be filled or consist of one element.'
+                  f'The columns: {sColumns} \n The tuple: {tValues}')
+    return
+
+
 class SQL:
     # TODO: PyCharm does not want to define standard reStructureText
     #  designation. I don't how it can fix now. So, I use available methods
@@ -127,7 +150,7 @@ class SQL:
         :type sSQL: str
         :param tValues: value(s) that need to safe inserting into query
             (by default, None).
-        :type tValues: tuple or None
+        :type tValues: tuple or list or None
         :return: Cursor or bool -- True if script execution is successful,
             otherwise False.
         """
@@ -153,7 +176,7 @@ class SQL:
         :param sColumns: Columns names of the table by where needs inserting.
         :type sColumns: str
         :param tValues: Value(s) as tuple for inserting.
-        :type tValues: tuple
+        :type tValues: tuple or list
         :return: ID of an inserted row  if the insert was successful.
             Otherwise, False.
         :rtype: str or bool
@@ -177,7 +200,7 @@ class SQL:
         :type sColumns: str or None
         :param tValues: value(s) as tuple for search of rows.
             (by default, None).
-        :type tValues: tuple
+        :type tValues: tuple or list
         :return: True if the deletion is successful, otherwise False.
         :rtype: bool
         """
@@ -204,7 +227,7 @@ class SQL:
         :param sWhereUpdate: A column where values correspond to the required.
         :type sWhereUpdate: str
         :param tValues: value(s) as tuple for search corresponding rows.
-        :type tValues: tuple
+        :type tValues: tuple or list
         :return: True if the insert was successful, otherwise False.
         :rtype: bool
         """
@@ -233,7 +256,7 @@ class SQL:
         :type sConj: str or None
         :param tValues: Value(s) as tuple for search
             (by default, empty).
-        :type tValues: tuple or None
+        :type tValues: tuple or list or None
         :param sFunc: Function name of sqlite, which need to apply
             (by default, empty). Note: Now, you can use only two sqlite
             functions: Count and DISTINCT.
@@ -273,7 +296,7 @@ class SQL:
         :param sWhere: Names of columns of the table by which to search.
         :type sWhere: str
         :param tValues: Value(s) as tuple for search.
-        :type tValues: tuple
+        :type tValues: tuple or list
         :param sConj: The one from 'AND' or 'OR' operator condition.
             By default, is used 'AND'.
         :type sConj: str or None
@@ -337,7 +360,7 @@ class SQL:
 
         :param lTable: Table names as list or tuple of string, or table name
             as string where cleaning is need to do.
-        :type lTable: tuple
+        :type lTable: tuple or list
         :return: True, if execution is successful. Otherwise, False.
             Note: False is returned even if cleaning the last table in
             the tuple was not successful.

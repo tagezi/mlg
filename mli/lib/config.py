@@ -14,16 +14,17 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
+import sys
 from configparser import ConfigParser, NoSectionError
-from os.path import normcase
+
+from mli.lib.str import get_file_patch
 
 
 class ConfigProgram(ConfigParser):
-    def __init__(self, sFilePath='../config.ini'):
+    def __init__(self, sFilePath='config.ini'):
         super().__init__()
 
-        self.sFilePath = normcase(sFilePath)
+        self.sFilePath = get_file_patch(sys.path[0], sFilePath)
         self.read(self.sFilePath)
         self.lSections = self.sections()
 

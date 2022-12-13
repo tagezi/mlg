@@ -395,6 +395,10 @@ class EditSynonymDialog(ATaxonDialog):
     def __init__(self, oParent=None):
         """ Initiating a class. """
         super(EditSynonymDialog, self).__init__(oParent)
+
+        self.lSynonym = None
+        self.iTaxonID = None
+
         self.init_UI()
         self.connect_actions()
 

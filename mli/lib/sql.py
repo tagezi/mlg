@@ -15,15 +15,15 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """ The module provides an API for working with the database. It creates a
-    multi-level API that can be used in other modules to create requests using
-    a minimum of transmitted data.
+multi-level API that can be used in other modules to create requests using
+a minimum of transmitted data.
 
-    :function: get_columns(sColumns, sConj='AND')
-    :class: SQL
+function: get_columns(sColumns, sConj='AND')
+class: SQL
 
-    Using:
+Using:
     Foo = SQL(_DataBaseFile_)
-    """
+"""
 
 import logging
 import sqlite3

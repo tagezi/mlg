@@ -57,7 +57,7 @@ def gbif_is_lichen(dTaxon):
     return False
 
 
-def gbif_get_id(sName, sLevel='species'):
+def gbif_get_id_from_gbif(sName, sLevel='species'):
     """ Looks up a taxon name in the gbif database.
 
     :param sName: The name of a taxon.
@@ -236,6 +236,46 @@ def gbif_parser_name(sString):
         return sName, sAuthor, iYear
 
 
+def gbif_get_id(oConnector, sName, sLevelEn):
+    """ Checks if the taxon's id exists in the database, and if it doesn't,
+    it gets it from the site.
+
+    :param oConnector: An instance of the sqlite database api class.
+    :type oConnector: SQL
+    :param sName: A name of the taxon.
+    :type sName: str
+    :param sLevelEn: A name of the taxon rank in english language.
+    :type sLevelEn: str
+    :return: ID taxon in gbif.
+    :rtype: int
+    """
+    sGBIF_id = oConnector.sql_get_id('DBIndexes', 'taxon_index',
+                                     'id_taxon, id_source',
+                                     (sName, 12,))
+    if not sGBIF_id:
+        sGBIF_id = gbif_get_id_from_gbif(sName, sLevelEn)
+
+    return sGBIF_id
+
+
+def gbif_parsing_answer(oConnector, lAnswer, sType):
+    """ Parses the response a list of dictionaries with taxon information.
+
+    :param oConnector: An instance of the sqlite database api class.
+    :type oConnector: SQL
+    :param lAnswer: A list of dictionaries with taxon information.
+    :type lAnswer: list[dict[str, bool, str, str, str, str, str, int]|None]
+    :param sType: The first word to output to the string. It makes sense to
+                  indicate either 'Synonym' or 'Children'.
+    :type sType: str
+    :return: None
+    """
+    if lAnswer:
+        for dAnswer in lAnswer:
+            print(f'{sType}: {dAnswer["parent"]} - {dAnswer["name"]}')
+            gbif_parsing_species(oConnector, dAnswer)
+
+
 def gbif_get_update(oConnector, iLevel):
     lRows = oConnector.get_all_by_level(iLevel)
     sLevelEn = oConnector.get_level_name('level_en_name', iLevel)[0][0]
@@ -246,11 +286,7 @@ def gbif_get_update(oConnector, iLevel):
             if bBreak:
                 continue
 
-            sGBIF_id = oConnector.sql_get_id('DBIndexes', 'taxon_index',
-                                             'id_taxon, id_source',
-                                             (sRow[0], 12,))
-            if not sGBIF_id:
-                sGBIF_id = gbif_get_id(sRow[1], sLevelEn)
+            sGBIF_id = gbif_get_id(oConnector, sRow[1], sLevelEn)
 
             dAnswer = gbif_get_taxon_info(sGBIF_id, sLevelEn)
             if dAnswer:
@@ -258,30 +294,21 @@ def gbif_get_update(oConnector, iLevel):
                 gbif_parsing_species(oConnector, dAnswer)
 
             lAnswer = gbif_get_children(sGBIF_id)
-            if lAnswer:
-                for dAnswer in lAnswer:
-                    print(f'Children: {dAnswer["parent"]} - {dAnswer["name"]}')
-                    gbif_parsing_species(oConnector, dAnswer)
+            gbif_parsing_answer(oConnector, lAnswer, 'Children')
 
             oConnector.insert_row('UpdateTaxonGBIF', 'id_taxon_sp', (sRow[0],))
 
-        lRows = oConnector.get_all_by_level(iLevel)
+        # lRows = oConnector.get_all_by_level(iLevel)
         for sRow in lRows:
             bBreak = oConnector.sql_get_id('UpdateTaxonGBIF',
                                            'id', 'id_taxon_sn', (sRow[0],))
             if bBreak:
                 continue
 
-            sGBIF_id = oConnector.sql_get_id('DBIndexes', 'taxon_index',
-                                             'id_taxon, id_source',
-                                             (sRow[0], 12,))
-
+            sGBIF_id = gbif_get_id(oConnector, sRow[1], sLevelEn)
             lAnswer = gbif_get_synonyms(sGBIF_id)
-            if lAnswer:
-                for dAnswer in lAnswer:
-                    print(f'Synonym: {dAnswer["parent"]} - {dAnswer["name"]}')
-                    gbif_parsing_species(oConnector, dAnswer)
 
+            gbif_parsing_answer(oConnector, lAnswer, 'Synonym')
             oConnector.insert_row('UpdateTaxonGBIF', 'id_taxon_sn', (sRow[0],))
 
 

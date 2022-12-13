@@ -14,6 +14,27 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+""" The module provides a means to get information from a taxon, as specified
+in gbif .
+
+function:
+    gbif_get_children(sGBIF_id)
+    gbif_get_id_from_gbif(sName, sLevel='species')
+    gbif_get_id(oConnector, sName, sLevelEn)
+    gbif_get_many(sURL, sGBIF_id)
+    gbif_get_status_id(oConnector, sStatus)
+    gbif_get_synonyms(sGBIF_id)
+    gbif_get_taxon_info(sGBIF_id, sLevel='species')
+    gbif_get_update(oConnector, iLevel)
+    gbif_is_lichen(dTaxon)
+    gbif_parser_name(sString)
+    gbif_parser_taxon(dData)
+    gbif_parsing_answer(oConnector, lAnswer, sType)
+    gbif_parsing_species(oConnector, dAnswer)
+    gbif_save_species(oConnector, dAnswer, iLevel)
+    gbif_update(oConnector, dAnswer, iTaxonID)
+"""
+
 import re
 import requests
 from time import sleep
@@ -212,6 +233,14 @@ def gbif_parser_taxon(dData):
 
 
 def gbif_parser_name(sString):
+    """ Parsing a name of the taxon separating the canonical name from the
+    name of the author and year, if possible.
+
+    :param sString: A string with a name of the taxon.
+    :type sString: str
+    :return: A canonical name, an author name and a naming year of the taxon.
+    :rtype: list[str, str, int]
+    """
     lResponse = species.name_parser([sString])
     sName = ''
     sAuthor = ''
@@ -277,6 +306,15 @@ def gbif_parsing_answer(oConnector, lAnswer, sType):
 
 
 def gbif_get_update(oConnector, iLevel):
+    """ Allows you to select all names from the database by level, start
+    getting data from gbif and enter information into the database.
+
+    :param oConnector: An instance of the sqlite database api class.
+    :type oConnector: SQL
+    :param iLevel: ID of a rank in database.
+    :type iLevel: int
+    :return: None
+    """
     lRows = oConnector.get_all_by_level(iLevel)
     sLevelEn = oConnector.get_level_name('level_en_name', iLevel)[0][0]
     if lRows:
@@ -313,6 +351,14 @@ def gbif_get_update(oConnector, iLevel):
 
 
 def gbif_parsing_species(oConnector, dAnswer):
+    """ Specifies whether to make changes to the database.
+
+    :param oConnector: An instance of the sqlite database api class.
+    :type oConnector: SQL
+    :param dAnswer: A dictionary with information about the taxon.
+    :type dAnswer: dict[str, bool, str, str, str, str, str, int]
+    :return: None
+    """
     # Exclude taxa with type name SH1169675.09FU
     if bool(re.search(r'\d', dAnswer['name'])):
         return
@@ -342,6 +388,17 @@ def gbif_parsing_species(oConnector, dAnswer):
 
 
 def gbif_save_species(oConnector, dAnswer, iLevel):
+    """ Saving information about the taxon in database.
+
+    :param oConnector: An instance of the sqlite database api class.
+    :type oConnector: SQL
+    :param dAnswer: A dictionary with information about the taxon.
+    :type dAnswer: dict[str, bool, str, str, str, str, str, int]
+    :param iLevel: The level's ID in database.
+    :type iLevel: int
+    :return: The taxon's ID in database.
+    :rtype: int or bool
+    """
     print(f'Insert row - {dAnswer["name"]}')
     iStatus = gbif_get_status_id(oConnector, dAnswer['tax_status'])
     iParent = oConnector.get_id_by_name_status((dAnswer['parent'], 1,))
@@ -355,11 +412,30 @@ def gbif_save_species(oConnector, dAnswer, iLevel):
 
 
 def gbif_get_status_id(oConnector, sStatus):
+    """ Returns the status id from the database.
+
+    :param oConnector: An instance of the sqlite database api class.
+    :type oConnector: SQL
+    :param sStatus: The name of the status, as is customary in gbif.
+    :type sStatus: str
+    :return: the status ID.
+    :rtype: int or bool
+    """
     return oConnector.sql_get_id('TaxonStatus', 'id_status',
                                  'status_name', (sStatus,))
 
 
-def gbif_update(oConnector, dAnswer, bContinue):
+def gbif_update(oConnector, dAnswer, iTaxonID):
+    """ Updates information in the database about the author and naming year.
+
+    :param oConnector: An instance of the sqlite database api class.
+    :type oConnector: SQL
+    :param dAnswer: A dictionary with information about the taxon.
+    :type dAnswer: dict[str, bool, str, str, str, str, str, int]
+    :param iTaxonID: The taxon's ID in database.
+    :type iTaxonID: int
+    :return: None
+    """
     sName = dAnswer['name']
     lContinue = oConnector.sql_get_values('Taxon',
                                           'author, year, id_status, '
@@ -369,12 +445,12 @@ def gbif_update(oConnector, dAnswer, bContinue):
     if not lContinue[0][0] and dAnswer['author'] and \
             dAnswer['tax_status'] == 'ACCEPTED':
         oConnector.update('Taxon', 'author', 'id_taxon',
-                          (dAnswer['author'], bContinue,))
+                          (dAnswer['author'], iTaxonID,))
         print(f'Enter author: {sName} - {dAnswer["author"]}')
 
     if dAnswer['year'] and not lContinue[0][1]:
         oConnector.update('Taxon', 'year', 'id_taxon',
-                          (dAnswer['year'], bContinue,))
+                          (dAnswer['year'], iTaxonID,))
         print(f'Enter year: {sName} - {dAnswer["year"]}')
 
 

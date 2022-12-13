@@ -251,7 +251,8 @@ class ATaxonDialog(AToolDialogButtons):
             sSQL = 'SELECT TaxonLevel.level_name, Taxon.taxon_lat_name ' \
                    'FROM Taxon JOIN TaxonLevel ' \
                    'ON Taxon.id_level=TaxonLevel.id_level ' \
-                   f"WHERE TaxonLevel.level_name='{sTaxonLevel}'" \
+                   f'WHERE TaxonLevel.level_name="{sTaxonLevel}" ' \
+                   f'AND id_status=1' \
                    'ORDER BY Taxon.taxon_lat_name ASC;'
             oCursor = self.oConnector.execute_query(sSQL)
 

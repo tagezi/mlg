@@ -252,7 +252,7 @@ class ATaxonDialog(AToolDialogButtons):
                    'FROM Taxon JOIN TaxonLevel ' \
                    'ON Taxon.id_level=TaxonLevel.id_level ' \
                    f'WHERE TaxonLevel.level_name="{sTaxonLevel}" ' \
-                   f'AND id_status=1' \
+                   f'AND id_status=1 ' \
                    'ORDER BY Taxon.taxon_lat_name ASC;'
             oCursor = self.oConnector.execute_query(sSQL)
 
@@ -447,8 +447,7 @@ class EditSynonymDialog(ATaxonDialog):
         self.iTaxonID = self.oConnector.sql_get_id('Taxon', 'id_taxon',
                                                    'taxon_lat_name',
                                                    (sValue,))
-        oCursor = self.oConnector.select('TaxonSynonym', 'taxon_name',
-                                         'id_taxon', (self.iTaxonID,))
+        oCursor = self.oConnector.get_synonym_id(self.iTaxonID)
         tSynonyms = oCursor.fetchall()
         lSynonyms = []
         for lRow in tSynonyms:

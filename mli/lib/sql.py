@@ -416,6 +416,17 @@ class SQL:
         return self.sql_get_id(sTable, 'id_taxon',
                                'taxon_lat_name, id_status', tValue)
 
-    def get_synonym_id(self, sValue, sTable='TaxonSynonym'):
-        return self.sql_get_id(sTable, 'id_other_names',
-                               'taxon_name', (sValue,))
+    def get_level_id(self, sColumns, tValues):
+        return self.sql_get_values('TaxonLevel', 'id_level', sColumns, tValues)
+
+    def get_level_name(self, sColumns, iValues):
+        return self.sql_get_values('TaxonLevel', sColumns,
+                                   'id_level', (iValues,))
+
+    def get_synonym_id(self, iValue):
+        return self.sql_get_id("Taxon", 'taxon_name, id_status',
+                               'id_taxon', (iValue, 2))
+
+    def get_source_id(self, sValue):
+        return self.sql_get_id('DBSources', 'id_source',
+                               'source_abbr', (sValue,))

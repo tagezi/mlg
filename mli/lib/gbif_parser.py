@@ -336,7 +336,7 @@ def gbif_get_update(oConnector, iLevel):
 
             oConnector.insert_row('UpdateTaxonGBIF', 'id_taxon_sp', (sRow[0],))
 
-        # lRows = oConnector.get_all_by_level(iLevel)
+        lRows = oConnector.get_all_by_level(iLevel)
         for sRow in lRows:
             bBreak = oConnector.sql_get_id('UpdateTaxonGBIF',
                                            'id', 'id_taxon_sn', (sRow[0],))

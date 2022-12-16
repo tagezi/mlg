@@ -14,6 +14,10 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""
+The module contains a collection of functions for solving routine tasks with
+strings.
+"""
 from os.path import join, normcase
 
 
@@ -27,8 +31,8 @@ def str_get_file_patch(sDir, sFile):
     return normcase(join(sDir, sFile))
 
 
-def order_str_to_dict(sString):
-    lString = sString.split()
+def str_sep_comma(sString):
+    """ Separates a string by comma to list.
 
     :param sString: A string that needs to separate.
     :type sString: str
@@ -43,6 +47,14 @@ def order_str_to_dict(sString):
 def str_sep_dot(sString):
     """ Separates a string by dot to list.
 
+    :param sString: A string that needs to separate.
+    :type sString: str
+    :return: A separated string by dot.
+    :rtype: list or None
+    """
+    if sString:
+        return sString.split('.')
+    return
 
 
 def str_text_to_list(sString):

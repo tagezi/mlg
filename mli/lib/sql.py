@@ -384,25 +384,36 @@ class SQL:
             'ORDER BY taxon_lat_name ASC', (iLevel,))
 
     def get_garbage(self):
-        iLevel = 21
-        sSQL = "SELECT Taxon.id_taxon, MainTaxon.taxon_lat_name, " \
-               "Taxon.taxon_lat_name " \
-               "FROM Taxon " \
-               "JOIN Taxon MainTaxon " \
-               "ON Taxon.id_main_taxon=MainTaxon.id_taxon " \
-               f"WHERE Taxon.id_level={iLevel};"
+        sSQL = "SELECT taxon_lat_name, author, COUNT(*) c " \
+               "FROM Taxon GROUP BY taxon_lat_name, author HAVING c > 1"
         lRow = self.execute_query(sSQL).fetchall()
         if lRow:
             return lRow
 
         return False
 
-    def get_level_id(self, sColumns, tValues):
-        return self.sql_get_values('TaxonLevel', 'id_level', sColumns, tValues)
-
-    def get_level_name(self, sColumns, iValues):
-        return self.sql_get_values('TaxonLevel', sColumns,
-                                   'id_level', (iValues,))
+    def del_garbage(self, sSource='GBIF'):
+        lGarbage = self.get_garbage()
+        if lGarbage:
+            for lRow in lGarbage:
+                sAuthor = lRow[1]
+                lDelete = self.sql_get_values('Taxon', 'id_taxon',
+                                              'taxon_lat_name, author',
+                                              (lRow[0], sAuthor,))
+                if not lDelete:
+                    lDelete = self.execute_query('SELECT id_taxon FROM Taxon '
+                                                 f'WHERE taxon_lat_name=? '
+                                                 f'AND author is NULL ',
+                                                 (lRow[0],)).fetchall()
+                iSource = self.get_source_id(sSource)
+                if lDelete and iSource:
+                    while len(lDelete) > 1:
+                        iID = self.sql_get_id('DBIndexes', 'id_db_index',
+                                              'id_taxon, id_source',
+                                              (lDelete[-1][0], iSource,))
+                        self.delete_row('DBIndexes', 'id_db_index', (iID,))
+                        self.delete_row('Taxon', 'id_taxon', lDelete[-1])
+                        lDelete.pop(-1)
 
     def get_id_by_name_author(self, tValue, sTable='Taxon'):
         if tValue[1]:
@@ -416,17 +427,96 @@ class SQL:
         return self.sql_get_id(sTable, 'id_taxon',
                                'taxon_lat_name, id_status', tValue)
 
-    def get_level_id(self, sColumns, tValues):
-        return self.sql_get_values('TaxonLevel', 'id_level', sColumns, tValues)
+    def get_level_id(self, sColumns, sValues):
+        return self.sql_get_id('TaxonLevel', 'id_level', sColumns, (sValues,))
 
     def get_level_name(self, sColumns, iValues):
         return self.sql_get_values('TaxonLevel', sColumns,
                                    'id_level', (iValues,))
 
-    def get_synonym_id(self, iValue):
+    def get_synonyms(self, iValue):
         return self.sql_get_id("Taxon", 'taxon_name, id_status',
                                'id_taxon', (iValue, 2))
 
     def get_source_id(self, sValue):
         return self.sql_get_id('DBSources', 'id_source',
                                'source_abbr', (sValue,))
+
+    def get_status_id(self, sValue):
+        return self.sql_get_id('TaxonStatus', 'id_status',
+                               'status_name', (sValue,))
+
+    def get_taxon_id(self, sName, sAuthor, sStatus='ACCEPTED'):
+        iIDStatus = self.get_status_id(sStatus)
+        tValues = (sName, sAuthor, iIDStatus,)
+        return self.sql_get_id("Taxon", 'id_taxon',
+                               'taxon_name, author, id_status',
+                                tValues)
+
+    def get_taxon_children(self, iID, sName, sAuthor, sStatus='ACCEPTED'):
+        sStatus = sStatus.upper()
+        iIDStatus = self.sql_get_id('TaxonStatus', 'id_status', 'status_name',
+                                    (sStatus,))
+        if sAuthor:
+            iMainID = self.sql_get_id('Taxon', 'id_taxon',
+                                      'taxon_name, author',
+                                      (sName, sAuthor))
+        else:
+            sSQL = 'SELECT id_taxon FROM Taxon ' \
+                   'WHERE taxon_name=? AND author is NULL'
+            iMainID = self.execute_query(sSQL, (sName,))
+
+        oCursor = self.select('Taxon',
+                              'id_taxon, taxon_lat_name, author, year',
+                              'id_main_taxon, id_status',
+                              (iID, iMainID, iIDStatus,))
+
+        return oCursor.fetchone()
+
+    def get_taxon_list(self, sStatus):
+        sSQL = 'SELECT Taxon.id_level, TaxonLevel.level_name, ' \
+               'Taxon.taxon_lat_name, Taxon.author ' \
+               'FROM Taxon ' \
+               'JOIN TaxonLevel ON Taxon.id_level=TaxonLevel.id_level ' \
+               'JOIN TaxonStatus ON Taxon.id_status=TaxonStatus.id_status ' \
+               f'WHERE TaxonStatus.status_name=? ' \
+               'ORDER BY Taxon.id_level ASC, Taxon.taxon_lat_name ASC;'
+        return self.execute_query(sSQL, (sStatus,)).fetchall()
+
+
+    def get_taxon_info(self, sName, sAuthor):
+        sSQL = "SELECT Taxon.id_main_taxon, " \
+               "MTaxonLevel.level_name AS Main_Taxon_level, " \
+               "MainTaxon.taxon_lat_name AS Main_Taxon_name, " \
+               "MainTaxon.author AS Main_Taxon_author, " \
+               "Taxon.id_level, " \
+               "TaxonLevel.level_name, " \
+               "Taxon.id_taxon, " \
+               "Taxon.taxon_lat_name, " \
+               "Taxon.author, " \
+               "Taxon.year " \
+               "FROM Taxon " \
+               "JOIN Taxon MainTaxon " \
+               "ON MainTaxon.id_taxon=Taxon.id_main_taxon " \
+               "JOIN TaxonLevel " \
+               "ON Taxon.id_level=TaxonLevel.id_level " \
+               "JOIN TaxonLevel MTaxonLevel " \
+               "ON MTaxonLevel.id_level=MainTaxon.id_level " \
+
+        if sAuthor:
+            sSQL = f"{sSQL}WHERE Taxon.taxon_lat_name=? AND Taxon.author=? "
+            tRows = self.execute_query(sSQL, (sName, sAuthor,)).fetchone()
+        else:
+            sSQL = f"{sSQL}WHERE Taxon.taxon_lat_name=? " \
+                   f"AND Taxon.author is NULL "
+            tRows = self.execute_query(sSQL, (sName,)).fetchone()
+        sLocalName = self.sql_get_values('LocalName',
+                                         'id_local_name, local_name',
+                                         'id_taxon', (tRows[6],))
+        lRows = []
+        lRows.extend(tRows)
+        if sLocalName:
+            lRows.extend(sLocalName[0])
+        else:
+            lRows.extend(['', ''])
+        return lRows

@@ -246,18 +246,13 @@ class ATaxonDialog(AToolDialogButtons):
         :type: list[str]
         """
         lValues = []
-        for sTaxonLevel in lTaxonLevel:
+        tRows = self.oConnector.get_taxon_list('ACCEPTED')
 
-            sSQL = 'SELECT TaxonLevel.level_name, Taxon.taxon_lat_name ' \
-                   'FROM Taxon JOIN TaxonLevel ' \
-                   'ON Taxon.id_level=TaxonLevel.id_level ' \
-                   f'WHERE TaxonLevel.level_name="{sTaxonLevel}" ' \
-                   f'AND id_status=1 ' \
-                   'ORDER BY Taxon.taxon_lat_name ASC;'
-            oCursor = self.oConnector.execute_query(sSQL)
-
-            for tRow in oCursor:
-                lValues.append(f'({tRow[0]}) {tRow[1]}')
+        for tRow in tRows:
+            if tRow[3]:
+                lValues.append(f'({tRow[1]}) {tRow[2]}, {tRow[3]}')
+            else:
+                lValues.append(f'({tRow[1]}) {tRow[2]}')
         return lValues
 
     def fill_combobox(self):
@@ -283,12 +278,14 @@ class ATaxonDialog(AToolDialogButtons):
             self.oComboTaxLevel.set_combo_list(lTaxonLevel)
             self.oComboTaxLevel.set_text(lTaxonLevel[0])
 
-    def check_synonyms(self, sTaxName, sSynonyms, sAuthors, sYears):
+    def check_synonyms(self, sTaxName, sAuthor, sSynonyms, sAuthors, sYears):
         """ Checks if there are such synonyms in the list of taxon and if the
         number of synonyms matches the number of authors.
 
         :param sTaxName: Latin name of taxon.
         :type sTaxName: str
+        :param sAuthor: An author of the taxon name.
+        :type sAuthor: str
         :param sSynonyms: A list of synonyms.
         :type sSynonyms: str
         :param sAuthors: A author list of synonyms.
@@ -299,8 +296,7 @@ class ATaxonDialog(AToolDialogButtons):
          synonyms, and a list of authors, or False
         :rtype: dict[int, list[str], list[str], list[str]] | bool
         """
-        iTaxName = self.oConnector.sql_get_id('Taxon', 'id_taxon',
-                                              'taxon_lat_name', (sTaxName,))
+        iTaxName = self.oConnector.get_taxon_id(sTaxName, sAuthor)
         bOk = True
         lSynonyms = []
         if sSynonyms:
@@ -308,7 +304,7 @@ class ATaxonDialog(AToolDialogButtons):
             for sSynonym in lSynonyms:
                 bExist = self.oConnector.sql_get_id('Taxon',
                                                     'id_taxon',
-                                                    'taxon_lat_name',
+                                                    'taxon_name',
                                                     (sSynonym,))
                 if bExist:
                     bOk = warning_synonym_exist(sTaxName)
@@ -341,15 +337,12 @@ class ATaxonDialog(AToolDialogButtons):
         :type lYears: list
         """
         if lSynonyms:
-            iStatus = self.oConnector.sql_get_id('TaxonStatus',
-                                                 'id_status',
-                                                 'status_name',
-                                                 ('ACCEPTED',))
+            iStatus = self.oConnector.get_status_id('SYNONYM')
             lValues = zip_taxon_lists(iTaxName, lSynonyms,
                                       lAuthors, lYears, iStatus)
             self.oConnector.insert_row('Taxon',
                                        'id_level, id_main_taxon, '
-                                       'taxon_lat_name, author, year'
+                                       'taxon_name, author, year'
                                        'id_status',
                                        lValues)
 
@@ -377,7 +370,7 @@ class AddSynonymsDialog(ATaxonDialog):
         sSynonyms = self.oTextEditSynonyms.get_text()
         sAuthors = self.oTextEditAuthors.get_text()
         sYears = self.oTextEditYears.get_text()
-        dSynonyms = self.check_synonyms(sTaxName, sSynonyms, sAuthors, sYears)
+        dSynonyms = self.check_synonyms(sTaxName, sAuthor, sSynonyms, sAuthors, sYears)
         if not dSynonyms:
             return
 
@@ -443,11 +436,9 @@ class EditSynonymDialog(ATaxonDialog):
         self.lSynonym = oCursor.fetchone()
 
     def onCurrentTaxonNamesChanged(self, sTaxonName):
-        sValue = sTaxonName.split(') ')[1]
-        self.iTaxonID = self.oConnector.sql_get_id('Taxon', 'id_taxon',
-                                                   'taxon_lat_name',
-                                                   (sValue,))
-        oCursor = self.oConnector.get_synonym_id(self.iTaxonID)
+        sTaxName, sAuthor = str_sep_name_taxon(sTaxonName)
+        self.iTaxonID = self.oConnector.get_taxon_id(sTaxName, sAuthor)
+        oCursor = self.oConnector.get_synonyms(self.iTaxonID)
         tSynonyms = oCursor.fetchall()
         lSynonyms = []
         for lRow in tSynonyms:
@@ -466,11 +457,13 @@ class EditTaxonDialog(ATaxonDialog):
 
         self.iOldMainTaxonID = None
         self.sOldMainTaxonName = None
+        self.sOldMainTaxonAuthor = None
         self.iOldTaxonLevelID = None
         self.sOldTaxonLevelName = None
         self.iOldTaxonID = None
         self.sOldAuthor = None
         self.sOldYear = None
+        self.iLocalNameID = None
         self.sOldTaxonLocalName = None
         self.iOldOtherNameID = None
         self.iOldOtherName = None
@@ -510,19 +503,16 @@ class EditTaxonDialog(ATaxonDialog):
             return
 
         if sOldTaxonName != sLatName:
-            self.save_('taxon_lat_name', sLatName, self.iOldTaxonID)
-        sMainTaxon = sMainTaxon.split()[1]
+            self.save_('taxon_name', sLatName, self.iOldTaxonID)
 
         sMainTaxonName, sMainTaxonAuthor = str_sep_name_taxon(sMainTaxon)
         if sMainTaxon != self.sOldMainTaxonName:
-            iMainTaxonID = self.oConnector.sql_get_id('Taxon', 'id_taxon',
-                                                      'taxon_lat_name',
-                                                      (sMainTaxon,))
+            iMainTaxonID = self.oConnector.get_taxon_id(sMainTaxonName,
+                                                        sMainTaxonAuthor)
             self.save_('id_main_taxon', iMainTaxonID, self.iOldTaxonID)
 
         if sTaxonLevel != self.sOldTaxonLevelName:
-            iLevelID = self.oConnector.sql_get_id('TaxonLevel', 'id_level',
-                                                  'level_name', (sTaxonLevel,))
+            iLevelID = self.oConnector.get_level_id('level_name', sTaxonLevel)
             self.save_('id_level', iLevelID, self.iOldTaxonID)
 
         if sAuthor != self.sOldAuthor:
@@ -532,41 +522,40 @@ class EditTaxonDialog(ATaxonDialog):
             self.save_('year', sYear, self.iOldTaxonID)
 
         if sLocaleName != self.sOldTaxonLocalName:
-            self.save_('taxon_local_name', sLocaleName, self.iOldTaxonID)
+            self.oConnector.update('LocalName', 'local_name', 'id_local_name',
+                                   (sLocaleName, self.iLocalNameID,))
 
     def onCurrentTaxonNamesChanged(self, sTaxonName):
-        sName = sTaxonName.split(') ')[1]
-        sSQL = "SELECT Taxon.id_main_taxon, MTaxonLevel.level_name, " \
-               "MainTaxon.taxon_lat_name AS Main_Taxon_name, " \
-               "Taxon.id_level, TaxonLevel.level_name, Taxon.id_taxon, " \
-               "Taxon.taxon_lat_name, Taxon.author, Taxon.year, " \
-               "Taxon.taxon_local_name " \
-               "FROM Taxon " \
-               "JOIN Taxon MainTaxon " \
-               "ON MainTaxon.id_taxon=Taxon.id_main_taxon " \
-               "JOIN TaxonLevel ON Taxon.id_level=TaxonLevel.id_level " \
-               "JOIN TaxonLevel MTaxonLevel " \
-               "ON MTaxonLevel.id_level=MainTaxon.id_level " \
-               f"WHERE Taxon.taxon_lat_name='{sName}'"
-        oCursor = self.oConnector.execute_query(sSQL)
+        sName, sAuthor = str_sep_name_taxon(sTaxonName)
+        lRow = self.oConnector.get_taxon_info(sName, sAuthor)
 
-        tRow = oCursor.fetchone()
-        self.iOldMainTaxonID = tRow[0]
-        sOldMainTaxonLevelName = tRow[1]
-        self.sOldMainTaxonName = tRow[2]
-        self.iOldTaxonLevelID = tRow[3]
-        self.sOldTaxonLevelName = tRow[4]
-        self.iOldTaxonID = tRow[5]
-        sOldTaxonLatName = tRow[6]
-        self.sOldAuthor = tRow[7]
-        self.sOldYear = tRow[8]
-        self.sOldTaxonLocalName = tRow[9]
+        self.iOldMainTaxonID = lRow[0]
+        sOldMainTaxonLevelName = lRow[1]
+        self.sOldMainTaxonName = lRow[2]
+        self.sOldMainTaxonAuthor = lRow[3]
+        self.iOldTaxonLevelID = lRow[4]
+        self.sOldTaxonLevelName = lRow[5]
+        self.iOldTaxonID = lRow[6]
+        sOldTaxonLatName = lRow[7]
+        self.sOldAuthor = lRow[8]
+        iOldYear = lRow[9]
+        self.iLocalNameID = lRow[10]
+        self.sOldTaxonLocalName = lRow[11]
+
+        if not iOldYear:
+            self.sOldYear = ''
+        else:
+            self.sOldYear = str(iOldYear)
 
         sMainTaxon = f'({sOldMainTaxonLevelName}) {self.sOldMainTaxonName}'
+        if self.sOldMainTaxonAuthor:
+            sMainTaxon = f'{sMainTaxon}, {self.sOldMainTaxonAuthor}'
+
         self.oComboMainTax.set_text(sMainTaxon)
         self.oComboTaxLevel.set_text(self.sOldTaxonLevelName)
         self.oLineEditLatName.set_text(sOldTaxonLatName)
         self.oLineEditAuthor.set_text(self.sOldAuthor)
+        self.oLineEditYear.set_text(self.sOldYear)
         self.oLineEditLocaleName.set_text(self.sOldTaxonLocalName)
 
     def save_(self, sSetCol, sUpdate, sWhere,
@@ -612,20 +601,16 @@ class NewTaxonDialog(ATaxonDialog):
             warning_lat_name()
             return
 
-        bTaxonName = self.oConnector.sql_get_id('Taxon', 'id_taxon',
-                                                'taxon_lat_name', (sLatName,))
+        bTaxonName = self.oConnector.get_taxon_id(sLatName, sAuthor)
 
         if sLatName and bTaxonName:
             warning_this_exist(_('taxon name'), sLatName)
             return
 
         if sLatName and not bTaxonName:
-            iTaxLevel = self.oConnector.sql_get_id('TaxonLevel', 'id_level',
-                                                   'level_name', (sTaxLevel,))
-            iMainTax = self.oConnector.sql_get_id('Taxon', 'id_taxon',
-                                                  'taxon_lat_name',
-                                                  (sMainTax,))
-            tTaxValues = (iTaxLevel, iMainTax, sLatName,
+            iLevel = self.oConnector.get_level_id('level_name', sLevel)
+            iMainTax = self.oConnector.get_taxon_id(sMainTax, sMAuthor)
+            tTaxValues = (iLevel, iMainTax, sLatName,
                           sAuthor, iYear, sLocalName,)
             dSynonyms = self.check_synonyms(sLatName, sSynonyms, sAuthors,
                                             sYears)
@@ -648,7 +633,7 @@ class NewTaxonDialog(ATaxonDialog):
         :param lYears:A list of years when the author named the taxon.
         :type lYears: list[str]
         """
-        sColumns = 'id_level, id_main_taxon, taxon_lat_name, ' \
+        sColumns = 'id_level, id_main_taxon, taxon_name, ' \
                    'author, year, taxon_local_name'
         iTaxonName = self.oConnector.insert_row('Taxon', sColumns,
                                                 tTaxonValues)

@@ -17,7 +17,7 @@
 from os.path import join, normcase
 
 
-def get_file_patch(sDir, sFile):
+def str_get_file_patch(sDir, sFile):
     """ Concatenates file path and file name based on OS rules.
 
         :param sDir: String with a patch to a file.
@@ -30,25 +30,33 @@ def get_file_patch(sDir, sFile):
 def order_str_to_dict(sString):
     lString = sString.split()
 
-    dElements = {'order': '', 'name': '', 'author': ''}
-    i = 0
-    for sElement in lString:
-        if i == 1:
-            dElements['order'] = sElement
-        elif i == 2:
-            dElements['name'] = sElement
-        else:
-            dElements['author'] = f"{dElements['author']} {sElement}"
-
-        i += 1
-
-    return dElements
+    :param sString: A string that needs to separate.
+    :type sString: str
+    :return: A separated string by comma.
+    :rtype: list or None
+    """
+    if sString:
+        return sString.split(', ')
+    return
 
 
-def text_to_list(sString):
+def str_sep_dot(sString):
+    """ Separates a string by dot to list.
+
+
+
+def str_text_to_list(sString):
     if sString:
         return sString.split('\n')
     return
+
+def str_sep_name_taxon(sString):
+    sName = sString.split(') ')[1]
+    if sName.find(', ') != -1:
+        lName = sName.split(', ')
+        return lName
+    return sName, None
+
 
 
 if __name__ == '__main__':

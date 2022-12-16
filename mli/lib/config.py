@@ -17,14 +17,14 @@
 import sys
 from configparser import ConfigParser, NoSectionError
 
-from mli.lib.str import get_file_patch
+from mli.lib.str import str_get_file_patch
 
 
 class ConfigProgram(ConfigParser):
     def __init__(self, sFilePath='config.ini'):
         super().__init__()
 
-        self.sFilePath = get_file_patch(sys.path[0], sFilePath)
+        self.sFilePath = str_get_file_patch(sys.path[0], sFilePath)
         self.read(self.sFilePath)
         self.lSections = self.sections()
 

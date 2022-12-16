@@ -25,7 +25,7 @@ from mli.gui.message_box import warning_lat_name, warning_synonym_exist, \
     warning_synonym_more, warning_this_exist
 from mli.lib.config import ConfigProgram
 from mli.lib.sql import SQL
-from mli.lib.str import text_to_list
+from mli.lib.str import str_sep_name_taxon, str_text_to_list
 
 
 def zip_taxon_lists(iTaxName, lSynonyms, lAuthors, lYears, iStatus):
@@ -304,7 +304,7 @@ class ATaxonDialog(AToolDialogButtons):
         bOk = True
         lSynonyms = []
         if sSynonyms:
-            lSynonyms.extend(text_to_list(sSynonyms))
+            lSynonyms.extend(str_text_to_list(sSynonyms))
             for sSynonym in lSynonyms:
                 bExist = self.oConnector.sql_get_id('Taxon',
                                                     'id_taxon',
@@ -315,9 +315,9 @@ class ATaxonDialog(AToolDialogButtons):
 
         lAuthors, lYears = [], []
         if sAuthors:
-            lAuthors.extend(text_to_list(sAuthors))
+            lAuthors.extend(str_text_to_list(sAuthors))
         if sYears:
-            lYears.extend(text_to_list(sYears))
+            lYears.extend(str_text_to_list(sYears))
         if len(lSynonyms) < len(lAuthors):
             bOk = warning_synonym_more()
 
@@ -373,7 +373,7 @@ class AddSynonymsDialog(ATaxonDialog):
 
     def onClickApply(self):
         """ Actions to be taken when adding a new taxon synonyms. """
-        sTaxName = self.oComboTaxNames.get_text().split(') ')[1]
+        sTaxName, sAuthor = str_sep_name_taxon(self.oComboTaxNames.get_text())
         sSynonyms = self.oTextEditSynonyms.get_text()
         sAuthors = self.oTextEditAuthors.get_text()
         sYears = self.oTextEditYears.get_text()
@@ -513,6 +513,7 @@ class EditTaxonDialog(ATaxonDialog):
             self.save_('taxon_lat_name', sLatName, self.iOldTaxonID)
         sMainTaxon = sMainTaxon.split()[1]
 
+        sMainTaxonName, sMainTaxonAuthor = str_sep_name_taxon(sMainTaxon)
         if sMainTaxon != self.sOldMainTaxonName:
             iMainTaxonID = self.oConnector.sql_get_id('Taxon', 'id_taxon',
                                                       'taxon_lat_name',
@@ -597,8 +598,8 @@ class NewTaxonDialog(ATaxonDialog):
 
     def onClickApply(self):
         """ Actions to be taken when adding a new taxon. """
-        sTaxLevel = self.oComboTaxLevel.get_text()
-        sMainTax = self.oComboMainTax.get_text().split()[1]
+        sLevel = self.oComboTaxLevel.get_text()
+        sMainTax, sMAuthor = str_sep_name_taxon(self.oComboMainTax.get_text())
         sLatName = self.oLineEditLatName.get_text()
         sAuthor = self.oLineEditAuthor.get_text()
         iYear = self.oLineEditYear.get_text()

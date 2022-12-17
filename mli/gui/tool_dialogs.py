@@ -370,7 +370,8 @@ class AddSynonymsDialog(ATaxonDialog):
         sSynonyms = self.oTextEditSynonyms.get_text()
         sAuthors = self.oTextEditAuthors.get_text()
         sYears = self.oTextEditYears.get_text()
-        dSynonyms = self.check_synonyms(sTaxName, sAuthor, sSynonyms, sAuthors, sYears)
+        dSynonyms = self.check_synonyms(sTaxName, sAuthor,
+                                        sSynonyms, sAuthors, sYears)
         if not dSynonyms:
             return
 

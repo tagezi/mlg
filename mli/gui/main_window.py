@@ -26,12 +26,46 @@ from mli.gui.tab_widget import CentralTabWidget
 from mli.gui.tool_dialogs import NewSubstrateDialog, EditTaxonDialog, \
     EditSubstrateDialog, EditSynonymDialog, NewTaxonDialog, AddSynonymsDialog
 
+from mli.lib.config import ConfigProgram
 from mli.lib.sql import SQL
+from mli.lib.str import str_get_file_patch
+
+
+def check_connect_db(oConnector):
+    """ Checks for the existence of a database and if it does not find it, then
+    creates it with default values.
+
+    :param oConnector: Instance attribute of SQL.
+    :type oConnector: SQL
+    :return: None
+    """
+    # The list of tables in DB
+    lTables = ['Colors', 'DBIndexes', 'DBSources', 'Images', 'Lang',
+               'LangVariant', 'LifeForm', 'LifeFormTaxon', 'LocalName',
+               'Metering', 'PartProperties', 'Parts', 'PartsColor',
+               'PartsSize', 'Places', 'PlacesOfLive', 'Substrate',
+               'SubstrateOfTaxon', 'Taxon', 'TaxonLevel', 'TaxonStatus']
+
+    for sTable in lTables:
+        bExist = oConnector.select('sqlite_master', '*', 'name, type',
+                                   (sTable, 'table',)).fetchone()
+        if not bExist:
+            sDir = '../db'
+            sFile = str_get_file_patch(sDir, 'mli_backup.sql')
+            with open(sFile) as sql_file:
+                sql_script = sql_file.read()
+                oConnector.execute_script(sql_script)
+                break
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+
+        oConfigProgram = ConfigProgram()
+        sDBFile = oConfigProgram.get_config_value('DB', 'filepath')
+        self.oConnector = SQL(sDBFile)
+        check_connect_db(self.oConnector)
 
         self.setWindowTitle(_('Manual Lichen identification'))
 

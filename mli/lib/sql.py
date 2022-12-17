@@ -18,8 +18,11 @@
 multi-level API that can be used in other modules to create requests using
 a minimum of transmitted data.
 
-function: get_columns(sColumns, sConj='AND')
-class: SQL
+Function:
+    get_columns(sColumns, sConj='AND')
+
+Class:
+    SQL
 
 Using:
     Foo = SQL(_DataBaseFile_)

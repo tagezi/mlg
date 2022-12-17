@@ -20,14 +20,6 @@ mli.lib.gbif\_parser module
    :undoc-members:
    :show-inheritance:
 
-mli.lib.helper module
----------------------
-
-.. automodule:: mli.lib.helper
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 mli.lib.log module
 ------------------
 

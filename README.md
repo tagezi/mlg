@@ -75,9 +75,10 @@ python3 -m mil
 
 All information including documentation, photographs, drawings, screenshots,
 information in the database and other background information is distributed
-under license `Creative Commons Attribution-ShareAlike 4.0 International
-<https://creativecommons.org/licenses/by-sa/4.0/deed.en>` (CC BY-SA 4.0).
+under license [Creative Commons Attribution-ShareAlike 4.0 
+International](https://creativecommons.org/licenses/by-sa/4.0/deed.en) 
+(CC BY-SA 4.0).
 
 All code and database structure is distributed under licenseAll code and
-database structure is distributed under license `GNU General Public License
-version 3 <https://www.gnu.org/licenses/gpl-3.0-standalone.html>` (GNU GPLv3).
+database structure is distributed under license [GNU General Public License
+version 3](https://www.gnu.org/licenses/gpl-3.0-standalone.html) (GNU GPLv3).

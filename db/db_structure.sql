@@ -131,16 +131,6 @@ CREATE TABLE Metering (
 );
 
 
--- Таблица: NederlandsSoortenregisterID
-DROP TABLE IF EXISTS NederlandsSoortenregisterID;
-
-CREATE TABLE NederlandsSoortenregisterID (
-    id_ns    INTEGER PRIMARY KEY,
-    id_taxon INTEGER REFERENCES Taxon (id_taxon),
-    id       INTEGER
-);
-
-
 -- Таблица: PartProperties
 DROP TABLE IF EXISTS PartProperties;
 

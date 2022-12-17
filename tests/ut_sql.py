@@ -18,7 +18,7 @@ import unittest
 from unittest import TestCase
 
 from mli.lib.sql import *
-from mli.lib.str import get_file_patch
+from mli.lib.str import str_get_file_patch
 
 
 def type_connector():
@@ -50,7 +50,7 @@ def suite():
 class TestSQLite(TestCase):
     def setUp(self):
         """ Creates temporal object of sqlite3.Connection for test. """
-        file_script = get_file_patch('../../mli/db', 'db_structure.sql')
+        file_script = str_get_file_patch('../../mli/db', 'db_structure.sql')
         self.oConnector = SQL(":memory:")
         sSQL = ''
         with open(file_script, "r") as f:

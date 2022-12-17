@@ -108,12 +108,12 @@ class SQL:
         :param sFileDB: Path to database as string.
         :type sFileDB: str
         """
+        self.logging = start_logging()
         try:
             self.oConnector = sqlite3.connect(sFileDB)
         except DatabaseError as e:
-            logging.exception(f'An error has occurred: {e}.\n'
-                              f'String of query: {sFileDB}\n')
-        self.logging = start_logging()
+            self.logging.exception(f"An error has occurred: {e}.\n"
+                                   f"String of query: {sFileDB}\n")
 
     def __del__(self):
         """ Closes connection with the database. """

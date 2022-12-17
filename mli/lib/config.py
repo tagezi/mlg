@@ -13,6 +13,8 @@
 #
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+""" The module provides an interface for editing the configuration file.
+"""
 
 import sys
 from configparser import ConfigParser, NoSectionError

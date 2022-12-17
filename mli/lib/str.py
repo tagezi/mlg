@@ -1,5 +1,5 @@
 #     This code is a part of program Manual Lichen identification
-#     Copyright (C) 2021  Valerii Goncharuk (aka tagezi)
+#     Copyright (C) 2022  Valerii Goncharuk (aka tagezi)
 #
 #     This program is free software: you can redistribute it and/or modify
 #     it under the terms of the GNU General Public License as published by
@@ -62,13 +62,13 @@ def str_text_to_list(sString):
         return sString.split('\n')
     return
 
+
 def str_sep_name_taxon(sString):
     sName = sString.split(') ')[1]
     if sName.find(', ') != -1:
         lName = sName.split(', ')
         return lName
     return sName, None
-
 
 
 if __name__ == '__main__':

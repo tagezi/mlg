@@ -37,7 +37,7 @@ class About(QMessageBox):
         )
 
         self.setInformativeText(
-            "Copyright (C) 2021  Valerii Goncharuk (aka tagezi)\n\n"
+            "Copyright (C) 2022  Valerii Goncharuk (aka tagezi)\n\n"
 
             "This program is free software: you can redistribute it and/or "
             "modify it under the terms of the GNU General Public License as "

@@ -61,12 +61,10 @@ class AToolDialogButtons(QDialog):
     """An abstract class that creates a block of Apply, OK, Cancel buttons and
     reserves action methods for them."""
 
-    def __init__(self, oParent=None):
+    def __init__(self, oConnector, oParent=None):
         """ Initiating a class. """
         super(AToolDialogButtons, self).__init__(oParent)
-        oConfigProgram = ConfigProgram()
-        sDBFile = oConfigProgram.get_config_value('DB', 'filepath')
-        self.oConnector = SQL(sDBFile)
+        self.oConnector = oConnector
         self.init_UI_button_block()
         self.connect_actions_button()
 
@@ -111,9 +109,9 @@ class ASubstrateDialog(AToolDialogButtons):
     """An abstract class that creates fields and functionality common to all
     dialogs of the substrate. """
 
-    def __init__(self, oParent=None):
+    def __init__(self, oConnector, oParent=None):
         """ Initiating a class. """
-        super(ASubstrateDialog, self).__init__(oParent)
+        super(ASubstrateDialog, self).__init__(oConnector, oParent)
         self.init_UI_failed()
 
     def init_UI_failed(self):
@@ -146,16 +144,16 @@ class ATaxonDialog(AToolDialogButtons):
     """ Creates abstract class that contain common elements for Dialogs of
         taxon."""
 
-    def __init__(self, oParent=None):
+    def __init__(self, oConnector, oParent=None):
         """ Initiating a class. """
-        super(ATaxonDialog, self).__init__(oParent)
+        super(ATaxonDialog, self).__init__(oConnector, oParent)
         self.init_UI_failed()
         self.fill_combobox()
         self.connect_actions()
 
     def init_UI_failed(self):
         """ initiating a dialog view """
-        self.oComboMainTax = VComboBox(_('Main Taxon:'))
+        self.oComboMainTax = VComboBox(_('Main Taxon:'), 450)
         self.oComboTaxLevel = VComboBox(_('Taxon level:'), 150)
         self.oLineEditLatName = VLineEdit(_('Latin name:'))
         self.oLineEditAuthor = HLineEdit(_('Author:'), 145)
@@ -348,9 +346,9 @@ class ATaxonDialog(AToolDialogButtons):
 
 
 class AddSynonymsDialog(ATaxonDialog):
-    def __init__(self, oParent=None):
+    def __init__(self, oConnector, oParent=None):
         """ Initiating a class. """
-        super(AddSynonymsDialog, self).__init__(oParent)
+        super(AddSynonymsDialog, self).__init__(oConnector, oParent)
         self.init_UI()
 
     def init_UI(self):
@@ -386,9 +384,9 @@ class AddSynonymsDialog(ATaxonDialog):
 
 
 class EditSynonymDialog(ATaxonDialog):
-    def __init__(self, oParent=None):
+    def __init__(self, oConnector, oParent=None):
         """ Initiating a class. """
-        super(EditSynonymDialog, self).__init__(oParent)
+        super(EditSynonymDialog, self).__init__(oConnector, oParent)
 
         self.lSynonym = None
         self.iTaxonID = None
@@ -452,9 +450,9 @@ class EditSynonymDialog(ATaxonDialog):
 
 
 class EditTaxonDialog(ATaxonDialog):
-    def __init__(self, oParent=None):
+    def __init__(self, oConnector, oParent=None):
         """ Initiating a class. """
-        super(EditTaxonDialog, self).__init__(oParent)
+        super(EditTaxonDialog, self).__init__(oConnector, oParent)
 
         self.iOldMainTaxonID = None
         self.sOldMainTaxonName = None
@@ -569,9 +567,9 @@ class EditTaxonDialog(ATaxonDialog):
 class NewTaxonDialog(ATaxonDialog):
     """ Dialog window which adds information on new taxon. """
 
-    def __init__(self, oParent=None):
+    def __init__(self, oConnector, oParent=None):
         """ Initiating a class. """
-        super(NewTaxonDialog, self).__init__(oParent)
+        super(NewTaxonDialog, self).__init__(oConnector, oParent)
         self.init_UI()
 
     def init_UI(self):
@@ -645,9 +643,9 @@ class NewTaxonDialog(ATaxonDialog):
 class EditSubstrateDialog(ASubstrateDialog):
     """ Dialog window which allows user to change substrate type. """
 
-    def __init__(self, oParent=None):
+    def __init__(self, oConnector, oParent=None):
         """ Initiating a class. """
-        super(EditSubstrateDialog, self).__init__(oParent)
+        super(EditSubstrateDialog, self).__init__(oConnector, oParent)
         self.init_UI()
 
     def init_UI(self):
@@ -682,9 +680,9 @@ class EditSubstrateDialog(ASubstrateDialog):
 class NewSubstrateDialog(ASubstrateDialog):
     """ Dialog window which adds new substrate type. """
 
-    def __init__(self, oParent=None):
+    def __init__(self, oConnector, oParent=None):
         """ Initiating a class. """
-        super(NewSubstrateDialog, self).__init__(oParent)
+        super(NewSubstrateDialog, self).__init__(oConnector, oParent)
         self.init_UI()
 
     def init_UI(self):

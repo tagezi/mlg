@@ -18,7 +18,7 @@
 The module contains a collection of functions for solving routine tasks with
 strings.
 """
-from os.path import join, normcase
+from os.path import join, normcase, split
 
 
 def str_get_file_patch(sDir, sFile):
@@ -29,6 +29,17 @@ def str_get_file_patch(sDir, sFile):
         :return: Patch to file based on OS rules.
         """
     return normcase(join(sDir, sFile))
+
+
+def str_get_path(sFullFile):
+    """ Splits a path to path and file name.
+
+    :param sFullFile: Path with filename.
+    :type sFullFile: str
+    :return: The path to file.
+    :rtype: str
+    """
+    return split(sFullFile)[0]
 
 
 def str_sep_comma(sString):

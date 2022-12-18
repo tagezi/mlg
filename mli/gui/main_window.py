@@ -28,10 +28,10 @@ from mli.gui.tool_dialogs import NewSubstrateDialog, EditTaxonDialog, \
 
 from mli.lib.config import ConfigProgram
 from mli.lib.sql import SQL
-from mli.lib.str import str_get_file_patch
+from mli.lib.str import str_get_file_patch, str_get_path
 
 
-def check_connect_db(oConnector):
+def check_connect_db(oConnector, sDBFile):
     """ Checks for the existence of a database and if it does not find it, then
     creates it with default values.
 
@@ -50,7 +50,7 @@ def check_connect_db(oConnector):
         bExist = oConnector.select('sqlite_master', '*', 'name, type',
                                    (sTable, 'table',)).fetchone()
         if not bExist:
-            sDir = '../db'
+            sDir = str_get_path(sDBFile)
             sFile = str_get_file_patch(sDir, 'mli_backup.sql')
             with open(sFile) as sql_file:
                 sql_script = sql_file.read()
@@ -65,7 +65,7 @@ class MainWindow(QMainWindow):
         oConfigProgram = ConfigProgram()
         sDBFile = oConfigProgram.get_config_value('DB', 'filepath')
         self.oConnector = SQL(sDBFile)
-        check_connect_db(self.oConnector)
+        check_connect_db(self.oConnector, sDBFile)
 
         self.setWindowTitle(_('Manual Lichen identification'))
 

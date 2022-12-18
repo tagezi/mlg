@@ -177,7 +177,7 @@ class MainWindow(QMainWindow):
         self.oAbout.triggered.connect(self.onDisplayAbout)
 
     def onAddSynonyms(self):
-        oNewSynonymsDialog = AddSynonymsDialog(self)
+        oNewSynonymsDialog = AddSynonymsDialog(self.oConnector, self)
         oNewSynonymsDialog.exec_()
 
     def onDisplayAbout(self):
@@ -193,21 +193,21 @@ class MainWindow(QMainWindow):
         oSettingDialog.exec_()
 
     def onEditTaxon(self):
-        oEditTaxonDialog = EditTaxonDialog(self)
+        oEditTaxonDialog = EditTaxonDialog(self.oConnector, self)
         oEditTaxonDialog.exec_()
 
     def onEditSubstrate(self):
-        oEditSubstrate = EditSubstrateDialog(self)
+        oEditSubstrate = EditSubstrateDialog(self.oConnector, self)
         oEditSubstrate.exec_()
 
     def onEditSynonym(self):
-        oEditSynonym = EditSynonymDialog(self)
+        oEditSynonym = EditSynonymDialog(self.oConnector, self)
         oEditSynonym.exec_()
 
     def onNewSubstrate(self):
-        oNewSubstrate = NewSubstrateDialog(self)
+        oNewSubstrate = NewSubstrateDialog(self.oConnector, self)
         oNewSubstrate.exec_()
 
     def onNewTaxon(self):
-        oNewTaxonDialog = NewTaxonDialog(self)
+        oNewTaxonDialog = NewTaxonDialog(self.oConnector, self)
         oNewTaxonDialog.exec_()

@@ -15,11 +15,13 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import sys
+from os import path
 from PyQt5.QtWidgets import QApplication
 
 from mli.gui.main_window import MainWindow
 
 if __name__ == "__main__":
+    path = path.dirname(path.realpath(__file__))
     app = QApplication(sys.argv)
-    sheet = MainWindow()
+    sheet = MainWindow(path)
     sys.exit(app.exec_())

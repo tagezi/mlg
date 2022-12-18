@@ -33,6 +33,38 @@ import sqlite3
 from sqlite3 import DatabaseError
 
 from mli.lib.log import start_logging
+from mli.lib.str import str_get_file_patch
+
+
+def check_connect_db(oConnector, sBasePath, sDBDir):
+    """ Checks for the existence of a database and if it does not find it, then
+    creates it with default values.
+
+    :param oConnector: Instance attribute of SQL.
+    :type oConnector: SQL
+    :param sBasePath: A path of the executed script.
+    :type sBasePath: str
+    :param sDBDir: A dir when database is by default.
+    :type sDBDir: str
+    :return: None
+    """
+    # The list of tables in DB
+    lTables = ['Colors', 'DBIndexes', 'DBSources', 'Images', 'Lang',
+               'LangVariant', 'LifeForm', 'LifeFormTaxon', 'LocalName',
+               'Metering', 'PartProperties', 'Parts', 'PartsColor',
+               'PartsSize', 'Places', 'PlacesOfLive', 'Substrate',
+               'SubstrateOfTaxon', 'Taxon', 'TaxonLevel', 'TaxonStatus']
+
+    for sTable in lTables:
+        bExist = oConnector.select('sqlite_master', '*', 'name, type',
+                                   (sTable, 'table',)).fetchone()
+        if not bExist:
+            sDBPath = str_get_file_patch(sBasePath, sDBDir)
+            sFile = str_get_file_patch(sDBPath, 'mli_backup.sql')
+            with open(sFile) as sql_file:
+                sql_script = sql_file.read()
+                oConnector.execute_script(sql_script)
+                break
 
 
 def get_columns(sColumns, sConj='AND'):

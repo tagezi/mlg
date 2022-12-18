@@ -27,45 +27,26 @@ from mli.gui.tool_dialogs import NewSubstrateDialog, EditTaxonDialog, \
     EditSubstrateDialog, EditSynonymDialog, NewTaxonDialog, AddSynonymsDialog
 
 from mli.lib.config import ConfigProgram
-from mli.lib.sql import SQL
+from mli.lib.sql import SQL, check_connect_db
 from mli.lib.str import str_get_file_patch, str_get_path
 
 
-def check_connect_db(oConnector, sDBFile):
-    """ Checks for the existence of a database and if it does not find it, then
-    creates it with default values.
-
-    :param oConnector: Instance attribute of SQL.
-    :type oConnector: SQL
-    :return: None
-    """
-    # The list of tables in DB
-    lTables = ['Colors', 'DBIndexes', 'DBSources', 'Images', 'Lang',
-               'LangVariant', 'LifeForm', 'LifeFormTaxon', 'LocalName',
-               'Metering', 'PartProperties', 'Parts', 'PartsColor',
-               'PartsSize', 'Places', 'PlacesOfLive', 'Substrate',
-               'SubstrateOfTaxon', 'Taxon', 'TaxonLevel', 'TaxonStatus']
-
-    for sTable in lTables:
-        bExist = oConnector.select('sqlite_master', '*', 'name, type',
-                                   (sTable, 'table',)).fetchone()
-        if not bExist:
-            sDir = str_get_path(sDBFile)
-            sFile = str_get_file_patch(sDir, 'mli_backup.sql')
-            with open(sFile) as sql_file:
-                sql_script = sql_file.read()
-                oConnector.execute_script(sql_script)
-                break
-
-
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, sPath):
         super().__init__()
 
-        oConfigProgram = ConfigProgram()
-        sDBFile = oConfigProgram.get_config_value('DB', 'filepath')
-        self.oConnector = SQL(sDBFile)
-        check_connect_db(self.oConnector, sDBFile)
+        self.sPathApp = sPath
+        oConfigProgram = ConfigProgram(self.sPathApp)
+        sBasePath = oConfigProgram.sDir
+        sDBPath = oConfigProgram.get_config_value('DB', 'db_path')
+        sDBDir = oConfigProgram.get_config_value('DB', 'db_dir')
+        if not sDBPath:
+            sDBFile = oConfigProgram.get_config_value('DB', 'db_file')
+            sDBPath = str_get_file_patch(sBasePath, sDBDir)
+            sDBPath = str_get_file_patch(sDBPath, sDBFile)
+
+        self.oConnector = SQL(sDBPath)
+        check_connect_db(self.oConnector, sBasePath, sDBDir)
 
         self.setWindowTitle(_('Manual Lichen identification'))
 
@@ -189,7 +170,7 @@ class MainWindow(QMainWindow):
         pass
 
     def onOpenSetting(self):
-        oSettingDialog = SettingDialog(self)
+        oSettingDialog = SettingDialog(self.oConnector, self.sPathApp, self)
         oSettingDialog.exec_()
 
     def onEditTaxon(self):

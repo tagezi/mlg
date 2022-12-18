@@ -20,12 +20,14 @@ from PyQt5.QtWidgets import QDialog, QPushButton, QVBoxLayout, QHBoxLayout, \
 
 from mli.gui.file_dialogs import OpenFileDialog
 from mli.lib.config import ConfigProgram
+from mli.lib.sql import SQL, check_connect_db
 
 
 class SettingDialog(QDialog):
-    def __init__(self, oParent=None):
+    def __init__(self, oConnector, sPathApp, oParent=None):
         super(SettingDialog, self).__init__(oParent)
-        self.oConfigProgram = ConfigProgram()
+        self.oConnector = oConnector
+        self.oConfigProgram = ConfigProgram(sPathApp)
         self.init_UI()
         self.connect_actions()
 
@@ -39,7 +41,7 @@ class SettingDialog(QDialog):
         oVLayout = QVBoxLayout()
         oHLayoutFiledPath = QHBoxLayout()
         oHLayoutButtons = QHBoxLayout()
-        sFileNameDB = self.oConfigProgram.get_config_value('DB', 'filepath')
+        sFileNameDB = self.oConfigProgram.get_config_value('DB', 'db_path')
         self.oTextFiled = QLineEdit(sFileNameDB)
         oHLayoutFiledPath.addWidget(self.oTextFiled)
         oHLayoutFiledPath.addWidget(self.oButtonOpenFile)
@@ -68,8 +70,14 @@ class SettingDialog(QDialog):
         self.oTextFiled.setText(sFileName)
 
     def onClickApply(self):
-        sFileName = self.oTextFiled.text()
-        self.oConfigProgram.set_config_value('DB', 'filepath', sFileName)
+        sDBPath = self.oTextFiled.text()
+        self.oConfigProgram.set_config_value('DB', 'path', sDBPath)
+
+        sBasePath = self.oConfigProgram.sDir
+        sDBDir = self.oConfigProgram.get_config_value('DB', 'db_dir')
+
+        self.oConnector = SQL(sDBPath)
+        check_connect_db(self.oConnector, sBasePath, sDBDir)
 
     def onClickOk(self):
         self.onClickApply()

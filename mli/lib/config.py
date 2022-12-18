@@ -44,7 +44,7 @@ file.
 import sys
 from configparser import ConfigParser, NoSectionError
 
-from mli.lib.str import str_get_file_patch
+from mli.lib.str import str_get_path, str_get_file_patch
 
 
 class ConfigProgram(ConfigParser):
@@ -67,7 +67,7 @@ class ConfigProgram(ConfigParser):
 
         If you only need to create a Section and an Option, you omit the Value.
     """
-    def __init__(self, sFilePath='config.ini'):
+    def __init__(self, sPathApp, sFilePath='config.ini'):
         """ Object initialization.
 
         :param sFilePath: Configuration file name.
@@ -75,7 +75,12 @@ class ConfigProgram(ConfigParser):
         """
         super().__init__()
 
-        self.sFilePath = str_get_file_patch(sys.path[0], sFilePath)
+        if sys.path[0] == sPathApp:
+            self.sDir = str_get_path(sys.path[0])
+        else:
+            self.sDir = sys.path[0]
+
+        self.sFilePath = str_get_file_patch(self.sDir, sFilePath)
         self.read(self.sFilePath)
         self.lSections = self.sections()
 

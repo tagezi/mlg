@@ -27,6 +27,16 @@ def warning_lat_name():
     oMsgBox.exec()
 
 
+def warning_restart_app():
+    """ Create a message dialog window with warning that app should be
+    restarted.
+    """
+    oMsgBox = QMessageBox()
+    oMsgBox.setText(_('The application must be restarted for the changes '
+                      'to take effect!'))
+    oMsgBox.exec()
+
+
 def warning_synonym_exist(sTaxName):
     """ Create a message dialog window with warning that the taxon name which
     trying to add is already exists.

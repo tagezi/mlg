@@ -19,6 +19,7 @@ from PyQt5.QtWidgets import QDialog, QPushButton, QVBoxLayout, QHBoxLayout, \
     QLineEdit
 
 from mli.gui.file_dialogs import OpenFileDialog
+from mli.gui.message_box import warning_restart_app
 from mli.lib.config import ConfigProgram
 from mli.lib.sql import SQL, check_connect_db
 
@@ -71,13 +72,14 @@ class SettingDialog(QDialog):
 
     def onClickApply(self):
         sDBPath = self.oTextFiled.text()
-        self.oConfigProgram.set_config_value('DB', 'path', sDBPath)
+        self.oConfigProgram.set_config_value('DB', 'db_path', sDBPath)
+        self.oConnector = SQL(sDBPath)
 
         sBasePath = self.oConfigProgram.sDir
         sDBDir = self.oConfigProgram.get_config_value('DB', 'db_dir')
-
-        self.oConnector = SQL(sDBPath)
         check_connect_db(self.oConnector, sBasePath, sDBDir)
+
+        warning_restart_app()
 
     def onClickOk(self):
         self.onClickApply()

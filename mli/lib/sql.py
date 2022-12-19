@@ -517,7 +517,6 @@ class SQL:
                'ORDER BY Taxon.id_level ASC, Taxon.taxon_name ASC;'
         return self.execute_query(sSQL, (sStatus,)).fetchall()
 
-
     def get_taxon_info(self, sName, sAuthor):
         sSQL = "SELECT Taxon.id_main_taxon, " \
                "MTaxonLevel.level_name AS Main_Taxon_level, " \

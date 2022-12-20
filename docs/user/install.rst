@@ -20,18 +20,18 @@ Below there are the commands if you decide to use git.
 
 Go to `mli` directory:
 
-.. prompt:: bash
+.. code-block:: bash
 
-   cd mli
+   $ cd mli
 
 Install requirements:
 
-.. prompt:: bash
+.. code-block:: bash
 
-   pip install -r requirements.txt
+   $ pip install -r requirements.txt
 
 Now you are ready to run the program:
 
-.. prompt:: bash
+.. code-block:: bash
 
-   python3 -m mli
+   $ python3 -m mli

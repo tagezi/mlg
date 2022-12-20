@@ -75,6 +75,17 @@ def str_text_to_list(sString):
 
 
 def str_sep_name_taxon(sString):
+    """ Splits the string into taxon name and author, taking a string of the
+        form '(rank) Taxon_name, authors'. It is permissible to indicate
+        authors separated by commas, in brackets, using the '&' symbol.
+
+    :param sString: A string that needed to separate.
+    :type sString: str
+    :return: A canonical form of taxon name and a string with the authors.
+             Returns empty instead of author if no author was specified in
+             the string.
+    :rtype: list[str, str|None]
+    """
     sString = ' '.join(sString.split(' ')[1:])
     print(sString)
     if sString.find(', ') != -1:

@@ -1,5 +1,7 @@
 # Manual Lichen identification
 
+[![Documentation Status](https://readthedocs.org/projects/manual-lichen-identification/badge/?version=latest)](https://manual-lichen-identification.readthedocs.io/en/latest/?badge=latest)
+
 ## Table of contents
 
 - [About Manual Lichen identification](#about-manual-lichen-identification)

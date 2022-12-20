@@ -18,6 +18,7 @@
 actions.
 
 *Function*:
+    | warning_no_synonyms(sName)
     | warning_lat_name()
     | warning_restart_app()
     | warning_this_exist(sThis, sThisName)

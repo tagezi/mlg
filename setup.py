@@ -54,5 +54,5 @@ setup(
         "Bug Reports": "https://github.com/tagezi/mli/issues",
         "Read the Docs": "https://github.com/tagezi/mli",
     },
-    keywords=["lichen", "identification", "biology", "lichenology, fungi"],
+    keywords=["lichen", "identification", "biology", "lichenology", "fungi"],
 )

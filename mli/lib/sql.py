@@ -470,8 +470,8 @@ class SQL:
                                    'id_level', (iValues,))
 
     def get_synonyms(self, iValue):
-        return self.sql_get_id("Taxon", 'taxon_name, id_status',
-                               'id_taxon', (iValue, 2))
+        return self.sql_get_values('Taxon', 'taxon_name, author',
+                                   'id_main_taxon, id_status', (iValue, 2))
 
     def get_source_id(self, sValue):
         return self.sql_get_id('DBSources', 'id_source',
@@ -481,11 +481,32 @@ class SQL:
         return self.sql_get_id('TaxonStatus', 'id_status',
                                'status_name', (sValue,))
 
+    def get_statuses(self):
+        return self.sql_get_all('TaxonStatus')
+
+    def get_substrate_id(self, sValue):
+        return self.sql_get_id('Substrate', 'id_substrate',
+                               'substrate_name', (sValue,))
+
+    def get_synonym_id(self, sName, sAuthor):
+        return self.sql_get_id('Taxon', 'id_taxon',
+                               'taxon_name, author', (sName, sAuthor,))
+
     def get_taxon_id(self, sName, sAuthor, sStatus='ACCEPTED'):
         iIDStatus = self.get_status_id(sStatus)
-        tValues = (sName, sAuthor, iIDStatus,)
-        return self.sql_get_id("Taxon", 'id_taxon',
-                               'taxon_name, author, id_status', tValues)
+        if sAuthor:
+            tValues = (sName, sAuthor, iIDStatus,)
+            return self.sql_get_id('Taxon', 'id_taxon',
+                                   'taxon_name, author, id_status', tValues)
+        else:
+            sSQL = 'SELECT id_taxon FROM Taxon ' \
+                   'WHERE taxon_name=? AND author is NULL AND id_status=?;'
+            tValues = (sName, iIDStatus,)
+            iTaxonID = self.execute_query(sSQL, tValues).fetchone()
+            if iTaxonID:
+                return iTaxonID[0]
+
+        return
 
     def get_taxon_children(self, iID, sName, sAuthor, sStatus='ACCEPTED'):
         sStatus = sStatus.upper()
@@ -534,7 +555,7 @@ class SQL:
                "JOIN TaxonLevel " \
                "ON Taxon.id_level=TaxonLevel.id_level " \
                "JOIN TaxonLevel MTaxonLevel " \
-               "ON MTaxonLevel.id_level=MainTaxon.id_level " \
+               "ON MTaxonLevel.id_level=MainTaxon.id_level "
 
         if sAuthor:
             sSQL = f"{sSQL}WHERE Taxon.taxon_name=? AND Taxon.author=? "
@@ -553,3 +574,8 @@ class SQL:
         else:
             lRows.extend(['', ''])
         return lRows
+
+    def insert_taxon(self, lValues):
+        self.insert_row('Taxon', 'id_level, id_main_taxon, '
+                        'taxon_name, author, year, id_status',
+                        lValues)

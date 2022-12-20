@@ -23,6 +23,7 @@ def warning_lat_name():
     isn't specified.
     """
     oMsgBox = QMessageBox()
+    oMsgBox.setWindowTitle(_('It\'s not a Latin name!'))
     oMsgBox.setText(_('Specify a Latin name of the taxon!'))
     oMsgBox.exec()
 
@@ -32,39 +33,9 @@ def warning_restart_app():
     restarted.
     """
     oMsgBox = QMessageBox()
-    oMsgBox.setText(_('The application must be restarted for the changes '
+    oMsgBox.setWindowTitle(_('Restart App!'))
+    oMsgBox.setText(_('The app must be restarted for the changes '
                       'to take effect!'))
-    oMsgBox.exec()
-
-
-def warning_synonym_exist(sTaxName):
-    """ Create a message dialog window with warning that the taxon name which
-    trying to add is already exists.
-
-    :param sTaxName: The taxon name which trying to add.
-    :type sTaxName: str
-    :return: agreement
-    :rtype: bool
-    """
-    oMsgBox = QMessageBox()
-    oMsgBox.setIcon(QMessageBox.Information)
-    oMsgBox.setText(_(f'The taxon name <i>{sTaxName}</i> already exists. '
-                      f'Do write data?'))
-    oMsgBox.setWindowTitle(_('Save Confirmation'))
-    oMsgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-
-    oMsgBoxButton = oMsgBox.exec()
-    if oMsgBoxButton == QMessageBox.Ok:
-        return True
-
-
-def warning_synonym_more():
-    """ Create a message dialog window with warning that the number of synonyms
-    and authors does not match.
-    """
-    oMsgBox = QMessageBox()
-    oMsgBox.setText(_('There are fewer synonyms than authors!'
-                      ' Try to fix it!'))
     oMsgBox.exec()
 
 
@@ -79,8 +50,11 @@ def warning_this_exist(sThis, sThisName):
     :rtype: bool
     """
     oMsgBox = QMessageBox()
-    oMsgBox.setText(_(f'The {sThis} <i>{sThisName}</i> already exists.'
-                      ' Try to fix it!'))
+    oMsgBox.setWindowTitle(_('The taxon name already exists!'))
+
+    sThe = _('The')
+    sExist = _("already exists.")
+    oMsgBox.setText(f'{sThe} {sThis} {sThisName} {sExist}')
     oMsgBox.exec()
 
 

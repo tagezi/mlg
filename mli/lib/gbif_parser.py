@@ -40,7 +40,7 @@ import requests
 from time import sleep
 
 from pygbif import species
-from sql import SQL
+from mli.lib.sql import SQL
 
 
 def gbif_is_lichen(dTaxon):

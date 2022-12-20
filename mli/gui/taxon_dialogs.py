@@ -17,14 +17,12 @@
 from gettext import gettext as _
 from itertools import zip_longest
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QHBoxLayout, QPushButton, QVBoxLayout
+from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout
 
-from mli.gui.dialog_elements import HComboBox, VComboBox, HLineEdit, \
+from mli.gui.abstract_classes import AToolDialogButtons
+from mli.gui.dialog_elements import VComboBox, HLineEdit, \
     VLineEdit, VTextEdit
-from mli.gui.message_box import warning_lat_name, warning_synonym_exist, \
-    warning_synonym_more, warning_this_exist
-from mli.lib.config import ConfigProgram
-from mli.lib.sql import SQL
+from mli.gui.message_box import warning_lat_name, warning_this_exist
 from mli.lib.str import str_sep_name_taxon, str_text_to_list
 
 
@@ -57,89 +55,6 @@ def zip_taxon_lists(iTaxName, lSynonyms, lAuthors, lYears, iStatus):
                             lAuthors, lYears, lStatus, fillvalue=''))
 
 
-class AToolDialogButtons(QDialog):
-    """An abstract class that creates a block of Apply, OK, Cancel buttons and
-    reserves action methods for them."""
-
-    def __init__(self, oConnector, oParent=None):
-        """ Initiating a class. """
-        super(AToolDialogButtons, self).__init__(oParent)
-        self.oConnector = oConnector
-        self.init_UI_button_block()
-        self.connect_actions_button()
-
-    def init_UI_button_block(self):
-        """ Creates a block of buttons for further use in child dialog classes.
-        """
-        self.oHLayoutButtons = QHBoxLayout()
-        self.oButtonApply = QPushButton(_('Apply'), self)
-        self.oButtonApply.setFixedWidth(80)
-        self.oButtonOk = QPushButton(_('Ok'), self)
-        self.oButtonOk.setFixedWidth(80)
-        self.oButtonCancel = QPushButton(_('Cancel'), self)
-        self.oButtonCancel.setFixedWidth(80)
-
-        self.oHLayoutButtons.addWidget(self.oButtonApply,
-                                       alignment=Qt.AlignRight)
-        self.oHLayoutButtons.addWidget(self.oButtonOk)
-        self.oHLayoutButtons.addWidget(self.oButtonCancel)
-
-    def connect_actions_button(self):
-        """ The method of linking signals and button slots. """
-        self.oButtonApply.clicked.connect(self.onClickApply)
-        self.oButtonOk.clicked.connect(self.onClickOk)
-        self.oButtonCancel.clicked.connect(self.onCancel)
-
-    def onCancel(self):
-        """ The method closes the dialog without saving the data. """
-        self.close()
-
-    def onClickApply(self):
-        """ Reserves the Apply dialog button method for future use. """
-        pass
-
-    def onClickOk(self):
-        """ The method saves the data and closes the dialog In order for the
-        data to be saved, you must override the method onClickApply."""
-        self.onClickApply()
-        self.close()
-
-
-class ASubstrateDialog(AToolDialogButtons):
-    """An abstract class that creates fields and functionality common to all
-    dialogs of the substrate. """
-
-    def __init__(self, oConnector, oParent=None):
-        """ Initiating a class. """
-        super(ASubstrateDialog, self).__init__(oConnector, oParent)
-        self.init_UI_failed()
-
-    def init_UI_failed(self):
-        """ initiating a dialog view """
-        self.oComboSubstrateLevel = HComboBox(_('Old substrate name:'))
-        self.oLineEditSubstrate = HLineEdit(_('New substrate name:'))
-
-    def onClickApply(self):
-        """ Realization of the abstract method of the parent class. """
-        sSubstrate = self.oLineEditSubstrate.get_text()
-        bSubstrate = self.oConnector.sql_get_id('Substrate',
-                                                'id_substrate',
-                                                'substrate_name',
-                                                (sSubstrate,))
-
-        if not bSubstrate:
-            self.save_((sSubstrate,))
-            self.oLineEditSubstrate.set_text('')
-
-    def save_(self, tValues):
-        """ Method for saving information about the substrate in the database.
-
-        :param tValues: Type of substrate to be entered into the database.
-        :type tValues: tuple
-        """
-        self.oConnector.insert_row('Substrate', 'substrate_name', tValues)
-
-
 class ATaxonDialog(AToolDialogButtons):
     """ Creates abstract class that contain common elements for Dialogs of
         taxon."""
@@ -153,6 +68,7 @@ class ATaxonDialog(AToolDialogButtons):
 
     def init_UI_failed(self):
         """ initiating a dialog view """
+        self.oComboStatus = VComboBox(_('Taxon status:'), 150)
         self.oComboMainTax = VComboBox(_('Main Taxon:'), 450)
         self.oComboTaxLevel = VComboBox(_('Taxon level:'), 150)
         self.oLineEditLatName = VLineEdit(_('Latin name:'))
@@ -162,25 +78,24 @@ class ATaxonDialog(AToolDialogButtons):
         self.oTextEditSynonyms = VTextEdit(_('Synonyms:'), 250)
         self.oTextEditAuthors = VTextEdit(_('Authors:'), 145)
         self.oTextEditYears = VTextEdit(_('Years:'), 50)
-        self.oComboTaxNames = VComboBox(_('Taxon name: '))
-        self.oComboBoxSynonym = VComboBox(_('Synonym:'))
+        self.oComboTaxNames = VComboBox(_('Taxon name:'), 450)
+        self.oComboBoxSynonym = VComboBox(_('Synonym:'), 150)
 
         self.oHLayoutAuthor = QHBoxLayout()
         self.oHLayoutAuthor.addLayout(self.oLineEditAuthor)
         self.oHLayoutAuthor.addStretch(5)
         self.oHLayoutAuthor.addLayout(self.oLineEditYear)
 
-        oVLayoutLevel = QVBoxLayout()
-        oVLayoutLevel.addLayout(self.oComboTaxLevel)
-        oVLayoutLevel.addStretch(1)
+        self.oVLayoutLevel = QVBoxLayout()
+        self.oVLayoutLevel.addLayout(self.oComboTaxLevel)
+        self.oVLayoutLevel.addStretch(1)
 
         oVLayoutTaxon = QVBoxLayout()
         oVLayoutTaxon.addLayout(self.oLineEditLatName)
         oVLayoutTaxon.addLayout(self.oHLayoutAuthor)
-        oVLayoutTaxon.addLayout(self.oLineEditLocaleName)
 
         self.oHLayoutTaxon = QHBoxLayout()
-        self.oHLayoutTaxon.addLayout(oVLayoutLevel)
+        self.oHLayoutTaxon.addLayout(self.oVLayoutLevel)
         self.oHLayoutTaxon.addLayout(oVLayoutTaxon)
 
         self.oHLayoutSynonyms = QHBoxLayout()
@@ -235,11 +150,21 @@ class ATaxonDialog(AToolDialogButtons):
 
         return lLevels
 
-    def create_taxon_list(self, lTaxonLevel):
+    def create_status_list(self):
+        """ Creates a list of statuses.
+
+        :return: list[str]
+        """
+        tRows = self.oConnector.get_statuses()
+        lList = []
+        for Row in tRows:
+            lList.append(Row[1].lower())
+
+        return lList
+
+    def create_taxon_list(self):
         """ Creates a list of taxon names for further use in dialog elements.
 
-        :param lTaxonLevel: A list of taxon level.
-        :type lTaxonLevel: list
         :return: A list in form - (Taxon Level) Taxon Name
         :type: list[str]
         """
@@ -257,10 +182,11 @@ class ATaxonDialog(AToolDialogButtons):
         """ Fills the fields with the drop-down list during the first
         initialization and after applying the Apply button."""
         lTaxonLevel = self.create_level_list(bGetAll=True)
-        self.oComboMainTax.set_combo_list(self.create_taxon_list(lTaxonLevel))
+        self.oComboStatus.set_combo_list(self.create_status_list())
+        self.oComboMainTax.set_combo_list(self.create_taxon_list())
         self.oComboTaxLevel.set_combo_list(lTaxonLevel)
         self.oComboTaxLevel.set_text(lTaxonLevel[1])
-        self.oComboTaxNames.set_combo_list(self.create_taxon_list(lTaxonLevel))
+        self.oComboTaxNames.set_combo_list(self.create_taxon_list())
 
     def onCurrentMainTaxonChanged(self, sTaxon=''):
         """ The slot that should fire after the taxon name in the Main taxon
@@ -290,8 +216,8 @@ class ATaxonDialog(AToolDialogButtons):
         :type sAuthors: str
         :param sYears: A list when the author named the taxon.
         :type sYears: str
-        :return:Returns a dictionary in the form of a taxon name, a list of
-         synonyms, and a list of authors, or False
+        :return: Returns a dictionary in the form of a taxon name, a list of
+            synonyms, and a list of authors, or False
         :rtype: dict[int, list[str], list[str], list[str]] | bool
         """
         iTaxName = self.oConnector.get_taxon_id(sTaxName, sAuthor)
@@ -300,20 +226,16 @@ class ATaxonDialog(AToolDialogButtons):
         if sSynonyms:
             lSynonyms.extend(str_text_to_list(sSynonyms))
             for sSynonym in lSynonyms:
-                bExist = self.oConnector.sql_get_id('Taxon',
-                                                    'id_taxon',
-                                                    'taxon_name',
-                                                    (sSynonym,))
+                # TODO: Do search synonym by name and author
+                bExist = self.oConnector.get_synonym_id(sSynonym, '')
                 if bExist:
-                    bOk = warning_synonym_exist(sTaxName)
+                    bOk = warning_this_exist('synonym', sTaxName)
 
         lAuthors, lYears = [], []
         if sAuthors:
             lAuthors.extend(str_text_to_list(sAuthors))
         if sYears:
             lYears.extend(str_text_to_list(sYears))
-        if len(lSynonyms) < len(lAuthors):
-            bOk = warning_synonym_more()
 
         if bOk:
             return {'tax_name': iTaxName,
@@ -338,49 +260,7 @@ class ATaxonDialog(AToolDialogButtons):
             iStatus = self.oConnector.get_status_id('SYNONYM')
             lValues = zip_taxon_lists(iTaxName, lSynonyms,
                                       lAuthors, lYears, iStatus)
-            self.oConnector.insert_row('Taxon',
-                                       'id_level, id_main_taxon, '
-                                       'taxon_name, author, year'
-                                       'id_status',
-                                       lValues)
-
-
-class AddSynonymsDialog(ATaxonDialog):
-    def __init__(self, oConnector, oParent=None):
-        """ Initiating a class. """
-        super(AddSynonymsDialog, self).__init__(oConnector, oParent)
-        self.init_UI()
-
-    def init_UI(self):
-        """ Creating a dialog window. """
-        self.setWindowTitle(_('Add new synonyms to taxon name'))
-        self.setModal(Qt.ApplicationModal)
-
-        oVLayout = QVBoxLayout()
-        oVLayout.addLayout(self.oComboTaxNames)
-        oVLayout.addLayout(self.oHLayoutSynonyms)
-        oVLayout.addLayout(self.oHLayoutButtons)
-        self.setLayout(oVLayout)
-
-    def onClickApply(self):
-        """ Actions to be taken when adding a new taxon synonyms. """
-        sTaxName, sAuthor = str_sep_name_taxon(self.oComboTaxNames.get_text())
-        sSynonyms = self.oTextEditSynonyms.get_text()
-        sAuthors = self.oTextEditAuthors.get_text()
-        sYears = self.oTextEditYears.get_text()
-        dSynonyms = self.check_synonyms(sTaxName, sAuthor,
-                                        sSynonyms, sAuthors, sYears)
-        if not dSynonyms:
-            return
-
-        self.save_synonyms(dSynonyms['tax_name'],
-                           dSynonyms['list_syn'],
-                           dSynonyms['list_auth'],
-                           dSynonyms['list_year'])
-
-        self.oTextEditSynonyms.clear_text()
-        self.oTextEditAuthors.clear_text()
-        self.oTextEditYears.clear_text()
+            self.oConnector.insert_taxon(lValues)
 
 
 class EditSynonymDialog(ATaxonDialog):
@@ -427,6 +307,7 @@ class EditSynonymDialog(ATaxonDialog):
         pass
 
     def onCurrentSynonymChanged(self, sSynonym):
+        # TODO: Do search synonym
         oCursor = self.oConnector.select('TaxonSynonym',
                                          'id_other_names, taxon_name,'
                                          ' author, year',
@@ -437,6 +318,7 @@ class EditSynonymDialog(ATaxonDialog):
     def onCurrentTaxonNamesChanged(self, sTaxonName):
         sTaxName, sAuthor = str_sep_name_taxon(sTaxonName)
         self.iTaxonID = self.oConnector.get_taxon_id(sTaxName, sAuthor)
+        # TODO: Debug it!
         oCursor = self.oConnector.get_synonyms(self.iTaxonID)
         tSynonyms = oCursor.fetchall()
         lSynonyms = []
@@ -460,23 +342,19 @@ class EditTaxonDialog(ATaxonDialog):
         self.iOldTaxonLevelID = None
         self.sOldTaxonLevelName = None
         self.iOldTaxonID = None
+        self.sOldTaxonName = None
         self.sOldAuthor = None
         self.sOldYear = None
-        self.iLocalNameID = None
-        self.sOldTaxonLocalName = None
-        self.iOldOtherNameID = None
-        self.iOldOtherName = None
-        self.iOldOtherNameAuthor = None
-        self.iOldOtherNameYear = None
 
         self.init_UI()
 
     def init_UI(self):
         """ Creating a dialog window. """
-        self.setWindowTitle(_('Editing synonyms of a taxon'))
+        self.setWindowTitle(_('Editing of a taxon'))
         self.setModal(Qt.ApplicationModal)
 
         oVLayout = QVBoxLayout()
+        oVLayout.addLayout(self.oComboStatus)
         oVLayout.addLayout(self.oComboTaxNames)
         oVLayout.addLayout(self.oComboMainTax)
         oVLayout.addLayout(self.oHLayoutTaxon)
@@ -489,19 +367,18 @@ class EditTaxonDialog(ATaxonDialog):
             self.onCurrentTaxonNamesChanged)
 
     def onClickApply(self):
-        sOldTaxonName = self.oComboTaxNames.get_text()
         sMainTaxon = self.oComboMainTax.get_text()
         sTaxonLevel = self.oComboTaxLevel.get_text()
         sLatName = self.oLineEditLatName.get_text()
         sAuthor = self.oLineEditAuthor.get_text()
         sYear = self.oLineEditYear.get_text()
-        sLocaleName = self.oLineEditLocaleName.get_text()
+        sStatus = self.oComboStatus.get_text()
 
         if not sLatName and not sLatName.isalpha() and not sLatName.isascii():
             warning_lat_name()
             return
 
-        if sOldTaxonName != sLatName:
+        if self.sOldTaxonName != sLatName:
             self.save_('taxon_name', sLatName, self.iOldTaxonID)
 
         sMainTaxonName, sMainTaxonAuthor = str_sep_name_taxon(sMainTaxon)
@@ -520,10 +397,6 @@ class EditTaxonDialog(ATaxonDialog):
         if sYear != self.sOldYear:
             self.save_('year', sYear, self.iOldTaxonID)
 
-        if sLocaleName != self.sOldTaxonLocalName:
-            self.oConnector.update('LocalName', 'local_name', 'id_local_name',
-                                   (sLocaleName, self.iLocalNameID,))
-
     def onCurrentTaxonNamesChanged(self, sTaxonName):
         sName, sAuthor = str_sep_name_taxon(sTaxonName)
         lRow = self.oConnector.get_taxon_info(sName, sAuthor)
@@ -535,11 +408,9 @@ class EditTaxonDialog(ATaxonDialog):
         self.iOldTaxonLevelID = lRow[4]
         self.sOldTaxonLevelName = lRow[5]
         self.iOldTaxonID = lRow[6]
-        sOldTaxonLatName = lRow[7]
+        self.sOldTaxonName = lRow[7]
         self.sOldAuthor = lRow[8]
         iOldYear = lRow[9]
-        self.iLocalNameID = lRow[10]
-        self.sOldTaxonLocalName = lRow[11]
 
         if not iOldYear:
             self.sOldYear = ''
@@ -552,10 +423,9 @@ class EditTaxonDialog(ATaxonDialog):
 
         self.oComboMainTax.set_text(sMainTaxon)
         self.oComboTaxLevel.set_text(self.sOldTaxonLevelName)
-        self.oLineEditLatName.set_text(sOldTaxonLatName)
+        self.oLineEditLatName.set_text(self.sOldTaxonName)
         self.oLineEditAuthor.set_text(self.sOldAuthor)
         self.oLineEditYear.set_text(self.sOldYear)
-        self.oLineEditLocaleName.set_text(self.sOldTaxonLocalName)
 
     def save_(self, sSetCol, sUpdate, sWhere,
               sTable='Taxon', sWhereCol='id_taxon'):
@@ -578,9 +448,9 @@ class NewTaxonDialog(ATaxonDialog):
         self.setModal(Qt.ApplicationModal)
 
         oVLayout = QVBoxLayout()
+        oVLayout.addLayout(self.oComboStatus)
         oVLayout.addLayout(self.oComboMainTax)
         oVLayout.addLayout(self.oHLayoutTaxon)
-        oVLayout.addLayout(self.oHLayoutSynonyms)
         oVLayout.addLayout(self.oHLayoutButtons)
         self.setLayout(oVLayout)
 
@@ -588,112 +458,31 @@ class NewTaxonDialog(ATaxonDialog):
         """ Actions to be taken when adding a new taxon. """
         sLevel = self.oComboTaxLevel.get_text()
         sMainTax, sMAuthor = str_sep_name_taxon(self.oComboMainTax.get_text())
-        sLatName = self.oLineEditLatName.get_text()
+        sName = self.oLineEditLatName.get_text()
         sAuthor = self.oLineEditAuthor.get_text()
         iYear = self.oLineEditYear.get_text()
-        sLocalName = self.oLineEditLocaleName.get_text()
-        sSynonyms = self.oTextEditSynonyms.get_text()
-        sAuthors = self.oTextEditAuthors.get_text()
-        sYears = self.oTextEditYears.get_text()
+        sStatus = self.oComboStatus.get_text().upper()
 
-        if not sLatName and sLatName.isalpha() and sLatName.isascii():
+        if not sName and sName.isalpha() and sName.isascii():
             warning_lat_name()
             return
 
-        bTaxonName = self.oConnector.get_taxon_id(sLatName, sAuthor)
+        bTaxonName = self.oConnector.get_taxon_id(sName, sAuthor)
 
-        if sLatName and bTaxonName:
-            warning_this_exist(_('taxon name'), sLatName)
+        if sName and bTaxonName:
+            warning_this_exist(_('taxon name'), f'<i>{sName}</i>, {sAuthor}')
             return
 
-        if sLatName and not bTaxonName:
+        if sName and not bTaxonName:
             iLevel = self.oConnector.get_level_id('level_name', sLevel)
+            iStatus = self.oConnector.get_status_id(sStatus)
             iMainTax = self.oConnector.get_taxon_id(sMainTax, sMAuthor)
-            tTaxValues = (iLevel, iMainTax, sLatName,
-                          sAuthor, iYear, sLocalName,)
-            dSynonyms = self.check_synonyms(sLatName, sSynonyms, sAuthors,
-                                            sYears)
-            self.save_(tTaxValues, dSynonyms['list_syn'],
-                       dSynonyms['list_auth'], dSynonyms['list_year'])
+            tValues = (iLevel, iMainTax, sName, sAuthor, iYear, iStatus,)
+
+            self.oConnector.insert_taxon(tValues)
 
             self.clean_field()
             self.fill_combobox()
-
-    def save_(self, tTaxonValues, lSynonyms, lAuthors, lYears):
-        """ Saving information about the taxon in the database.
-
-        :param tTaxonValues: Information on taxon in view: index of a Taxon
-            level, a Main taxon, a Latin name, an Author, a Year, a Local name.
-        :type tTaxonValues: tuple[str]
-        :param lSynonyms: A list of taxon synonyms.
-        :type lSynonyms: list[str]
-        :param lAuthors: A list of authors of taxon synonyms.
-        :type lAuthors: list[str]
-        :param lYears:A list of years when the author named the taxon.
-        :type lYears: list[str]
-        """
-        sColumns = 'id_level, id_main_taxon, taxon_name, ' \
-                   'author, year, taxon_local_name'
-        iTaxonName = self.oConnector.insert_row('Taxon', sColumns,
-                                                tTaxonValues)
-        if lSynonyms:
-            self.save_synonyms(iTaxonName, lSynonyms, lAuthors, lYears)
-
-
-class EditSubstrateDialog(ASubstrateDialog):
-    """ Dialog window which allows user to change substrate type. """
-
-    def __init__(self, oConnector, oParent=None):
-        """ Initiating a class. """
-        super(EditSubstrateDialog, self).__init__(oConnector, oParent)
-        self.init_UI()
-
-    def init_UI(self):
-        """ Creating a dialog window. """
-        self.setWindowTitle(_('Edit substrate...'))
-        self.setModal(Qt.ApplicationModal)
-
-        self.oComboSubstrateLevel.set_combo_list(
-            sorted(self.create_substrate_list('Substrate')))
-
-        oVLayout = QVBoxLayout()
-        oVLayout.addLayout(self.oComboSubstrateLevel)
-        oVLayout.addLayout(self.oLineEditSubstrate)
-        oVLayout.addLayout(self.oHLayoutButtons)
-        self.setLayout(oVLayout)
-
-    def create_substrate_list(self, sDB):
-        """ Filling the drop-down list with substrate types.
-
-        :param sDB: A name table when information on substrate is saved.
-        :type sDB: str
-        :return: A list of substrate types.
-        :rtype: list[str]
-        """
-        oCursor = self.oConnector.sql_get_all(sDB)
-        lValues = []
-        for tRow in oCursor:
-            lValues.append(tRow[1])
-        return lValues
-
-
-class NewSubstrateDialog(ASubstrateDialog):
-    """ Dialog window which adds new substrate type. """
-
-    def __init__(self, oConnector, oParent=None):
-        """ Initiating a class. """
-        super(NewSubstrateDialog, self).__init__(oConnector, oParent)
-        self.init_UI()
-
-    def init_UI(self):
-        """ Creating a dialog window. """
-        self.setWindowTitle(_('Add new substrate...'))
-        self.setModal(Qt.ApplicationModal)
-
-        oVLayout = QVBoxLayout()
-        oVLayout.addLayout(self.oLineEditSubstrate)
-        oVLayout.addLayout(self.oHLayoutButtons)
-        self.setLayout(oVLayout)
 
 
 if __name__ == '__main__':

@@ -20,11 +20,12 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow, QAction, qApp
 
 from mli.gui.file_dialogs import OpenFileDialog
+from mli.gui.substract_dialogs import EditSubstrateDialog, NewSubstrateDialog
 from mli.gui.help_dialog import About
 from mli.gui.setting_dialog import SettingDialog
 from mli.gui.tab_widget import CentralTabWidget
-from mli.gui.tool_dialogs import NewSubstrateDialog, EditTaxonDialog, \
-    EditSubstrateDialog, EditSynonymDialog, NewTaxonDialog, AddSynonymsDialog
+from mli.gui.taxon_dialogs import EditTaxonDialog, EditSynonymDialog,\
+    NewTaxonDialog
 
 from mli.lib.config import ConfigProgram
 from mli.lib.sql import SQL, check_connect_db
@@ -82,7 +83,6 @@ class MainWindow(QMainWindow):
         # Tools
         self.oNewTaxon = QAction(_('&New taxon...'))
         self.oEditTaxon = QAction(_('&Edit taxon...'))
-        self.oAddSynonyms = QAction(_('Add synonyms taxon...'))
         self.oEditSynonym = QAction(_('Edit synonym taxon...'))
         self.oNewSubstrate = QAction(_('New substrate...'))
         self.oEditSubstrate = QAction(_('Edit substrate...'))
@@ -122,7 +122,6 @@ class MainWindow(QMainWindow):
         oTools = oMenuBar.addMenu(_('&Tools'))
         oTools.addAction(self.oNewTaxon)
         oTools.addAction(self.oEditTaxon)
-        oTools.addAction(self.oAddSynonyms)
         oTools.addAction(self.oEditSynonym)
         oTools.addSeparator()
         oTools.addAction(self.oNewSubstrate)
@@ -148,17 +147,12 @@ class MainWindow(QMainWindow):
         # Menu Tools
         self.oNewTaxon.triggered.connect(self.onNewTaxon)
         self.oEditTaxon.triggered.connect(self.onEditTaxon)
-        self.oAddSynonyms.triggered.connect(self.onAddSynonyms)
         self.oEditSynonym.triggered.connect(self.onEditSynonym)
         self.oNewSubstrate.triggered.connect(self.onNewSubstrate)
         self.oEditSubstrate.triggered.connect(self.onEditSubstrate)
 
         # Menu Help
         self.oAbout.triggered.connect(self.onDisplayAbout)
-
-    def onAddSynonyms(self):
-        oNewSynonymsDialog = AddSynonymsDialog(self.oConnector, self)
-        oNewSynonymsDialog.exec_()
 
     def onDisplayAbout(self):
         """ Method open dialog window with information about the program. """

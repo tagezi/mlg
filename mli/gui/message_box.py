@@ -36,6 +36,14 @@ from gettext import gettext as _
 from PyQt5.QtWidgets import QMessageBox
 
 
+def warning_no_synonyms(sName):
+    oMsgBox = QMessageBox()
+    oMsgBox.setWindowTitle(_('There are no synonyms!'))
+    sString = _('There are no synonyms for:')
+    oMsgBox.setText(f'{sString} {sName}')
+    oMsgBox.exec()
+
+
 def warning_lat_name():
     """ Create a message dialog window with warning that a Latin name of taxon
     isn't specified.

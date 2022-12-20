@@ -22,7 +22,8 @@ from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout
 from mli.gui.abstract_classes import AToolDialogButtons
 from mli.gui.dialog_elements import VComboBox, HLineEdit, \
     VLineEdit, VTextEdit
-from mli.gui.message_box import warning_lat_name, warning_this_exist
+from mli.gui.message_box import warning_no_synonyms, warning_lat_name,\
+    warning_this_exist
 from mli.lib.str import str_sep_name_taxon, str_text_to_list
 
 
@@ -318,9 +319,12 @@ class EditSynonymDialog(ATaxonDialog):
     def onCurrentTaxonNamesChanged(self, sTaxonName):
         sTaxName, sAuthor = str_sep_name_taxon(sTaxonName)
         self.iTaxonID = self.oConnector.get_taxon_id(sTaxName, sAuthor)
-        # TODO: Debug it!
-        oCursor = self.oConnector.get_synonyms(self.iTaxonID)
-        tSynonyms = oCursor.fetchall()
+
+        tSynonyms = self.oConnector.get_synonyms(self.iTaxonID)
+        if not tSynonyms:
+            warning_no_synonyms(f'{sTaxName}, {sAuthor}')
+            return
+
         lSynonyms = []
         for lRow in tSynonyms:
             lSynonyms.append(lRow[0])

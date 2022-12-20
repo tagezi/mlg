@@ -4,6 +4,14 @@ mli.gui package
 Submodules
 ----------
 
+mli.gui.abstract\_classes module
+--------------------------------
+
+.. automodule:: mli.gui.abstract_classes
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 mli.gui.dialog\_elements module
 -------------------------------
 
@@ -60,10 +68,10 @@ mli.gui.tab\_widget module
    :undoc-members:
    :show-inheritance:
 
-mli.gui.tool\_dialogs module
-----------------------------
+mli.gui.taxon\_dialogs module
+-----------------------------
 
-.. automodule:: mli.gui.tool_dialogs
+.. automodule:: mli.gui.taxon_dialogs
    :members:
    :undoc-members:
    :show-inheritance:

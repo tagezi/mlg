@@ -38,7 +38,7 @@ from mli.lib.str import str_get_file_patch
 
 def check_connect_db(oConnector, sBasePath, sDBDir):
     """ Checks for the existence of a database and if it does not find it, then
-    creates it with default values.
+        creates it with default values.
 
     :param oConnector: Instance attribute of SQL.
     :type oConnector: SQL
@@ -88,9 +88,10 @@ def get_increase_value(sColumns, tValues):
     """ Checks counting elements of values, and if them fewer,
      then makes them equal.
 
-     :Note: In the rison that tuple can't be multiplied on flot, the process
-     of increasing the tuple becomes somewhat resource-intensive. So,
-     tValues should be consisting of one element.
+     Note:
+        In the rison that tuple can't be multiplied on flot, the process
+        of increasing the tuple becomes somewhat resource-intensive. So,
+        tValues should be consisting of one element.
 
     :param sColumns: Colum(s) in query.
     :type sColumns: str

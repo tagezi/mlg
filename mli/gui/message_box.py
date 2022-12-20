@@ -14,6 +14,24 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+""" The module provides message boxes that give hints about incorrect user
+actions.
+
+*Function*:
+    | warning_lat_name()
+    | warning_restart_app()
+    | warning_this_exist(sThis, sThisName)
+
+*Using*:
+    As an example, let's show that the name of the taxon Cladonia, P. Browne
+    already exists.
+
+    .. code-block::
+
+        warning_this_exist('taxon name', 'Cladonia, P.Browne')
+
+"""
+
 from gettext import gettext as _
 from PyQt5.QtWidgets import QMessageBox
 
@@ -46,8 +64,6 @@ def warning_this_exist(sThis, sThisName):
     :type sThis: str
     :param sThisName: The name of stuff which trying to add.
     :type sThisName: str
-    :return: refuse
-    :rtype: bool
     """
     oMsgBox = QMessageBox()
     oMsgBox.setWindowTitle(_('The taxon name already exists!'))

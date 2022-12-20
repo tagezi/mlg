@@ -84,7 +84,7 @@ def gbif_get_id_from_gbif(sName, sLevel='species'):
     :param sName: The name of a taxon.
     :type sName: str
     :param sLevel: The rank of a taxon.
-    :type sLevel:str
+    :type sLevel: str
     :return: Key ID of the taxon in gbif.
     :rtype: str
     """

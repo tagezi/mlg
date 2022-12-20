@@ -5,17 +5,13 @@ The application is just being developed and is still very far even from the
 beta testing stage. However, I hope interested people can help with
 development, testing, or ideas on how to improve it.
 
-------------------
 User documentation
 ------------------
 .. toctree::
    :maxdepth: 2
 
-   user/about.rst
-   user/license.rst
-   user/install.rst
+   user/introduction.rst
 
------------------
 Dev documentation
 -----------------
 
@@ -26,7 +22,11 @@ questions, please contact me. Any contribution is invaluable.
 
 Thank you!
 
-------------------
+.. toctree::
+   :maxdepth: 4
+
+   dev/modules.rst
+
 Indices and tables
 ------------------
 

@@ -75,11 +75,15 @@ def str_text_to_list(sString):
 
 
 def str_sep_name_taxon(sString):
-    sName = sString.split(') ')[1]
-    if sName.find(', ') != -1:
-        lName = sName.split(', ')
-        return lName
-    return sName, None
+    sString = ' '.join(sString.split(' ')[1:])
+    print(sString)
+    if sString.find(', ') != -1:
+        sName = sString.split(', ')[0]
+        sAuthor = ','.join(sString.split(',')[1:]).strip()
+        print(sName, sAuthor)
+
+        return sName, sAuthor
+    return sString, None
 
 
 if __name__ == '__main__':

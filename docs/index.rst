@@ -25,6 +25,7 @@ Thank you!
 .. toctree::
    :maxdepth: 4
 
+   dev/db.rst
    dev/modules.rst
 
 Indices and tables

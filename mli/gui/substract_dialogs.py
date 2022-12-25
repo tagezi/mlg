@@ -21,11 +21,10 @@ from gettext import gettext as _
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout
 
-from mli.gui.abstract_classes import AToolDialogButtons
-from mli.gui.dialog_elements import HComboBox, HLineEdit
+from mli.gui.dialog_elements import ADialogApplyButtons, HComboBox, HLineEdit
 
 
-class ASubstrateDialog(AToolDialogButtons):
+class ASubstrateDialog(ADialogApplyButtons):
     """An abstract class that creates fields and functionality common to all
     dialogs of the substrate. """
 

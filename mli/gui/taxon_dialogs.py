@@ -20,14 +20,13 @@ from gettext import gettext as _
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout
 
-from mli.gui.abstract_classes import AToolDialogButtons
-from mli.gui.dialog_elements import VComboBox, HLineEdit, VLineEdit
+from mli.gui.dialog_elements import ADialogApplyButtons, VComboBox, VLineEdit
 from mli.gui.message_box import warning_no_synonyms, warning_lat_name,\
     warning_this_exist
 from mli.lib.str import str_sep_name_taxon
 
 
-class ATaxonDialog(AToolDialogButtons):
+class ATaxonDialog(ADialogApplyButtons):
     """ Creates abstract class that contain common elements for Dialogs of
         taxon."""
 

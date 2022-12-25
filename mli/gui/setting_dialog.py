@@ -17,16 +17,16 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QPushButton, QVBoxLayout, QHBoxLayout, \
-    QLineEdit
+from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QHBoxLayout, QLineEdit
 
+from mli.gui.dialog_elements import ADialogApplyButtons
 from mli.gui.file_dialogs import OpenFileDialog
 from mli.gui.message_box import warning_restart_app
 from mli.lib.config import ConfigProgram
 from mli.lib.sql import SQL, check_connect_db
 
 
-class SettingDialog(QDialog):
+class SettingDialog(ADialogApplyButtons):
     def __init__(self, oConnector, sPathApp, oParent=None):
         super(SettingDialog, self).__init__(oParent)
         self.oConnector = oConnector
@@ -37,29 +37,20 @@ class SettingDialog(QDialog):
     def init_UI(self):
         self.setWindowTitle('Setting')
         self.setModal(Qt.ApplicationModal)
-        self.oButtonApply = QPushButton('Apply', self)
-        self.oButtonOk = QPushButton('Ok', self)
-        self.oButtonCancel = QPushButton('Cancel', self)
         self.oButtonOpenFile = QPushButton('...', self)
+        sFileNameDB = self.oConfigProgram.get_config_value('DB', 'db_path')
+
         oVLayout = QVBoxLayout()
         oHLayoutFiledPath = QHBoxLayout()
-        oHLayoutButtons = QHBoxLayout()
-        sFileNameDB = self.oConfigProgram.get_config_value('DB', 'db_path')
         self.oTextFiled = QLineEdit(sFileNameDB)
         oHLayoutFiledPath.addWidget(self.oTextFiled)
         oHLayoutFiledPath.addWidget(self.oButtonOpenFile)
-        oHLayoutButtons.addWidget(self.oButtonApply)
-        oHLayoutButtons.addWidget(self.oButtonOk)
-        oHLayoutButtons.addWidget(self.oButtonCancel)
         oVLayout.addLayout(oHLayoutFiledPath)
-        oVLayout.addLayout(oHLayoutButtons)
+        oVLayout.addLayout(self.oHLayoutButtons)
         self.setLayout(oVLayout)
 
     def connect_actions(self):
         self.oButtonOpenFile.clicked.connect(self.onClickOpenFile)
-        self.oButtonApply.clicked.connect(self.onClickApply)
-        self.oButtonOk.clicked.connect(self.onClickOk)
-        self.oButtonCancel.clicked.connect(self.onCancel)
 
     def onClickOpenFile(self):
         dParameter = {'name': 'Selecting directory',
@@ -82,13 +73,6 @@ class SettingDialog(QDialog):
         check_connect_db(self.oConnector, sBasePath, sDBDir)
 
         warning_restart_app()
-
-    def onClickOk(self):
-        self.onClickApply()
-        self.close()
-
-    def onCancel(self):
-        self.close()
 
 
 if __name__ == '__main__':

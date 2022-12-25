@@ -148,3 +148,14 @@ license.
 In simple terms, you have the right to use, modify and distribute the
 application and the information in it, if you indicate the source of the
 information in any reasonable way and do not change the licenses.
+
+Contributors
+~~~~~~~~~~~~
+
+This list may not be complete, as some authors may not contribute directly to
+github, but send information and patches to other authors. Also, it may happen
+that some authors forget to include themselves in the contributor list. So,
+this is the minimum list of contributors. To get a complete list, you need to
+do a full revision of authorship.
+
+.. include:: ../../contributors.txt

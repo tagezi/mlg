@@ -1,5 +1,7 @@
 #     This code is a part of program Manual Lichen identification
-#     Copyright (C) 2022  Valerii Goncharuk (aka tagezi)
+#     Copyright (C) 2022 contributors Manual Lichen identification
+#     The full list is available at the link
+#     https://github.com/tagezi/mli/blob/master/contributors.txt
 #
 #     This program is free software: you can redistribute it and/or modify
 #     it under the terms of the GNU General Public License as published by

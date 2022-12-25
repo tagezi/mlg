@@ -52,14 +52,11 @@ class MainWindow(QMainWindow):
         check_connect_db(self.oConnector, sBasePath, sDBDir)
 
         self.setWindowTitle(_('Manual Lichen identification'))
-        # self.oTable = TableView(self, sDefaultTableName)
-        self.oCentralTabWidget = CentralTabWidget(self, 'Tab')
-        # self.oCentralTabWidget.add_tab(self.oTable)
-        self.setCentralWidget(self.oCentralTabWidget)
 
         self.create_actions()
         self.connect_actions()
         self.set_menu_bar()
+        self.setCentralWidget(CentralTabWidget(self, 'Tab 1'))
         self.onSetStatusBarMessage()
 
         self.showMaximized()

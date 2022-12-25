@@ -22,18 +22,16 @@ from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout
 class CentralTabWidget(QTabWidget):
     def __init__(self, oParent, sName):
         super(CentralTabWidget, self).__init__(oParent)
-        self.oLayout = QVBoxLayout(self)
         self.sName = sName
+        self.oTab = None
 
         self.setMovable(True)
         self.setTabPosition(QTabWidget.South)
         self.setTabShape(QTabWidget.Triangular)
 
-        # Add tabs to widget
-        self.oLayout.addWidget(self)
-        # self.setLayout(self.oLayout)
+        self.add_tab()
 
-    def add_tab(self, oWidget, sName=''):
+    def add_tab(self, oWidget=None, sName=''):
         if not sName:
             sName = self.sName
         # Initialize tab screen
@@ -42,10 +40,11 @@ class CentralTabWidget(QTabWidget):
         # Add tabs
         self.addTab(self.oTab, sName)
 
-        # Create first tab
-        self.oTab.layout = QVBoxLayout(self)
-        self.oTab.layout.addWidget(oWidget)
-        self.oTab.setLayout(self.oTab.layout)
+        # Create tab content
+        if oWidget:
+            self.oTab.layout = QVBoxLayout(self)
+            self.oTab.layout.addWidget(oWidget)
+            self.oTab.setLayout(self.oTab.layout)
 
         iIndexTab = self.count() - 1
         self.update_tab_name(iIndexTab, sName)

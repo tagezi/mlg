@@ -158,4 +158,6 @@ that some authors forget to include themselves in the contributor list. So,
 this is the minimum list of contributors. To get a complete list, you need to
 do a full revision of authorship.
 
+**The list of contributors:**
+
 .. include:: ../../contributors.txt

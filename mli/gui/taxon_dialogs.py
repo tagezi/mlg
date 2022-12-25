@@ -52,7 +52,7 @@ class ATaxonDialog(AToolDialogButtons):
         """ initiating a dialog view """
         self.oComboStatus = VComboBox(_('Taxon status:'), 180)
         self.oComboTaxRank = VComboBox(_('Taxon rank:'), 180)
-        self.oLineEditLatName = VLineEdit(_('Latin name:') )
+        self.oLineEditLatName = VLineEdit(_('Latin name:'))
         self.oLineEditAuthor = VLineEdit(_('Author:'), 240)
         self.oLineEditYear = VLineEdit(_('Year:'), 50)
         self.oComboTaxNames = VComboBox(_('Taxon name:'), 500)
@@ -165,11 +165,12 @@ class ATaxonDialog(AToolDialogButtons):
     def fill_form(self, sSciName):
         if not sSciName:
             return
+
         sName, sAuthor = str_sep_name_taxon(sSciName)
         if sName == 'Biota':
             return
-        lRow = self.oConnector.get_taxon_info(sName, sAuthor)
 
+        lRow = self.oConnector.get_taxon_info(sName, sAuthor)
         self.iOldMainTaxonID = lRow[0]
         sOldMainTaxonRankName = lRow[1]
         self.sOldMainTaxonName = lRow[2]
@@ -312,6 +313,7 @@ class EditSynonymDialog(ATaxonDialog):
 
         self.oComboBoxSynonym.set_combo_list(lSynonyms)
 
+
 class EditTaxonDialog(ATaxonDialog):
     def __init__(self, oConnector, oParent=None):
         """ Initiating a class. """
@@ -361,7 +363,8 @@ class NewTaxonDialog(ATaxonDialog):
     def onClickApply(self):
         """ Actions to be taken when adding a new taxon. """
         sRank = self.oComboTaxRank.get_text()
-        sMainTax, sMAuthor = str_sep_name_taxon(self.oComboMainTaxon.get_text())
+        sMainTaxon, sMAuthor = \
+            str_sep_name_taxon(self.oComboMainTaxon.get_text())
         sName = self.oLineEditLatName.get_text()
         sAuthor = self.oLineEditAuthor.get_text()
         iYear = self.oLineEditYear.get_text()
@@ -380,7 +383,7 @@ class NewTaxonDialog(ATaxonDialog):
         if sName and not bTaxonName:
             iRank = self.oConnector.get_level_id('level_name', sRank)
             iStatus = self.oConnector.get_status_id(sStatus)
-            iMainTax = self.oConnector.get_taxon_id(sMainTax, sMAuthor)
+            iMainTax = self.oConnector.get_taxon_id(sMainTaxon, sMAuthor)
             tValues = (iRank, iMainTax, sName, sAuthor, iYear, iStatus,)
 
             self.oConnector.insert_taxon(tValues)

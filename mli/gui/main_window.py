@@ -78,13 +78,13 @@ class MainWindow(QMainWindow):
         self.oRedo.setShortcut('Ctrl+Z')
         self.oFind = QAction(_('Find...'), self)
         self.oFind.setShortcut('Ctrl+F')
-
-        # Tools
         self.oNewTaxon = QAction(_('&New taxon...'))
         self.oEditTaxon = QAction(_('&Edit taxon...'))
         self.oEditSynonym = QAction(_('Edit synonym taxon...'))
         self.oNewSubstrate = QAction(_('New substrate...'))
         self.oEditSubstrate = QAction(_('Edit substrate...'))
+
+        # Tools
 
         # Help
         self.oOpenHelp = QAction(_('&Help'), self)
@@ -109,22 +109,18 @@ class MainWindow(QMainWindow):
         oEdit.addAction(self.oUndo)
         oEdit.addAction(self.oRedo)
         oEdit.addSeparator()
+        oTaxa = oEdit.addMenu(_('Taxa'))
+        oTaxa.addAction(self.oNewTaxon)
+        oTaxa.addAction(self.oEditTaxon)
+        oTaxa.addAction(self.oEditSynonym)
+        oSubstrates = oEdit.addMenu(_('Substrates'))
+        oSubstrates.addAction(self.oNewSubstrate)
+        oSubstrates.addAction(self.oEditSubstrate)
+        oEdit.addSeparator()
         oEdit.addAction(self.oFind)
-
-        # Create View menu
-        oView = oMenuBar.addMenu(_('&View'))
-
-        # Create Run menu
-        oView = oMenuBar.addMenu(_('&Run'))
 
         # Create Tool menu
         oTools = oMenuBar.addMenu(_('&Tools'))
-        oTools.addAction(self.oNewTaxon)
-        oTools.addAction(self.oEditTaxon)
-        oTools.addAction(self.oEditSynonym)
-        oTools.addSeparator()
-        oTools.addAction(self.oNewSubstrate)
-        oTools.addAction(self.oEditSubstrate)
 
         # Create Help menu
         oHelpMenu = oMenuBar.addMenu(_('&Help'))
@@ -143,7 +139,7 @@ class MainWindow(QMainWindow):
         self.oSetting.triggered.connect(self.onOpenSetting)
         self.oExitAct.triggered.connect(qApp.quit)
 
-        # Menu Tools
+        # Menu Edit
         self.oNewTaxon.triggered.connect(self.onNewTaxon)
         self.oEditTaxon.triggered.connect(self.onEditTaxon)
         self.oEditSynonym.triggered.connect(self.onEditSynonym)

@@ -21,6 +21,7 @@ import unittest
 
 from ut_pep8 import TestPEP8
 from ut_sql import TestSQLite
+from ut_str import TestStr
 
 
 def suite():
@@ -30,6 +31,7 @@ def suite():
     """
     oSuite = unittest.TestSuite()
     oSuite.addTest(unittest.makeSuite(TestPEP8))
+    oSuite.addTest(TestStr('test_str_sep_name_taxon'))
     oSuite.addTest(TestSQLite('test_sql_get_columns'))
     oSuite.addTest(TestSQLite('test_sql__init__'))
     oSuite.addTest(TestSQLite('test_sql_execute'))

@@ -88,7 +88,9 @@ def str_sep_name_taxon(sString):
              the string.
     :rtype: list[str, str|None]
     """
-    sString = ' '.join(sString.split(' ')[1:])
+    if sString.find('(') == 0:
+        sString = ' '.join(sString.split(' ')[1:])
+
     if sString.find(', ') != -1:
         sName = sString.split(', ')[0]
         sAuthor = ','.join(sString.split(',')[1:]).strip()

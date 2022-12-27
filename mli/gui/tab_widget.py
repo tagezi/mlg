@@ -28,8 +28,13 @@ class CentralTabWidget(QTabWidget):
         self.setMovable(True)
         self.setTabPosition(QTabWidget.South)
         self.setTabShape(QTabWidget.Triangular)
+        self.setTabsClosable(True)
 
         self.add_tab()
+        self.connect_actions()
+
+    def connect_actions(self):
+        self.tabCloseRequested.connect(self.onCloseTab)
 
     def add_tab(self, oWidget=None, sName=''):
         if not sName:
@@ -49,6 +54,11 @@ class CentralTabWidget(QTabWidget):
         iIndexTab = self.count() - 1
         self.update_tab_name(iIndexTab, sName)
         self.setCurrentIndex(iIndexTab)
+
+    def onCloseTab(self, index):
+        if self.count() < 2:
+            return
+        self.removeTab(index)
 
     def update_tab_name(self, iTabIndex=0, sTabName='Table 1'):
         self.setTabText(iTabIndex, sTabName)

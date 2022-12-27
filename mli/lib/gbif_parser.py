@@ -43,6 +43,7 @@ from time import sleep
 
 from pygbif import species
 from mli.lib.sql import SQL
+from mli.lib.str import str_sep_name_taxon
 
 
 def gbif_is_lichen(dTaxon):
@@ -107,7 +108,7 @@ def gbif_get_id_from_gbif(sName, sLevel='species'):
 
     for dData in lData:
         if gbif_is_lichen(dData) and dData['rank'] == sLevel and \
-                dData['canonicalName'] == sName:
+                dData['canonicalName'] == str_sep_name_taxon(sName)[0]:
             return lData[0]['key']
 
     return

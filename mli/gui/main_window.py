@@ -19,7 +19,8 @@
 from gettext import gettext as _
 
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QMainWindow, QAction, qApp
+from PyQt5.QtWidgets import QAction, qApp, QComboBox, QCompleter, \
+    QInputDialog, QMainWindow, QTextBrowser
 
 from mli.gui.file_dialogs import OpenFileDialog
 from mli.gui.substract_dialogs import EditSubstrateDialog, NewSubstrateDialog
@@ -28,6 +29,7 @@ from mli.gui.setting_dialog import SettingDialog
 from mli.gui.tab_widget import CentralTabWidget
 from mli.gui.taxon_dialogs import EditTaxonDialog, EditSynonymDialog,\
     NewTaxonDialog
+from mli.gui.taxon_info import TaxonBrowser
 
 from mli.lib.config import ConfigProgram
 from mli.lib.sql import SQL, check_connect_db
@@ -52,11 +54,11 @@ class MainWindow(QMainWindow):
         check_connect_db(self.oConnector, sBasePath, sDBDir)
 
         self.setWindowTitle(_('Manual Lichen identification'))
-
+        self.oCentralWidget = CentralTabWidget(self, 'Tab 1')
         self.create_actions()
         self.connect_actions()
         self.set_menu_bar()
-        self.setCentralWidget(CentralTabWidget(self, 'Tab 1'))
+        self.setCentralWidget(self.oCentralWidget)
         self.onSetStatusBarMessage()
 
         self.showMaximized()
@@ -85,6 +87,7 @@ class MainWindow(QMainWindow):
         self.oEditSubstrate = QAction(_('Edit substrate...'))
 
         # Tools
+        self.oTaxonInfo = QAction(_('Information on Taxon...'))
 
         # Help
         self.oOpenHelp = QAction(_('&Help'), self)
@@ -121,15 +124,12 @@ class MainWindow(QMainWindow):
 
         # Create Tool menu
         oTools = oMenuBar.addMenu(_('&Tools'))
+        oTools.addAction(self.oTaxonInfo)
 
         # Create Help menu
         oHelpMenu = oMenuBar.addMenu(_('&Help'))
         oHelpMenu.addAction(self.oOpenHelp)
         oHelpMenu.addAction(self.oAbout)
-
-    def onSetStatusBarMessage(self, sMassage='Ready'):
-        """ Method create Status Bar on main window of program GUI. """
-        self.statusBar().showMessage(sMassage)
 
     def connect_actions(self):
         """ It is PyQt5 slots or other words is connecting from GUI element to
@@ -146,8 +146,25 @@ class MainWindow(QMainWindow):
         self.oNewSubstrate.triggered.connect(self.onNewSubstrate)
         self.oEditSubstrate.triggered.connect(self.onEditSubstrate)
 
+        # Tool menu
+        self.oTaxonInfo.triggered.connect(self.onTaxonInfo)
+
         # Menu Help
         self.oAbout.triggered.connect(self.onDisplayAbout)
+
+    def get_page_taxon_info(self, sTaxonName):
+        return TaxonBrowser(self.oConnector, sTaxonName)
+
+    def get_taxon_list(self):
+        lValues = []
+        tTaxonList = self.oConnector.get_full_taxon_list()
+
+        for tRow in tTaxonList:
+            if tRow[1]:
+                lValues.append(f'{tRow[0]}, {tRow[1]}')
+            else:
+                lValues.append(f'{tRow[0]}')
+        return lValues
 
     def onDisplayAbout(self):
         """ Method open dialog window with information about the program. """
@@ -180,3 +197,25 @@ class MainWindow(QMainWindow):
     def onNewTaxon(self):
         oNewTaxonDialog = NewTaxonDialog(self.oConnector, self)
         oNewTaxonDialog.exec_()
+
+    def onTaxonInfo(self):
+        lTaxonList = self.get_taxon_list()
+        oInputDialog = QInputDialog(self)
+        oInputDialog.setWindowTitle('Taxon choosing')
+        oInputDialog.setLabelText(_('Taxon list:'))
+        oInputDialog.setComboBoxItems(lTaxonList)
+        oInputDialog.setComboBoxEditable(True)
+        oComboBox = oInputDialog.findChild(QComboBox)
+        if oComboBox is not None:
+            oCompleter = QCompleter(lTaxonList, oComboBox)
+            oComboBox.setCompleter(oCompleter)
+
+        ok = oInputDialog.exec_()
+        if ok:
+            sTaxonName = oInputDialog.textValue()
+            oTaxonInfo = self.get_page_taxon_info(sTaxonName)
+            self.oCentralWidget.add_tab(oTaxonInfo, sTaxonName)
+
+    def onSetStatusBarMessage(self, sMassage='Ready'):
+        """ Method create Status Bar on main window of program GUI. """
+        self.statusBar().showMessage(sMassage)

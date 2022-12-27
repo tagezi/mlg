@@ -465,12 +465,36 @@ class SQL:
         return self.sql_get_id(sTable, 'id_taxon',
                                'taxon_name, id_status', tValue)
 
+    def get_full_taxon_list(self):
+        sSQL = 'SELECT Taxon.taxon_name, Taxon.author ' \
+               'FROM Taxon ORDER BY Taxon.taxon_name ASC;'
+        return self.execute_query(sSQL).fetchall()
+
     def get_level_id(self, sColumns, sValues):
         return self.sql_get_id('TaxonLevel', 'id_level', sColumns, (sValues,))
 
     def get_level_name(self, sColumns, iValues):
         return self.sql_get_values('TaxonLevel', sColumns,
                                    'id_level', (iValues,))
+
+    def get_level_taxon(self, sName, sAuthor):
+        sSQL = 'SELECT Taxon.id_level, TaxonLevel.level_name ' \
+               'FROM Taxon ' \
+               'JOIN TaxonLevel ON Taxon.id_level=TaxonLevel.id_level '
+        if sAuthor:
+            sSQL = f'{sSQL}WHERE Taxon.taxon_name=? AND Taxon.author=?'
+            return self.execute_query(sSQL, (sName, sAuthor,)).fetchall()[0]
+        else:
+            sSQL = f'{sSQL}WHERE Taxon.taxon_name=? AND Taxon.author is NULL'
+            return self.execute_query(sSQL, (sName,)).fetchall()[0]
+
+    def get_main_taxon(self, tValue):
+        sSQL = 'SELECT Taxon.id_main_taxon, MainTaxon.taxon_name, ' \
+               'MainTaxon.author FROM Taxon ' \
+               'JOIN Taxon MainTaxon ' \
+               'ON MainTaxon.id_taxon=Taxon.id_main_taxon ' \
+               'WHERE Taxon.taxon_name=? AND Taxon.author=?'
+        return self.execute_query(sSQL, tValue).fetchall()[0]
 
     def get_synonyms(self, iValue):
         sSQL = 'SELECT TaxonLevel.level_name, Taxon.taxon_name, ' \
@@ -489,6 +513,20 @@ class SQL:
         return self.sql_get_id('TaxonStatus', 'id_status',
                                sColumn, (sValue,))
 
+    def get_status_taxon(self, sName, sAuthor):
+        sSQL = 'SELECT TaxonStatus.id_status, TaxonStatus.status_local_name ' \
+               'FROM Taxon ' \
+               'JOIN TaxonStatus ON' \
+               ' Taxon.id_status=TaxonStatus.id_status '
+        if sAuthor:
+            sSQL =  f'{sSQL}WHERE Taxon.taxon_name=? AND Taxon.author=?'
+            return self.execute_query(sSQL, (sName, sAuthor,)).fetchall()[0]
+        else:
+            sSQL = f'{sSQL}WHERE Taxon.taxon_name=? AND Taxon.author is NULL'
+            return self.execute_query(sSQL, (sName,)).fetchall()[0]
+
+
+
     def get_statuses(self):
         return self.sql_get_all('TaxonStatus')
 
@@ -501,7 +539,10 @@ class SQL:
                                'taxon_name, author', (sName, sAuthor,))
 
     def get_taxon_id(self, sName, sAuthor, sStatus='ACCEPTED'):
-        iIDStatus = self.get_status_id(sStatus, 'status_name')
+        if type(sStatus) == str:
+            iIDStatus = self.get_status_id(sStatus, 'status_name')
+        else:
+            iIDStatus = sStatus
         if sAuthor:
             tValues = (sName, sAuthor, iIDStatus,)
             return self.sql_get_id('Taxon', 'id_taxon',
@@ -516,25 +557,15 @@ class SQL:
 
         return
 
-    def get_taxon_children(self, iID, sName, sAuthor, sStatus='ACCEPTED'):
-        sStatus = sStatus.upper()
-        iIDStatus = self.sql_get_id('TaxonStatus', 'id_status', 'status_name',
-                                    (sStatus,))
-        if sAuthor:
-            iMainID = self.sql_get_id('Taxon', 'id_taxon',
-                                      'taxon_name, author',
-                                      (sName, sAuthor))
-        else:
-            sSQL = 'SELECT id_taxon FROM Taxon ' \
-                   'WHERE taxon_name=? AND author is NULL'
-            iMainID = self.execute_query(sSQL, (sName,))
-
-        oCursor = self.select('Taxon',
-                              'id_taxon, taxon_name, author, year',
-                              'id_main_taxon, id_status',
-                              (iID, iMainID, iIDStatus,))
-
-        return oCursor.fetchone()
+    def get_taxon_children(self, iID, sStatus):
+        sSQL = 'SELECT TaxonLevel.level_name, ' \
+               'Taxon.taxon_name, Taxon.author ' \
+               'FROM Taxon ' \
+               'JOIN TaxonLevel ON Taxon.id_level=TaxonLevel.id_level ' \
+               'JOIN TaxonStatus ON Taxon.id_status=TaxonStatus.id_status ' \
+               f'WHERE Taxon.id_main_taxon=? AND TaxonStatus.status_local_name=? ' \
+               'ORDER BY Taxon.id_level ASC, Taxon.taxon_name ASC;'
+        return self.execute_query(sSQL, (iID, sStatus,)).fetchall()
 
     def get_taxon_list(self, sStatus):
         sSQL = 'SELECT Taxon.id_level, TaxonLevel.level_name, ' \
@@ -545,6 +576,15 @@ class SQL:
                f'WHERE TaxonStatus.status_name=? ' \
                'ORDER BY Taxon.id_level ASC, Taxon.taxon_name ASC;'
         return self.execute_query(sSQL, (sStatus,)).fetchall()
+
+    def get_taxon_db_link(self, iID):
+        sSQL = 'SELECT DBSources.source_abbr, ' \
+               'DBSources.index_link, DBIndexes.taxon_index ' \
+               'FROM Taxon ' \
+               'JOIN DBIndexes ON Taxon.id_taxon=DBIndexes.id_taxon ' \
+               'JOIN DBSources ON DBIndexes.id_source=DBSources.id_source ' \
+               'WHERE Taxon.id_taxon=?;'
+        return self.execute_query(sSQL, (iID,)).fetchall()
 
     def get_taxon_info(self, sName, sAuthor):
         sSQL = "SELECT Taxon.id_main_taxon, " \

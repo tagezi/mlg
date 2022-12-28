@@ -77,7 +77,8 @@ class TaxonBrowser(QWidget):
             sHTML = f'{sHTML}<h3>{_("Description:")}</h3>'
             sHTML = f'{sHTML} ({sNoData}) '
             sHTML = f'{sHTML}<h3>{_("Children:")}</h3>'
-            lChildren = self.oConnector.get_taxon_children(iTaxonID, sStatusName)
+            lChildren = \
+                self.oConnector.get_taxon_children(iTaxonID, sStatusName)
             if lChildren:
                 for sLevel, sName, sAuthor in lChildren:
                     sHTML = f'{sHTML} ({sLevel}) ' \

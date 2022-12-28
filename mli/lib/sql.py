@@ -519,13 +519,11 @@ class SQL:
                'JOIN TaxonStatus ON' \
                ' Taxon.id_status=TaxonStatus.id_status '
         if sAuthor:
-            sSQL =  f'{sSQL}WHERE Taxon.taxon_name=? AND Taxon.author=?'
+            sSQL = f'{sSQL}WHERE Taxon.taxon_name=? AND Taxon.author=?'
             return self.execute_query(sSQL, (sName, sAuthor,)).fetchall()[0]
         else:
             sSQL = f'{sSQL}WHERE Taxon.taxon_name=? AND Taxon.author is NULL'
             return self.execute_query(sSQL, (sName,)).fetchall()[0]
-
-
 
     def get_statuses(self):
         return self.sql_get_all('TaxonStatus')
@@ -563,7 +561,8 @@ class SQL:
                'FROM Taxon ' \
                'JOIN TaxonLevel ON Taxon.id_level=TaxonLevel.id_level ' \
                'JOIN TaxonStatus ON Taxon.id_status=TaxonStatus.id_status ' \
-               f'WHERE Taxon.id_main_taxon=? AND TaxonStatus.status_local_name=? ' \
+               f'WHERE Taxon.id_main_taxon=? AND' \
+               f' TaxonStatus.status_local_name=? ' \
                'ORDER BY Taxon.id_level ASC, Taxon.taxon_name ASC;'
         return self.execute_query(sSQL, (iID, sStatus,)).fetchall()
 

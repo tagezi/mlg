@@ -90,8 +90,12 @@ class TaxonBrowser(QWidget):
         lTaxonDB = self.oConnector.get_taxon_db_link(iTaxonID)
         if lTaxonDB:
             for sSource, sLink, sIndex in lTaxonDB:
-                sHTML = f'{sHTML} {sSource}: ' \
-                        f'<a href="{sLink}{sIndex}">{sIndex}</a> '
+                if sSource == 'Plantarium':
+                    sHTML = f'{sHTML} {sSource}: ' \
+                            f'<a href="{sLink}{sIndex}.html">{sIndex}</a> '
+                else:
+                    sHTML = f'{sHTML} {sSource}: ' \
+                            f'<a href="{sLink}{sIndex}">{sIndex}</a> '
         else:
             sLevelDB = \
                 self.oConnector.get_level_name('level_en_name', iLevelID)[0][0]

@@ -230,6 +230,10 @@ class MainWindow(QMainWindow):
         oNewTaxonDialog = NewTaxonDialog(self.oConnector, self)
         oNewTaxonDialog.exec_()
 
+    def onSetStatusBarMessage(self, sMassage='Ready'):
+        """ Method create Status Bar on main window of program GUI. """
+        self.statusBar().showMessage(sMassage)
+
     def onTaxonInfo(self):
         lTaxonList = self.get_taxon_list()
         oInputDialog = QInputDialog(self)
@@ -247,7 +251,3 @@ class MainWindow(QMainWindow):
             sTaxonName = oInputDialog.textValue()
             oTaxonInfo = self.get_page_taxon_info(sTaxonName)
             self.oCentralWidget.add_tab(oTaxonInfo, sTaxonName)
-
-    def onSetStatusBarMessage(self, sMassage='Ready'):
-        """ Method create Status Bar on main window of program GUI. """
-        self.statusBar().showMessage(sMassage)

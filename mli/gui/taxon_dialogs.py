@@ -131,7 +131,7 @@ class ATaxonDialog(ADialogApplyButtons):
         tRows = self.oConnector.get_statuses()
         lList = []
         for Row in tRows:
-            lList.append(Row[3])
+            lList.append(Row[2])
 
         return lList
 
@@ -142,7 +142,7 @@ class ATaxonDialog(ADialogApplyButtons):
         :type: list[str]
         """
         lValues = []
-        tRows = self.oConnector.get_taxon_list('ACCEPTED')
+        tRows = self.oConnector.get_taxon_list('accepted')
 
         for tRow in tRows:
             if tRow[3]:

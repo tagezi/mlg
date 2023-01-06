@@ -53,7 +53,8 @@ class ASubstrateDialog(ADialogApplyButtons):
         :param tValues: Type of substrate to be entered into the database.
         :type tValues: tuple
         """
-        self.oConnector.insert_row('Substrate', 'substrate_name', tValues)
+        self.oConnector.insert_row('Substrate',
+                                   'substrate_local_name', tValues)
 
 
 class EditSubstrateDialog(ASubstrateDialog):

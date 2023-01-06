@@ -424,6 +424,7 @@ def gbif_get_status_id(oConnector, sStatus):
     :return: the status ID.
     :rtype: int or bool
     """
+    sStatus = sStatus.lower().replace('_', ' ')
     return oConnector.sql_get_id('TaxonStatus', 'id_status',
                                  'status_name', (sStatus,))
 

@@ -465,6 +465,14 @@ class SQL:
         return self.sql_get_id(sTable, 'id_taxon',
                                'taxon_name, id_status', tValue)
 
+    def get_color_id_by_name(self, sValue):
+        return self.sql_get_id('Colors', 'id_color',
+                               'color_local_name', (sValue,))
+
+    def get_color_id_by_hex(self, sValue):
+        return self.sql_get_id('Colors', 'id_color',
+                               'color_local_name', (sValue,))
+
     def get_full_taxon_list(self):
         sSQL = 'SELECT Taxon.taxon_name, Taxon.author ' \
                'FROM Taxon ORDER BY Taxon.taxon_name ASC;'
@@ -530,7 +538,7 @@ class SQL:
 
     def get_substrate_id(self, sValue):
         return self.sql_get_id('Substrate', 'id_substrate',
-                               'substrate_name', (sValue,))
+                               'substrate_local_name', (sValue,))
 
     def get_synonym_id(self, sName, sAuthor):
         return self.sql_get_id('Taxon', 'id_taxon',

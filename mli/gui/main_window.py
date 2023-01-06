@@ -22,11 +22,13 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction, qApp, QComboBox, QCompleter, \
     QInputDialog, QMainWindow, QTextBrowser
 
+from mli.gui.color_dialogs import NewColor, EditColor
 from mli.gui.file_dialogs import OpenFileDialog
 from mli.gui.substract_dialogs import EditSubstrateDialog, NewSubstrateDialog
 from mli.gui.help_dialog import About
 from mli.gui.setting_dialog import SettingDialog
 from mli.gui.tab_widget import CentralTabWidget
+from mli.gui.table_widget import TableWidget
 from mli.gui.taxon_dialogs import EditTaxonDialog, EditSynonymDialog,\
     NewTaxonDialog
 from mli.gui.taxon_info import TaxonBrowser
@@ -83,6 +85,10 @@ class MainWindow(QMainWindow):
         self.oNewTaxon = QAction(_('&New taxon...'))
         self.oEditTaxon = QAction(_('&Edit taxon...'))
         self.oEditSynonym = QAction(_('Edit synonym taxon...'))
+        self.oNewColor = QAction(_('New color...'))
+        self.oNewColorsTaxon = QAction(_('New color for taxon...'))
+        self.oEditColor = QAction(_('Edit color...'))
+        self.oEditColorsTaxon = QAction(_('Edit colors of taxon...'))
         self.oNewSubstrate = QAction(_('New substrate...'))
         self.oEditSubstrate = QAction(_('Edit substrate...'))
 
@@ -116,6 +122,14 @@ class MainWindow(QMainWindow):
         oTaxa.addAction(self.oNewTaxon)
         oTaxa.addAction(self.oEditTaxon)
         oTaxa.addAction(self.oEditSynonym)
+
+        oColor = oEdit.addMenu(_('Color'))
+        oColor.addAction(self.oNewColor)
+        oColor.addAction(self.oEditColor)
+        oEdit.addSeparator()
+        oColor.addAction(self.oNewColorsTaxon)
+        oColor.addAction(self.oEditColorsTaxon)
+
         oSubstrates = oEdit.addMenu(_('Substrates'))
         oSubstrates.addAction(self.oNewSubstrate)
         oSubstrates.addAction(self.oEditSubstrate)
@@ -143,6 +157,10 @@ class MainWindow(QMainWindow):
         self.oNewTaxon.triggered.connect(self.onNewTaxon)
         self.oEditTaxon.triggered.connect(self.onEditTaxon)
         self.oEditSynonym.triggered.connect(self.onEditSynonym)
+        self.oNewColor.triggered.connect(self.onNewColor)
+        self.oEditColor.triggered.connect(self.onEditColor)
+        self.oNewColorsTaxon.triggered.connect(self.onNewColorTaxon)
+        self.oEditColorsTaxon.triggered.connect(self.onEditColorTaxon)
         self.oNewSubstrate.triggered.connect(self.onNewSubstrate)
         self.oEditSubstrate.triggered.connect(self.onEditSubstrate)
 
@@ -178,9 +196,12 @@ class MainWindow(QMainWindow):
         oSettingDialog = SettingDialog(self.oConnector, self.sPathApp, self)
         oSettingDialog.exec_()
 
-    def onEditTaxon(self):
-        oEditTaxonDialog = EditTaxonDialog(self.oConnector, self)
-        oEditTaxonDialog.exec_()
+    def onEditColor(self):
+        oEditColor = EditColor(self.oConnector, self)
+        oEditColor.exec_()
+
+    def onEditColorTaxon(self):
+        pass
 
     def onEditSubstrate(self):
         oEditSubstrate = EditSubstrateDialog(self.oConnector, self)
@@ -189,6 +210,17 @@ class MainWindow(QMainWindow):
     def onEditSynonym(self):
         oEditSynonym = EditSynonymDialog(self.oConnector, self)
         oEditSynonym.exec_()
+
+    def onEditTaxon(self):
+        oEditTaxonDialog = EditTaxonDialog(self.oConnector, self)
+        oEditTaxonDialog.exec_()
+
+    def onNewColor(self):
+        oNewColor = NewColor(self.oConnector, self)
+        oNewColor.exec_()
+
+    def onNewColorTaxon(self):
+        pass
 
     def onNewSubstrate(self):
         oNewSubstrate = NewSubstrateDialog(self.oConnector, self)

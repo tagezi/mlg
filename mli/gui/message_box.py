@@ -77,7 +77,7 @@ def warning_this_exist(sThis, sThisName):
     :type sThisName: str
     """
     oMsgBox = QMessageBox()
-    oMsgBox.setWindowTitle(_('The taxon name already exists!'))
+    oMsgBox.setWindowTitle(_('This already exists!'))
 
     sThe = _('The')
     sExist = _("already exists.")

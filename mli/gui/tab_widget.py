@@ -20,9 +20,8 @@ from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout
 
 
 class CentralTabWidget(QTabWidget):
-    def __init__(self, oParent, sName):
+    def __init__(self, oParent):
         super(CentralTabWidget, self).__init__(oParent)
-        self.sName = sName
         self.oTab = None
 
         self.setMovable(True)
@@ -30,15 +29,12 @@ class CentralTabWidget(QTabWidget):
         self.setTabShape(QTabWidget.Triangular)
         self.setTabsClosable(True)
 
-        self.add_tab()
         self.connect_actions()
 
     def connect_actions(self):
         self.tabCloseRequested.connect(self.onCloseTab)
 
     def add_tab(self, oWidget=None, sName=''):
-        if not sName:
-            sName = self.sName
         # Initialize tab screen
         self.oTab = QWidget()
 

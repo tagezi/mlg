@@ -56,7 +56,15 @@ class MainWindow(QMainWindow):
         check_connect_db(self.oConnector, sBasePath, sDBDir)
 
         self.setWindowTitle(_('Manual Lichen identification'))
-        self.oCentralWidget = CentralTabWidget(self, 'Tab 1')
+        self.oCentralWidget = CentralTabWidget(self)
+
+        dKeyTable = {_('Name'): [''],
+                     _('Life form'): [''],
+                     _('Thallus color'): ['']}
+        oTableWidget = TableWidget(dKeyTable,
+                                   len(dKeyTable['Name']), len(dKeyTable))
+
+        self.oCentralWidget.add_tab(oTableWidget, _('Simple indications'))
         self.create_actions()
         self.connect_actions()
         self.set_menu_bar()

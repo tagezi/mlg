@@ -70,9 +70,9 @@ class TaxonBrowser(QWidget):
             lSynonyms = self.oConnector.get_synonyms(iTaxonID)
             if lSynonyms:
                 sHTML = f'{sHTML}<h3>{_("Synonyms:")}</h3>'
-                for sLevel, sName, sAuthor in lSynonyms:
+                for sLevel, sNameSyn, sAuthor in lSynonyms:
                     sHTML = f'{sHTML} ({sLevel}) ' \
-                            f'{get_name_string(sName, sAuthor)}<br>'
+                            f'{get_name_string(sNameSyn, sAuthor)}<br>'
 
             sHTML = f'{sHTML}<h3>{_("Description:")}</h3>'
             sHTML = f'{sHTML} ({sNoData}) '
@@ -80,9 +80,9 @@ class TaxonBrowser(QWidget):
             lChildren = \
                 self.oConnector.get_taxon_children(iTaxonID, sStatusName)
             if lChildren:
-                for sLevel, sName, sAuthor in lChildren:
+                for sLevel, sNameChild, sAuthor in lChildren:
                     sHTML = f'{sHTML} ({sLevel}) ' \
-                            f'{get_name_string(sName, sAuthor)}<br>'
+                            f'{get_name_string(sNameChild, sAuthor)}<br>'
             else:
                 sHTML = f'{sHTML} ({sNoData}) '
 
@@ -109,6 +109,12 @@ class TaxonBrowser(QWidget):
             for sSource, sLink, sIndex in lTaxonDB:
                 sHTML = f'{sHTML} {sSource}: ' \
                         f'<a href="{sLink}{sIndex}">{sIndex}</a> '
+
+        if iLevelID >= 21:
+            sNameForURL = sName.replace(' ', r'%20')
+            sURL = r'https://lichenportal.org/cnalh/taxa/index.php?taxon='
+            sHTML = f'{sHTML} LichenPortal: ' \
+                    f'<a href="{sURL}{sNameForURL}">{sName}</a> '
 
         sHTML = f'{sHTML}<h3>{_("References to literature:")}</h3>'
         sHTML = f'{sHTML} ({sNoData}) '

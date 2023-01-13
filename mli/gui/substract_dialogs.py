@@ -53,8 +53,8 @@ class ASubstrateDialog(ADialogApplyButtons):
         :param tValues: Type of substrate to be entered into the database.
         :type tValues: tuple
         """
-        self.oConnector.insert_row('Substrate',
-                                   'substrate_local_name', tValues)
+        self.oConnector.insert_row('Substrates',
+                                   'substrateLocalName', tValues)
 
 
 class EditSubstrateDialog(ASubstrateDialog):
@@ -71,7 +71,7 @@ class EditSubstrateDialog(ASubstrateDialog):
         self.setModal(Qt.ApplicationModal)
 
         self.oComboSubstrateLevel.set_combo_list(
-            sorted(self.create_substrate_list('Substrate')))
+            sorted(self.create_substrate_list('Substrates')))
 
         oVLayout = QVBoxLayout()
         oVLayout.addLayout(self.oComboSubstrateLevel)
@@ -88,10 +88,7 @@ class EditSubstrateDialog(ASubstrateDialog):
         :rtype: list[str]
         """
         oCursor = self.oConnector.sql_get_all(sDB)
-        lValues = []
-        for tRow in oCursor:
-            lValues.append(tRow[1])
-        return lValues
+        return [tRow[2] for tRow in oCursor]
 
 
 class NewSubstrateDialog(ASubstrateDialog):

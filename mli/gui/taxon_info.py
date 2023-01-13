@@ -20,9 +20,6 @@ from gettext import gettext as _
 
 from PyQt5.QtWidgets import QWidget, QTextBrowser, QVBoxLayout
 
-from mli.lib.gbif_parser import gbif_get_id_from_gbif
-from mli.lib.str import str_sep_name_taxon
-
 
 def get_name_string(sName, sAuthor):
     if sAuthor:
@@ -32,11 +29,11 @@ def get_name_string(sName, sAuthor):
 
 
 class TaxonBrowser(QWidget):
-    def __init__(self, oConnector, sNameTaxon):
+    def __init__(self, oConnector, sSciName):
         super().__init__()
 
         self.oConnector = oConnector
-        self.sNameTaxon = sNameTaxon
+        self.sSciName = sSciName
 
         self.initUI()
 
@@ -51,18 +48,19 @@ class TaxonBrowser(QWidget):
 
     def get_page_taxon_info(self):
         sNoData = _('There is no data.')
-        sName, sAuthor = str_sep_name_taxon(self.sNameTaxon)
         iStatusID, sStatusName = \
-            self.oConnector.get_status_taxon(sName, sAuthor)
-        iLevelID, sLevelName = self.oConnector.get_level_taxon(sName, sAuthor)
-        iTaxonID = self.oConnector.get_taxon_id(sName, sAuthor, iStatusID)
+            self.oConnector.get_status_taxon(self.sSciName)
+        iLevelID, sLevelName = self.oConnector.get_taxon_rank(self.sSciName)
+        iTaxonID = self.oConnector.get_taxon_id(self.sSciName)
+        sName, sAuthor = self.oConnector.get_name_author(iTaxonID)[0]
         sHTML = f'<h2>({sLevelName}) {get_name_string(sName, sAuthor)}</h2>'
-        if iStatusID != 1:
-            sIS = _(" is synonym of ")
-            iMainID, sMainName, sMainAuthor = \
-                self.oConnector.get_main_taxon((sName, sAuthor,))
-            sHTML = f'{sHTML}{get_name_string(sName, sAuthor)} {sIS}' \
-                    f'{get_name_string(sMainName, sMainAuthor)}'
+
+        # if iStatusID != 1:
+        #     sIS = _(" is synonym of ")
+        #     iMainID, sMainName, sMainAuthor = \
+        #         self.oConnector.get_main_taxon(iTaxonID)[0]
+        #     sHTML = f'{sHTML}{get_name_string(sName, sAuthor)} {sIS}' \
+        #             f'{get_name_string(sMainName, sMainAuthor)}'
 
         sHTML = f'{sHTML}<h3>{_("Status:")}</h3>'
         sHTML = f'{sHTML} {sStatusName}'
@@ -96,19 +94,6 @@ class TaxonBrowser(QWidget):
                 else:
                     sHTML = f'{sHTML} {sSource}: ' \
                             f'<a href="{sLink}{sIndex}">{sIndex}</a> '
-        else:
-            sLevelDB = \
-                self.oConnector.get_level_name('level_en_name', iLevelID)[0][0]
-            sTaxonGBIF = gbif_get_id_from_gbif(self.sNameTaxon, sLevelDB)
-
-            sColumns = 'id_taxon, id_source, taxon_index'
-            tValues = (iTaxonID, 12, sTaxonGBIF)
-            self.oConnector.insert_row('DBIndexes', sColumns, tValues)
-
-            lTaxonDB = self.oConnector.get_taxon_db_link(iTaxonID)
-            for sSource, sLink, sIndex in lTaxonDB:
-                sHTML = f'{sHTML} {sSource}: ' \
-                        f'<a href="{sLink}{sIndex}">{sIndex}</a> '
 
         if iLevelID >= 21:
             sNameForURL = sName.replace(' ', r'%20')

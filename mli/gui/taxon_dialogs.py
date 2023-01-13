@@ -107,10 +107,8 @@ class ATaxonDialog(ADialogApplyButtons):
         :return: list of taxon levels.
         :rtype: list[str]
         """
-        oCursor = self.oConnector.sql_get_all('TaxonLevel')
-        lRanks, lValues = [], []
-        for tRow in oCursor:
-            lValues.append(tRow[3])
+        oCursor = self.oConnector.sql_get_all('TaxonRanks')
+        lValues = [tRow[3] for tRow in oCursor]
 
         if bGetAll is None:
             sRankMainTaxon = sTaxon.split('(')[1].split(')')[0]
@@ -141,15 +139,9 @@ class ATaxonDialog(ADialogApplyButtons):
         :return: A list in form - (Taxon Rank) Taxon Name
         :type: list[str]
         """
-        lValues = []
         tRows = self.oConnector.get_taxon_list('accepted')
 
-        for tRow in tRows:
-            if tRow[3]:
-                lValues.append(f'({tRow[1]}) {tRow[2]}, {tRow[3]}')
-            else:
-                lValues.append(f'({tRow[1]}) {tRow[2]}')
-        return lValues
+        return [f'({tRow[1]}) {tRow[2]}' for tRow in tRows]
 
     def fill_combobox(self):
         """ Fills the fields with the drop-down list during the first
@@ -167,11 +159,13 @@ class ATaxonDialog(ADialogApplyButtons):
         if not sSciName:
             return
 
-        sName, sAuthor = str_sep_name_taxon(sSciName)
-        if sName == 'Biota':
+        # sName, sAuthor = str_sep_name_taxon(sSciName)
+        if sSciName.find('Biota') != -1:
             return
 
-        lRow = self.oConnector.get_taxon_info(sName, sAuthor)
+        sSciName = str_sep_name_taxon(sSciName)
+
+        lRow = self.oConnector.get_taxon_info(sSciName)
         self.iOldMainTaxonID = lRow[0]
         sOldMainTaxonRankName = lRow[1]
         self.sOldMainTaxonName = lRow[2]
@@ -215,25 +209,24 @@ class ATaxonDialog(ADialogApplyButtons):
         if self.sOldTaxonName != sLatName:
             self.save_('taxon_name', sLatName, self.iOldTaxonID)
 
-        sMainTaxonName, sMainTaxonAuthor = str_sep_name_taxon(sMainTaxon)
-        if sMainTaxonName != self.sOldMainTaxonName:
-            iMainTaxonID = self.oConnector.get_taxon_id(sMainTaxonName,
-                                                        sMainTaxonAuthor)
-            self.save_('id_main_taxon', iMainTaxonID, self.iOldTaxonID)
+        sMainSciName = str_sep_name_taxon(sMainTaxon)
+        if sMainSciName != self.sOldMainTaxonName:
+            iMainTaxonID = self.oConnector.get_taxon_id(sMainSciName)
+            self.save_('mainTaxonID', iMainTaxonID, self.iOldTaxonID)
 
         if sTaxonRank != self.sOldTaxonRankName:
-            iRankID = self.oConnector.get_level_id('level_name', sTaxonRank)
-            self.save_('id_level', iRankID, self.iOldTaxonID)
+            iRankID = self.oConnector.get_rank_id('rankLocalName', sTaxonRank)
+            self.save_('rankID', iRankID, self.iOldTaxonID)
 
         if sAuthor and sAuthor != self.sOldAuthor:
-            self.save_('author', sAuthor, self.iOldTaxonID)
+            self.save_('authorship', sAuthor, self.iOldTaxonID)
 
         if sYear and sYear != self.sOldYear:
-            self.save_('year', sYear, self.iOldTaxonID)
+            self.save_('yearPublishing', sYear, self.iOldTaxonID)
 
         if sStatus != self.sOldStatus:
             iStatusID = self.oConnector.get_status_id(sStatus)
-            self.save_('id_status', iStatusID, self.iOldTaxonID)
+            self.save_('statusID', iStatusID, self.iOldTaxonID)
 
         self.clean_field()
         self.fill_combobox()
@@ -253,7 +246,7 @@ class ATaxonDialog(ADialogApplyButtons):
             self.oComboTaxRank.set_text(lTaxonRank[0])
 
     def save_(self, sSetCol, sUpdate, sWhere,
-              sTable='Taxon', sWhereCol='id_taxon'):
+              sTable='Taxa', sWhereCol='taxonID'):
 
         tValues = (sUpdate, sWhere,)
         self.oConnector.update(sTable, sSetCol, sWhereCol, tValues)
@@ -295,22 +288,22 @@ class EditSynonymDialog(ATaxonDialog):
         self.fill_form(sSynonym)
 
     def onCurrentTaxonNamesChanged(self, sTaxonName):
-        sName, sAuthor = str_sep_name_taxon(sTaxonName)
-        self.iTaxonID = self.oConnector.get_taxon_id(sName, sAuthor)
+        sSciName = str_sep_name_taxon(sTaxonName)
+        self.iTaxonID = self.oConnector.get_taxon_id(sSciName)
 
         tSynonyms = self.oConnector.get_synonyms(self.iTaxonID)
         if not tSynonyms:
-            if not sTaxonName or sName == 'Biota':
+            if not sTaxonName or sSciName.find('Biota') != -1:
                 return
-            if sAuthor:
-                warning_no_synonyms(f'{sName}, {sAuthor}')
-            else:
-                warning_no_synonyms(f'{sName}')
+            # if sAuthor:
+            #     warning_no_synonyms(f'{sName}, {sAuthor}')
+            # else:
+            #     warning_no_synonyms(f'{sName}')
             return
 
-        lSynonyms = []
-        for lRow in tSynonyms:
-            lSynonyms.append(f'({lRow[0]}) {lRow[1]}, {lRow[2]}')
+        lSynonyms = [f'({lRow[0]}) {lRow[1]}' for lRow in tSynonyms]
+        # for lRow in tSynonyms:
+        #     lSynonyms.append(f'({lRow[0]}) {lRow[1]}, {lRow[2]}')
 
         self.oComboBoxSynonym.set_combo_list(lSynonyms)
 
@@ -364,8 +357,7 @@ class NewTaxonDialog(ATaxonDialog):
     def onClickApply(self):
         """ Actions to be taken when adding a new taxon. """
         sRank = self.oComboTaxRank.get_text()
-        sMainTaxon, sMAuthor = \
-            str_sep_name_taxon(self.oComboMainTaxon.get_text())
+        sMainTaxon = str_sep_name_taxon(self.oComboMainTaxon.get_text())
         sName = self.oLineEditLatName.get_text()
         sAuthor = self.oLineEditAuthor.get_text()
         iYear = self.oLineEditYear.get_text()
@@ -382,12 +374,13 @@ class NewTaxonDialog(ATaxonDialog):
             return
 
         if sName and not bTaxonName:
-            iRank = self.oConnector.get_level_id('level_name', sRank)
+            iRank = self.oConnector.get_rank_id('rankLocalName', sRank)
             iStatus = self.oConnector.get_status_id(sStatus)
-            iMainTax = self.oConnector.get_taxon_id(sMainTaxon, sMAuthor)
-            tValues = (iRank, iMainTax, sName, sAuthor, iYear, iStatus,)
+            iMainTax = self.oConnector.get_taxon_id(sMainTaxon)
+            PublishedIn = ''
 
-            self.oConnector.insert_taxon(tValues)
+            self.oConnector.insert_taxon(sName, sAuthor, iYear, PublishedIn,
+                                         iRank, iMainTax, iStatus)
 
             self.clean_field()
             self.fill_combobox()

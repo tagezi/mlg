@@ -182,15 +182,9 @@ class MainWindow(QMainWindow):
         return TaxonBrowser(self.oConnector, sTaxonName)
 
     def get_taxon_list(self):
-        lValues = []
         tTaxonList = self.oConnector.get_full_taxon_list()
 
-        for tRow in tTaxonList:
-            if tRow[1]:
-                lValues.append(f'{tRow[0]}, {tRow[1]}')
-            else:
-                lValues.append(f'{tRow[0]}')
-        return lValues
+        return [tRow[0] for tRow in tTaxonList]
 
     def onDisplayAbout(self):
         """ Method open dialog window with information about the program. """
@@ -253,7 +247,6 @@ class MainWindow(QMainWindow):
         if oComboBox is not None:
             oCompleter = QCompleter(lTaxonList, oComboBox)
             oComboBox.setCompleter(oCompleter)
-
         ok = oInputDialog.exec_()
         if ok:
             sTaxonName = oInputDialog.textValue()

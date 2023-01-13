@@ -36,20 +36,47 @@ class AColor(ADialogApplyButtons):
     def init_UI(self):
         """ initiating a dialog view """
         self.oComboColors = HComboBox(_('Old color name:'))
-        self.oLineEditColor = HLineEdit(_('New color name:'))
+        self.oLineEditlName = HLineEdit(_('New color name:'))
+        self.oLineEditLocalName = HLineEdit(_('New color Local name:'))
         self.oLineEditHEXCode = HLineEdit(_('HEX code of color:'), 200)
+
+    def check_color(self, sColorName, sColorLocalName, sHEXCode):
+        bColor = self.oConnector.get_color_id('colorName', sColorName)
+        if bColor:
+            warning_this_exist('color', sColorName)
+            return True
+
+        bColor = self.oConnector.get_color_id('colorLocalName',
+                                              sColorLocalName)
+        if bColor:
+            warning_this_exist('color', sColorLocalName)
+            return True
+
+        bColor = self.oConnector.get_color_id('hexCode', sHEXCode)
+        if bColor:
+            warning_this_exist('color', sHEXCode)
+            return True
+
+        return False
 
     def onClickApply(self):
         """ Realization of the abstract method of the parent class. """
         pass
 
-    def save_(self, tValues):
+    def save_(self, sColorName, sColorLocalName, sHEXCode):
         """ Method for saving information about a color in the database.
 
-        :param tValues: Type of color to be entered into the database.
-        :type tValues: tuple
+        :param sColorName: A color name in english.
+        :type sColorName: str
+        :param sColorLocalName: A color name in local language.
+        :type sColorLocalName: str
+        :param sHEXCode: A HEX code of the color.
+        :type sHEXCode: str
+        :rtype: None
         """
-        self.oConnector.insert_row('Colors', 'color_local_name', tValues)
+        self.oConnector.insert_row('Colors',
+                                   'colorName, colorLocalName, hexCode',
+                                   (sColorName, sColorLocalName, sHEXCode,))
 
 
 class EditColor(AColor):
@@ -70,7 +97,9 @@ class EditColor(AColor):
 
         oVLayout = QVBoxLayout()
         oVLayout.addLayout(self.oComboColors)
-        oVLayout.addLayout(self.oLineEditColor)
+        oVLayout.addLayout(self.oLineEditlName)
+        oVLayout.addLayout(self.oLineEditLocalName)
+        oVLayout.addLayout(self.oLineEditHEXCode)
         oVLayout.addLayout(self.oHLayoutButtons)
         self.setLayout(oVLayout)
 
@@ -83,29 +112,20 @@ class EditColor(AColor):
         :rtype: list[str]
         """
         oCursor = self.oConnector.sql_get_all(sDB)
-        lValues = []
-        for tRow in oCursor:
-            lValues.append(tRow[1])
-        return lValues
+        return [tRow[2] for tRow in oCursor]
 
     def onClickApply(self):
         """ Realization of the abstract method of the parent class. """
         # OldName
-        sColor = self.oLineEditColor.get_text()
+        sColorName = self.oLineEditlName.get_text()
+        sColorLocalName = self.oLineEditLocalName.get_text()
         sHEXCode = self.oLineEditHEXCode.get_text()
 
-        bColor = self.oConnector.get_color_id_by_name(sColor)
-        if bColor:
-            warning_this_exist('color', sColor)
+        if self.check_color(sColorName, sColorLocalName, sHEXCode):
             return
 
-        bHEX = self.oConnector.get_color_id_by_hex(sHEXCode)
-        if bHEX:
-            warning_this_exist('color', sColor)
-            return
-
-        self.save_((sColor,))
-        self.oLineEditColor.set_text('')
+        self.save_(sColorName, sColorLocalName, sHEXCode)
+        self.oLineEditLocalName.set_text('')
 
 
 class NewColor(AColor):
@@ -122,28 +142,41 @@ class NewColor(AColor):
         self.setModal(Qt.ApplicationModal)
 
         oVLayout = QVBoxLayout()
-        oVLayout.addLayout(self.oLineEditColor)
+        oVLayout.addLayout(self.oLineEditlName)
+        oVLayout.addLayout(self.oLineEditLocalName)
         oVLayout.addLayout(self.oLineEditHEXCode)
         oVLayout.addLayout(self.oHLayoutButtons)
         self.setLayout(oVLayout)
 
     def onClickApply(self):
         """ Realization of the abstract method of the parent class. """
-        sColor = self.oLineEditColor.get_text()
+        sColorName = self.oLineEditlName.get_text()
+        sColorLocalName = self.oLineEditLocalName.get_text()
         sHEXCode = self.oLineEditHEXCode.get_text()
 
-        bColor = self.oConnector.get_color_id_by_name(sColor)
-        if bColor:
-            warning_this_exist('color', sColor)
+        if self.check_color(sColorName, sColorLocalName, sHEXCode):
             return
 
-        bHEX = self.oConnector.get_color_id_by_hex(sHEXCode)
-        if bHEX:
-            warning_this_exist('color', sColor)
-            return
+        self.save_(sColorName, sColorLocalName, sHEXCode)
+        self.oLineEditlName.set_text('')
+        self.oLineEditLocalName.set_text('')
+        self.oLineEditHEXCode.set_text('')
 
-        self.save_((sColor,))
-        self.oLineEditColor.set_text('')
+
+class ATaxonColors(ADialogApplyButtons):
+    """An abstract class that creates fields and functionality common to all
+    dialogs of color. """
+
+    def __init__(self, oConnector, oParent=None):
+        """ Initiating a class. """
+        super(ATaxonColors, self).__init__(oConnector, oParent)
+        self.init_UI()
+
+    def init_UI(self):
+        """ initiating a dialog view """
+        self.oComboColors = HComboBox(_('Old color name:'))
+        self.oLineEditLocalName = HLineEdit(_('New color name:'))
+        self.oLineEditHEXCode = HLineEdit(_('HEX code of color:'), 200)
 
 
 if __name__ == '__main__':

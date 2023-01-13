@@ -90,13 +90,7 @@ def str_sep_name_taxon(sString):
     """
     if sString.find('(') == 0:
         sString = ' '.join(sString.split(' ')[1:])
-
-    if sString.find(', ') != -1:
-        sName = sString.split(', ')[0]
-        sAuthor = ','.join(sString.split(',')[1:]).strip()
-
-        return sName, sAuthor
-    return sString, None
+    return sString
 
 
 if __name__ == '__main__':

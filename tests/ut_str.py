@@ -31,47 +31,41 @@ def suite():
 class TestStr(unittest.TestCase):
     def test_str_sep_name_taxon(self):
         """ Check if str_sep_name_taxon work correctly. """
-        sTestValue = '(kingdom) Fungi, R.T.Moore'
-        sTaxon, sAuthor = str_sep_name_taxon(sTestValue)
-        self.assertEqual(sTaxon, 'Fungi')
-        self.assertEqual(sAuthor, 'R.T.Moore')
+        sTestValue = '(kingdom) Fungi R.T.Moore'
+        sTaxon = str_sep_name_taxon(sTestValue)
+        self.assertEqual(sTaxon, 'Fungi R.T.Moore')
 
-        sTestValue = '(species) Absconditella modesta, (Zahlbr.) Vĕzda'
-        sTaxon, sAuthor = str_sep_name_taxon(sTestValue)
-        self.assertEqual(sTaxon, 'Absconditella modesta')
-        self.assertEqual(sAuthor, '(Zahlbr.) Vĕzda')
+        sTestValue = '(species) Absconditella modesta (Zahlbr.) Vĕzda'
+        sTaxon = str_sep_name_taxon(sTestValue)
+        self.assertEqual(sTaxon, 'Absconditella modesta (Zahlbr.) Vĕzda')
 
-        sTestValue = '(species) Acanthotrema martini, ' \
+        sTestValue = '(species) Acanthotrema martini ' \
                      '(Sogandares) Lafuente, Roca & Carbonell'
-        sTaxon, sAuthor = str_sep_name_taxon(sTestValue)
-        self.assertEqual(sTaxon, 'Acanthotrema martini')
-        self.assertEqual(sAuthor, '(Sogandares) Lafuente, Roca & Carbonell')
+        sTaxon = str_sep_name_taxon(sTestValue)
+        self.assertEqual(sTaxon, 'Acanthotrema martini (Sogandares) '
+                                 'Lafuente, Roca & Carbonell')
 
         sTestValue = '(species) Acanthotheciopsis caesiocarnea'
-        sTaxon, sAuthor = str_sep_name_taxon(sTestValue)
+        sTaxon = str_sep_name_taxon(sTestValue)
         self.assertEqual(sTaxon, 'Acanthotheciopsis caesiocarnea')
-        self.assertEqual(sAuthor, None)
 
-        sTestValue = 'Fungi, R.T.Moore'
-        sTaxon, sAuthor = str_sep_name_taxon(sTestValue)
-        self.assertEqual(sTaxon, 'Fungi')
-        self.assertEqual(sAuthor, 'R.T.Moore')
+        sTestValue = 'Fungi R.T.Moore'
+        sTaxon = str_sep_name_taxon(sTestValue)
+        self.assertEqual(sTaxon, 'Fungi R.T.Moore')
 
-        sTestValue = 'Absconditella modesta, (Zahlbr.) Vĕzda'
-        sTaxon, sAuthor = str_sep_name_taxon(sTestValue)
-        self.assertEqual(sTaxon, 'Absconditella modesta')
-        self.assertEqual(sAuthor, '(Zahlbr.) Vĕzda')
+        sTestValue = 'Absconditella modesta (Zahlbr.) Vĕzda'
+        sTaxon = str_sep_name_taxon(sTestValue)
+        self.assertEqual(sTaxon, 'Absconditella modesta (Zahlbr.) Vĕzda')
 
-        sTestValue = 'Acanthotrema martini, ' \
+        sTestValue = 'Acanthotrema martini ' \
                      '(Sogandares) Lafuente, Roca & Carbonell'
-        sTaxon, sAuthor = str_sep_name_taxon(sTestValue)
-        self.assertEqual(sTaxon, 'Acanthotrema martini')
-        self.assertEqual(sAuthor, '(Sogandares) Lafuente, Roca & Carbonell')
+        sTaxon = str_sep_name_taxon(sTestValue)
+        self.assertEqual(sTaxon, 'Acanthotrema martini (Sogandares) '
+                                 'Lafuente, Roca & Carbonell')
 
         sTestValue = 'Acanthotheciopsis caesiocarnea'
-        sTaxon, sAuthor = str_sep_name_taxon(sTestValue)
+        sTaxon = str_sep_name_taxon(sTestValue)
         self.assertEqual(sTaxon, 'Acanthotheciopsis caesiocarnea')
-        self.assertEqual(sAuthor, None)
 
 
 if __name__ == '__main__':

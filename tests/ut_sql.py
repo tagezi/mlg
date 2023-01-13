@@ -85,75 +85,76 @@ class TestSQLite(TestCase):
 
     def test_sql_execute(self):
         """ Check if execute_script and execute_query work. """
-        oCursor = self.oConnector.execute_query('SELECT taxon_lat_name '
-                                                'FROM Taxon '
-                                                'WHERE taxon_lat_name="Biota"')
+        oCursor = self.oConnector.execute_query('SELECT scientificName '
+                                                'FROM Taxa '
+                                                'WHERE scientificName=?',
+                                                ('Biota Cavalier-Smith',))
         lRows = oCursor.fetchall()
-        self.assertEqual(lRows[0][0], 'Biota')
+        self.assertEqual(lRows[0][0], 'Biota Cavalier-Smith')
 
     def test_sql_insert_row(self):
         """ Check if insert_row work correctly. """
-        bIns = self.oConnector.insert_row('Taxon',
-                                          'taxon_lat_name', ('check',))
+        bIns = self.oConnector.insert_row('Taxa',
+                                          'scientificName', ('check',))
         self.assertTrue(bIns)
 
-        oCursor = self.oConnector.execute_query('SELECT taxon_lat_name '
-                                                'FROM Taxon '
-                                                'WHERE taxon_lat_name="check"'
+        oCursor = self.oConnector.execute_query('SELECT scientificName '
+                                                'FROM Taxa '
+                                                'WHERE scientificName="check"'
                                                 )
         lRows = oCursor.fetchall()
         self.assertEqual(lRows[0][0], 'check')
 
-        bIns = self.oConnector.insert_row('Taxon',
-                                          'taxon_lat_name',
-                                          ('check_too', 1, 2))
+        bIns = self.oConnector.insert_row('Taxa',
+                                          'scientificName',
+                                          ('check_too', 1, 2,))
         self.assertFalse(bIns)
 
     def test_sql_select(self):
         """ Check if select work correctly. """
-        self.oConnector.insert_row('Taxon', 'taxon_lat_name', ('check',))
-        oCursor = self.oConnector.select('Taxon', 'taxon_lat_name',
-                                         'taxon_lat_name', ('check',))
+        self.oConnector.insert_row('Taxa', 'scientificName', ('check',))
+        oCursor = self.oConnector.select('Taxa', 'scientificName',
+                                         'scientificName', ('check',))
         lRows = oCursor.fetchall()
         self.assertEqual(lRows[0][0], 'check')
 
-        oCursor = self.oConnector.select('Taxon', 'taxon_lat_name')
+        oCursor = self.oConnector.select('Taxa', 'scientificName')
         lRows = oCursor.fetchall()
-        self.assertEqual(lRows[0][0], 'Biota')
-        self.assertEqual(lRows[1][0], 'Fungi')
-        self.assertEqual(lRows[2][0], 'check')
+        self.assertEqual(lRows[0][0], 'Biota Cavalier-Smith')
+        self.assertEqual(lRows[1][0], 'Eukaryota Tomas')
+        self.assertEqual(lRows[2][0], 'Fungi')
 
-        oCursor = self.oConnector.select('Taxon', '*', sFunc='Count')
+        oCursor = self.oConnector.select('Taxa', '*', sFunc='Count')
         lRows = oCursor.fetchall()
-        self.assertEqual(lRows[0][0], 3)
+        self.assertEqual(lRows[0][0], 3025)
 
-        self.oConnector.insert_row('Taxon', 'taxon_lat_name', ('check',))
-        oCursor = self.oConnector.select('Taxon',
-                                         'taxon_lat_name', sFunc='DISTINCT')
+        self.oConnector.insert_row('Taxa', 'scientificName', ('check',))
+        oCursor = self.oConnector.select('Taxa',
+                                         'scientificName', sFunc='DISTINCT')
         lRows = oCursor.fetchall()
-        self.assertEqual(lRows[0][0], 'Biota')
-        self.assertEqual(lRows[1][0], 'Fungi')
-        self.assertEqual(lRows[2][0], 'check')
+        self.assertEqual(lRows[0][0], 'Biota Cavalier-Smith')
+        self.assertEqual(lRows[1][0], 'Eukaryota Tomas')
+        self.assertEqual(lRows[2][0], 'Fungi')
 
     def test_sql_delete_row(self):
         """ Check if delete_row work correctly. """
-        self.oConnector.insert_row('Taxon', 'taxon_lat_name', ('check',))
-        iDel = self.oConnector.delete_row('Taxon',
-                                          'taxon_lat_name', ('check',))
+        self.oConnector.insert_row('Taxa', 'scientificName', ('check',))
+        iDel = self.oConnector.delete_row('Taxa',
+                                          'scientificName', ('check',))
         self.assertTrue(iDel)
-        oCursor = self.oConnector.select('Taxon', 'taxon_lat_name',
-                                         'taxon_lat_name', ('check',))
+        oCursor = self.oConnector.select('Taxa', 'scientificName',
+                                         'scientificName', ('check',))
         lRows = oCursor.fetchall()
         self.assertFalse(lRows)
-        oCursor = self.oConnector.select('Taxon', 'taxon_lat_name',
-                                         'taxon_lat_name', ('Biota',))
+        oCursor = self.oConnector.select('Taxa', 'canonicalName',
+                                         'canonicalName', ('Biota',))
         lRows = oCursor.fetchall()
         self.assertTrue(lRows)
 
-        self.oConnector.insert_row('Taxon', 'taxon_lat_name', ('check',))
-        iDel = self.oConnector.delete_row('Taxon')
+        self.oConnector.insert_row('Colors', 'colorName', ('check',))
+        iDel = self.oConnector.delete_row('Colors')
         self.assertTrue(iDel)
-        lRows = self.oConnector.sql_count('Taxon')
+        lRows = self.oConnector.sql_count('Colors')
         self.assertEqual(lRows, 0)
 
     # TODO: test for export_db
@@ -163,18 +164,16 @@ class TestSQLite(TestCase):
 
     def test_sql_sql_count(self):
         """ Check if sql_count work correctly. """
-        self.oConnector.insert_row('Taxon', 'taxon_lat_name', ('check',))
-        oCursor = self.oConnector.select('Taxon', '*', sFunc='Count')
+        oCursor = self.oConnector.select('Taxa', '*', sFunc='Count')
         lRowsLow = oCursor.fetchall()
-        lRowsAverage = self.oConnector.sql_count('Taxon')
+        lRowsAverage = self.oConnector.sql_count('Taxa')
         self.assertEqual(lRowsLow[0][0], lRowsAverage)
 
     def test_sql_sql_get_all(self):
         """ Check if sql_get_all work correctly. """
-        self.oConnector.insert_row('Taxon', 'taxon_lat_name', ('check',))
-        oCursor = self.oConnector.select('Taxon', '*')
+        oCursor = self.oConnector.select('Taxa', '*')
         lRowsLow = oCursor.fetchall()
-        lRowsAverage = self.oConnector.sql_get_all('Taxon')
+        lRowsAverage = self.oConnector.sql_get_all('Taxa')
         self.assertEqual(lRowsLow[0][0], lRowsAverage[0][0])
         self.assertEqual(lRowsLow[1][0], lRowsAverage[1][0])
 
@@ -183,26 +182,26 @@ class TestSQLite(TestCase):
 
     def test_sql_sql_get_id(self):
         """ Check if sql_get_id work correctly. """
-        self.oConnector.insert_row('Taxon', 'taxon_lat_name', ('check',))
-        oCursor = self.oConnector.select('Taxon', 'id_taxon',
-                                         'taxon_lat_name', ('check',))
+        self.oConnector.insert_row('Taxa', 'scientificName', ('check',))
+        oCursor = self.oConnector.select('Taxa', 'taxonID',
+                                         'scientificName', ('check',))
         lRowsLow = oCursor.fetchall()
-        lRowsAverage = self.oConnector.sql_get_id('Taxon',
-                                                  'id_taxon',
-                                                  'taxon_lat_name',
+        lRowsAverage = self.oConnector.sql_get_id('Taxa',
+                                                  'taxonID',
+                                                  'scientificName',
                                                   ('check',))
         self.assertEqual(lRowsLow[0][0], lRowsAverage)
 
-        lRow = self.oConnector.sql_get_id('Mistake', 'id_taxon',
-                                          'taxon_lat_name', ('check',))
+        lRow = self.oConnector.sql_get_id('Mistake', 'taxonID',
+                                          'scientificName', ('check',))
         self.assertEqual(lRow, 0)
 
     def test_sql_sql_table_clean(self):
         """ Check if delete_row work correctly. """
-        self.oConnector.insert_row('Taxon', 'taxon_lat_name', ('check',))
-        iDel = self.oConnector.delete_row('Taxon')
+        self.oConnector.insert_row('Colors', 'colorName', ('check',))
+        iDel = self.oConnector.delete_row('Colors')
         self.assertTrue(iDel)
-        lRows = self.oConnector.sql_count('Taxon')
+        lRows = self.oConnector.sql_count('Colors')
         self.assertEqual(lRows, 0)
 
         iDel = self.oConnector.delete_row('Mistake')

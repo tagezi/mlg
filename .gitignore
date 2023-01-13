@@ -152,6 +152,6 @@ cython_debug/
 
 # my work folders and files
 temp/
+db/online_db_damps/
 python.log
 *.db
-

@@ -59,25 +59,6 @@ class AColor(ADialogApplyButtons):
 
         return False
 
-    def onClickApply(self):
-        """ Realization of the abstract method of the parent class. """
-        pass
-
-    def save_(self, sColorName, sColorLocalName, sHEXCode):
-        """ Method for saving information about a color in the database.
-
-        :param sColorName: A color name in english.
-        :type sColorName: str
-        :param sColorLocalName: A color name in local language.
-        :type sColorLocalName: str
-        :param sHEXCode: A HEX code of the color.
-        :type sHEXCode: str
-        :rtype: None
-        """
-        self.oConnector.insert_row('Colors',
-                                   'colorName, colorLocalName, hexCode',
-                                   (sColorName, sColorLocalName, sHEXCode,))
-
 
 class EditColor(AColor):
     """ Dialog window which allows user to change color type. """
@@ -116,7 +97,7 @@ class EditColor(AColor):
 
     def onClickApply(self):
         """ Realization of the abstract method of the parent class. """
-        # OldName
+        sOldColorLocalName = self.oComboColors.get_text()
         sColorName = self.oLineEditlName.get_text()
         sColorLocalName = self.oLineEditLocalName.get_text()
         sHEXCode = self.oLineEditHEXCode.get_text()
@@ -124,8 +105,26 @@ class EditColor(AColor):
         if self.check_color(sColorName, sColorLocalName, sHEXCode):
             return
 
-        self.save_(sColorName, sColorLocalName, sHEXCode)
+        iColorID = self.oConnector.get_color_id('colorLocalName',
+                                                sOldColorLocalName)
+        self.save_(sColorName, sColorLocalName, sHEXCode, iColorID)
         self.oLineEditLocalName.set_text('')
+
+    def save_(self, sColorName, sColorLocalName, sHEXCode, iColorID):
+        """ Method for saving information about a color in the database.
+
+        :param sColorName: A color name in english.
+        :type sColorName: str
+        :param sColorLocalName: A color name in local language.
+        :type sColorLocalName: str
+        :param sHEXCode: A HEX code of the color.
+        :type sHEXCode: str
+        :param iColorID: A color id what entry needs to update.
+        :rtype: None
+        """
+        self.oConnector.update('Colors', 'colorName, colorLocalName, hexCode',
+                              (sColorName, sColorLocalName,
+                               sHEXCode, iColorID))
 
 
 class NewColor(AColor):
@@ -161,6 +160,21 @@ class NewColor(AColor):
         self.oLineEditlName.set_text('')
         self.oLineEditLocalName.set_text('')
         self.oLineEditHEXCode.set_text('')
+
+    def save_(self, sColorName, sColorLocalName, sHEXCode):
+        """ Method for saving information about a color in the database.
+
+        :param sColorName: A color name in english.
+        :type sColorName: str
+        :param sColorLocalName: A color name in local language.
+        :type sColorLocalName: str
+        :param sHEXCode: A HEX code of the color.
+        :type sHEXCode: str
+        :rtype: None
+        """
+        self.oConnector.insert_row('Colors',
+                                   'colorName, colorLocalName, hexCode',
+                                   (sColorName, sColorLocalName, sHEXCode,))
 
 
 class ATaxonColors(ADialogApplyButtons):

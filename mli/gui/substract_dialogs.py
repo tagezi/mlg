@@ -24,40 +24,7 @@ from PyQt5.QtWidgets import QVBoxLayout
 from mli.gui.dialog_elements import ADialogApplyButtons, HComboBox, HLineEdit
 
 
-class ASubstrateDialog(ADialogApplyButtons):
-    """An abstract class that creates fields and functionality common to all
-    dialogs of the substrate. """
-
-    def __init__(self, oConnector, oParent=None):
-        """ Initiating a class. """
-        super(ASubstrateDialog, self).__init__(oConnector, oParent)
-        self.init_UI_failed()
-
-    def init_UI_failed(self):
-        """ initiating a dialog view """
-        self.oComboSubstrateLevel = HComboBox(_('Old substrate name:'))
-        self.oLineEditSubstrate = HLineEdit(_('New substrate name:'))
-
-    def onClickApply(self):
-        """ Realization of the abstract method of the parent class. """
-        sSubstrate = self.oLineEditSubstrate.get_text()
-        bSubstrate = self.oConnector.get_substrate_id(sSubstrate)
-
-        if not bSubstrate:
-            self.save_((sSubstrate,))
-            self.oLineEditSubstrate.set_text('')
-
-    def save_(self, tValues):
-        """ Method for saving information about the substrate in the database.
-
-        :param tValues: Type of substrate to be entered into the database.
-        :type tValues: tuple
-        """
-        self.oConnector.insert_row('Substrates',
-                                   'substrateLocalName', tValues)
-
-
-class EditSubstrateDialog(ASubstrateDialog):
+class EditSubstrateDialog(ADialogApplyButtons):
     """ Dialog window which allows user to change substrate type. """
 
     def __init__(self, oConnector, oParent=None):
@@ -70,6 +37,8 @@ class EditSubstrateDialog(ASubstrateDialog):
         self.setWindowTitle(_('Edit substrate...'))
         self.setModal(Qt.ApplicationModal)
 
+        self.oComboSubstrateLevel = HComboBox(_('Old substrate name:'))
+        self.oLineEditSubstrate = HLineEdit(_('New substrate name:'))
         self.oComboSubstrateLevel.set_combo_list(
             sorted(self.create_substrate_list('Substrates')))
 
@@ -90,8 +59,30 @@ class EditSubstrateDialog(ASubstrateDialog):
         oCursor = self.oConnector.sql_get_all(sDB)
         return [tRow[2] for tRow in oCursor]
 
+    def onClickApply(self):
+        """ Realization of the abstract method of the parent class. """
+        sOldSubstrate = self.oComboSubstrateLevel.get_text()
+        sSubstrate = self.oLineEditSubstrate.get_text()
+        bSubstrate = self.oConnector.get_substrate_id(sSubstrate)
 
-class NewSubstrateDialog(ASubstrateDialog):
+        if sOldSubstrate == bSubstrate or bSubstrate:
+            return
+
+        iSubstrateID = self.oConnector.get_substrate_id(sOldSubstrate)
+        self.save_((sSubstrate, iSubstrateID,))
+        self.oLineEditSubstrate.set_text('')
+
+    def save_(self, tValues):
+        """ Method for saving information about the substrate in the database.
+
+        :param tValues: Type of substrate to be entered into the database.
+        :type tValues: tuple
+        """
+        self.oConnector.update('Substrates', 'substrateLocalName',
+                               'substrateID', tValues)
+
+
+class NewSubstrateDialog(ADialogApplyButtons):
     """ Dialog window which adds new substrate type. """
 
     def __init__(self, oConnector, oParent=None):
@@ -104,10 +95,33 @@ class NewSubstrateDialog(ASubstrateDialog):
         self.setWindowTitle(_('Add new substrate...'))
         self.setModal(Qt.ApplicationModal)
 
+        self.oComboSubstrateLevel = HComboBox(_('Old substrate name:'))
+        self.oLineEditSubstrate = HLineEdit(_('New substrate name:'))
+
         oVLayout = QVBoxLayout()
         oVLayout.addLayout(self.oLineEditSubstrate)
         oVLayout.addLayout(self.oHLayoutButtons)
         self.setLayout(oVLayout)
+
+    def onClickApply(self):
+        """ Realization of the abstract method of the parent class. """
+        sSubstrate = self.oLineEditSubstrate.get_text()
+        bSubstrate = self.oConnector.get_substrate_id(sSubstrate)
+
+        if bSubstrate:
+            return
+
+        self.save_((sSubstrate,))
+        self.oLineEditSubstrate.set_text('')
+
+    def save_(self, tValues):
+        """ Method for saving information about the substrate in the database.
+
+        :param tValues: Type of substrate to be entered into the database.
+        :type tValues: tuple
+        """
+        self.oConnector.insert_row('Substrates',
+                                   'substrateLocalName', tValues)
 
 
 if __name__ == '__main__':

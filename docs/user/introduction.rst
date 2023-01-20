@@ -42,50 +42,31 @@ So, downloading a tree only takes about a week.
 better taxon tree, albeit often without forms and subspecies, would require
 from two weeks to a month, as it has a limit of 10,000 API calls per day.
 
-Currently, the database contains 48.5 thousand taxonomic units. Of these, 28.8
-thousand are synonyms, 18.6 thousand are real names and 1.7 thousand have an
-incorrect interpretation of reality. Below is a table that summarizes the
-taxonomic tree.
+Currently, the database contains 60 965 taxonomic units. Of these, 38.8
+thousand are synonyms, 22 thousand are real names. Below is a table that
+summarizes the taxonomic tree.
 
-+----+------------+--------+
-| №  | rank       | Count  |
-+====+============+========+
-| 1  | superregio | 1      |
-+----+------------+--------+
-| 2  | regio	  | 1      |
-+----+------------+--------+
-| 3  | regnum     | 1      |
-+----+------------+--------+
-| 4  | subregnum  | 5      |
-+----+------------+--------+
-| 5  | divisio    | 4      |
-+----+------------+--------+
-| 6  | subdivisio | 1      |
-+----+------------+--------+
-| 7  | classis    | 1      |
-+----+------------+--------+
-| 8  | subclassis | 4      |
-+----+------------+--------+
-| 9  | ordo       | 21     |
-+----+------------+--------+
-| 10 | subordo    | 4      |
-+----+------------+--------+
-| 11 | familia    | 83     |
-+----+------------+--------+
-| 12 | subfamilia | 10     |
-+----+------------+--------+
-| 13 | genus      | 1025   |
-+----+------------+--------+
-| 14 | species    | 16679  |
-+----+------------+--------+
-| 15 | subspecies | 240    |
-+----+------------+--------+
-| 16 | varietas   | 441    |
-+----+------------+--------+
-| 17 | forma      | 100    |
-+----+------------+--------+
-| 18 | synonym    | 28810  |
-+----+------------+--------+
++-------------+--------+
+| rank        | Count  |
++=============+========+
+| kingdom     | 1      |
++-------------+--------+
+| division    | 2      |
++-------------+--------+
+| class       | 7      |
++-------------+--------+
+| order       | 28     |
++-------------+--------+
+| family      | 126    |
++-------------+--------+
+| genus       | 1199   |
++-------------+--------+
+| species     | 19817  |
++-------------+--------+
+| subspecies  | 258    |
++-------------+--------+
+| synonym     | 28810  |
++-------------+--------+
 
 Install and run
 ~~~~~~~~~~~~~~~

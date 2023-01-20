@@ -493,7 +493,8 @@ class SQL:
         return self.execute_query(sSQL, (sSciName,)).fetchall()[0]
 
     def get_main_taxon(self, iTaxonID):
-        sSQL = 'SELECT TaxonTree.mainTaxonID FROM TaxonTree ' \
+        sSQL = 'SELECT MainTaxa.canonicalName,  MainTaxa.authorship ' \
+               'FROM TaxonTree ' \
                'JOIN Taxa ON TaxonTree.TaxonID=Taxa.TaxonID '  \
                'JOIN Taxa MainTaxa ON MainTaxa.TaxonID=TaxonTree.mainTaxonID' \
                ' WHERE Taxa.taxonID=?'

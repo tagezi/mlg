@@ -18,93 +18,85 @@
 
 from gettext import gettext as _
 
-from PyQt5.QtWidgets import QWidget, QTextBrowser, QVBoxLayout
+from PyQt5.QtWidgets import QTextBrowser
+
+from mli.lib.str import HTMLDoc
 
 
-def get_name_string(sName, sAuthor):
-    if sAuthor:
-        return f'<i>{sName}</i>, {sAuthor}'
-    else:
-        return f'<i>{sName}</i>'
-
-
-class TaxonBrowser(QWidget):
+class TaxonBrowser(QTextBrowser):
     def __init__(self, oConnector, sSciName):
         super().__init__()
 
         self.oConnector = oConnector
         self.sSciName = sSciName
+        self.sNoData = _('There is no data.')
+        self.oHTML = HTMLDoc()
 
         self.initUI()
 
     def initUI(self):
-        oTextBrowser = QTextBrowser()
-        oTextBrowser.setOpenExternalLinks(True)
-        oTextBrowser.setText(self.get_page_taxon_info())
-
-        oBox = QVBoxLayout()
-        oBox.addWidget(oTextBrowser)
-        self.setLayout(oBox)
+        self.setOpenExternalLinks(True)
+        self.setText(self.get_page_taxon_info())
 
     def get_page_taxon_info(self):
-        sNoData = _('There is no data.')
         iStatusID, sStatusName = \
             self.oConnector.get_status_taxon(self.sSciName)
-        iLevelID, sLevelName = self.oConnector.get_taxon_rank(self.sSciName)
+        iLevelID, sRankName = self.oConnector.get_taxon_rank(self.sSciName)
         iTaxonID = self.oConnector.get_taxon_id(self.sSciName)
         sName, sAuthor = self.oConnector.get_name_author(iTaxonID)[0]
-        sHTML = f'<h2>({sLevelName}) {get_name_string(sName, sAuthor)}</h2>'
+        self.oHTML.set_title_doc(sRankName, sName, sAuthor)
 
-        # if iStatusID != 1:
-        #     sIS = _(" is synonym of ")
-        #     iMainID, sMainName, sMainAuthor = \
-        #         self.oConnector.get_main_taxon(iTaxonID)[0]
-        #     sHTML = f'{sHTML}{get_name_string(sName, sAuthor)} {sIS}' \
-        #             f'{get_name_string(sMainName, sMainAuthor)}'
+        if iStatusID != 1:
+            sMainName, sMainAuthor = self.oConnector.get_main_taxon(iTaxonID)
+            self.oHTML.set_is_synonym(sName, sAuthor, sMainName, sMainAuthor)
 
-        sHTML = f'{sHTML}<h3>{_("Status:")}</h3>'
-        sHTML = f'{sHTML} {sStatusName}'
+        self.oHTML.set_title_chart(_('Status:'))
+        self.oHTML.set_string(sStatusName)
+
         if iStatusID == 1:
-            lSynonyms = self.oConnector.get_synonyms(iTaxonID)
-            if lSynonyms:
-                sHTML = f'{sHTML}<h3>{_("Synonyms:")}</h3>'
-                for sLevel, sNameSyn, sAuthor in lSynonyms:
-                    sHTML = f'{sHTML} ({sLevel}) ' \
-                            f'{get_name_string(sNameSyn, sAuthor)}<br>'
+            self.get_accepted_taxon_info(iTaxonID, sStatusName)
 
-            sHTML = f'{sHTML}<h3>{_("Description:")}</h3>'
-            sHTML = f'{sHTML} ({sNoData}) '
-            sHTML = f'{sHTML}<h3>{_("Children:")}</h3>'
-            lChildren = \
-                self.oConnector.get_taxon_children(iTaxonID, sStatusName)
-            if lChildren:
-                for sLevel, sNameChild, sAuthor in lChildren:
-                    sHTML = f'{sHTML} ({sLevel}) ' \
-                            f'{get_name_string(sNameChild, sAuthor)}<br>'
-            else:
-                sHTML = f'{sHTML} ({sNoData}) '
+        self.get_taxon_db_links(iTaxonID, iLevelID, sName)
+        self.get_taxon_ref_links(iTaxonID)
 
-        sHTML = f'{sHTML}<h3>{_("Database links:")}</h3>'
-        lTaxonDB = self.oConnector.get_taxon_db_link(iTaxonID)
-        if lTaxonDB:
-            for sSource, sLink, sIndex in lTaxonDB:
-                if sSource == 'Plantarium':
-                    sHTML = f'{sHTML} {sSource}: ' \
-                            f'<a href="{sLink}{sIndex}.html">{sIndex}</a> '
-                else:
-                    sHTML = f'{sHTML} {sSource}: ' \
-                            f'<a href="{sLink}{sIndex}">{sIndex}</a> '
+        return self.oHTML.get_doc()
 
-        if iLevelID >= 21:
-            sNameForURL = sName.replace(' ', r'%20')
-            sURL = r'https://lichenportal.org/cnalh/taxa/index.php?taxon='
-            sHTML = f'{sHTML} LichenPortal: ' \
-                    f'<a href="{sURL}{sNameForURL}">{sName}</a> '
+    def get_accepted_taxon_info(self, iTaxonID, sStatusName):
+        self.oHTML.set_title_chart(_('Synonyms:'))
+        tSynonyms = self.oConnector.get_synonyms(iTaxonID)
+        self.get_name(tSynonyms)
 
-        sHTML = f'{sHTML}<h3>{_("References to literature:")}</h3>'
-        sHTML = f'{sHTML} ({sNoData}) '
+        self.oHTML.set_title_chart(_("Description:"))
+        self.oHTML.set_no_data(self.sNoData)
 
-        return sHTML
+        self.oHTML.set_title_chart(_('Children:'))
+        tChildren = \
+            self.oConnector.get_taxon_children(iTaxonID, sStatusName)
+        self.get_name(tChildren)
+
+    def get_name(self, tValues):
+        if tValues:
+            for sRank, sNameSyn, sAuthor in tValues:
+                self.oHTML.set_rang_name(sRank, sNameSyn, sAuthor)
+        else:
+            self.oHTML.set_no_data(self.sNoData)
+
+    def get_taxon_db_links(self, iTaxonID, iLevelID, sName):
+        tTaxonDB = self.oConnector.get_taxon_db_link(iTaxonID)
+        self.oHTML.set_title_chart(_("Database links:"))
+        if tTaxonDB:
+            for sSource, sLink, sIndex in tTaxonDB:
+                self.oHTML.set_link(sSource, sLink, sIndex)
+        else:
+            self.oHTML.set_no_data(self.sNoData)
+
+        if iLevelID <= 21:
+            sLink = r'https://lichenportal.org/cnalh/taxa/index.php?taxon='
+            self.oHTML.set_link('LichenPortal', sLink, sName)
+
+    def get_taxon_ref_links(self, iTaxonID):
+        self.oHTML.set_title_chart(_('References to literature:'))
+        self.oHTML.set_no_data(self.sNoData)
 
 
 if __name__ == '__main__':

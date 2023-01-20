@@ -21,6 +21,7 @@ The module contains a collection of functions for solving routine tasks with
 strings.
 """
 from os.path import join, normcase, split
+from gettext import gettext as _
 
 
 def str_get_file_patch(sDir, sFile):
@@ -31,6 +32,23 @@ def str_get_file_patch(sDir, sFile):
         :return: Patch to file based on OS rules.
         """
     return normcase(join(sDir, sFile))
+
+
+def str_get_html_name(sCanonicalName, sAuthor=''):
+    """ Inserts html tags into the taxon scientific name so that the canonical
+     name is written in italics.
+
+    :param sCanonicalName: A canonical name of the taxon.
+    :type sCanonicalName: str
+    :param sAuthor: Author(s) of the taxon.
+    :type sAuthor: str
+    :return: Formatted string.
+    :rtype: str
+    """
+    if sAuthor:
+        return f'<i>{sCanonicalName}</i>, {sAuthor}'
+    else:
+        return f'<i>{sCanonicalName}</i>'
 
 
 def str_get_path(sFullFile):
@@ -91,6 +109,48 @@ def str_sep_name_taxon(sString):
     if sString.find('(') == 0:
         sString = ' '.join(sString.split(' ')[1:])
     return sString
+
+
+class HTMLDoc:
+
+    def __init__(self):
+        self.lDoc = []
+        self.dLinks = {}
+
+    def set_title_doc(self, sRank, sName, sAuthor):
+        self.lDoc.append(f'<h2>({sRank}) '
+                         f'{str_get_html_name(sName, sAuthor)}</h2>')
+
+    def set_title_chart(self, sTitle):
+        if self.dLinks:
+            self.lDoc.extend([item[1] for item in sorted(self.dLinks.items())])
+
+        self.lDoc.append(f'<h3>{sTitle}</h3>')
+
+    def set_is_synonym(self, sName, sAuthor, sMainName, sMainAuthor):
+        sIS = _(" is synonym of ")
+        self.lDoc.append(f'{str_get_html_name(sName, sAuthor)} {sIS}'
+                         f'{str_get_html_name(sMainName, sMainAuthor)}')
+
+    def set_rang_name(self, sRank, sName, sAuthor):
+        self.set_string(f'({sRank}) {str_get_html_name(sName, sAuthor)}')
+
+    def set_string(self, String):
+        self.lDoc.append(f'{String}<br>')
+
+    def set_no_data(self, sNoData):
+        self.lDoc.append(f'({sNoData})')
+
+    def set_link(self, sSource, sLink, sIndex,):
+        if sSource == 'Plantarium':
+            self.dLinks[sSource.upper()] = \
+                f'{sSource}: <a href="{sLink}{sIndex}.html">{sIndex}</a> '
+        else:
+            self.dLinks[sSource.upper()] = \
+                f'{sSource}: <a href="{sLink}{sIndex}">{sIndex}</a> '
+
+    def get_doc(self):
+        return ''.join(self.lDoc)
 
 
 if __name__ == '__main__':

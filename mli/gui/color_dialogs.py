@@ -123,8 +123,8 @@ class EditColor(AColor):
         :rtype: None
         """
         self.oConnector.update('Colors', 'colorName, colorLocalName, hexCode',
-                              (sColorName, sColorLocalName,
-                               sHEXCode, iColorID))
+                               (sColorName, sColorLocalName,
+                                sHEXCode, iColorID))
 
 
 class NewColor(AColor):

@@ -17,9 +17,8 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from gettext import gettext as _
-
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QAction, qApp, QComboBox, QCompleter, \
+from PyQt6.QtGui import QAction, QIcon
+from PyQt6.QtWidgets import QApplication, QComboBox, QCompleter, \
     QInputDialog, QMainWindow, QTextBrowser
 
 from mli.gui.color_dialogs import NewColor, EditColor
@@ -159,7 +158,7 @@ class MainWindow(QMainWindow):
         # Menu File
         self.oOpenDB.triggered.connect(self.onOpenDB)
         self.oSetting.triggered.connect(self.onOpenSetting)
-        self.oExitAct.triggered.connect(qApp.quit)
+        self.oExitAct.triggered.connect(QApplication.quit)
 
         # Menu Edit
         self.oNewTaxon.triggered.connect(self.onNewTaxon)
@@ -189,48 +188,48 @@ class MainWindow(QMainWindow):
     def onDisplayAbout(self):
         """ Method open dialog window with information about the program. """
         oAbout = About(self)
-        oAbout.exec_()
+        oAbout.exec()
 
     def onOpenDB(self):
         pass
 
     def onOpenSetting(self):
         oSettingDialog = SettingDialog(self.oConnector, self.sPathApp, self)
-        oSettingDialog.exec_()
+        oSettingDialog.exec()
 
     def onEditColor(self):
         oEditColor = EditColor(self.oConnector, self)
-        oEditColor.exec_()
+        oEditColor.exec()
 
     def onEditColorTaxon(self):
         pass
 
     def onEditSubstrate(self):
         oEditSubstrate = EditSubstrateDialog(self.oConnector, self)
-        oEditSubstrate.exec_()
+        oEditSubstrate.exec()
 
     def onEditSynonym(self):
         oEditSynonym = EditSynonymDialog(self.oConnector, self)
-        oEditSynonym.exec_()
+        oEditSynonym.exec()
 
     def onEditTaxon(self):
         oEditTaxonDialog = EditTaxonDialog(self.oConnector, self)
-        oEditTaxonDialog.exec_()
+        oEditTaxonDialog.exec()
 
     def onNewColor(self):
         oNewColor = NewColor(self.oConnector, self)
-        oNewColor.exec_()
+        oNewColor.exec()
 
     def onNewColorTaxon(self):
         pass
 
     def onNewSubstrate(self):
         oNewSubstrate = NewSubstrateDialog(self.oConnector, self)
-        oNewSubstrate.exec_()
+        oNewSubstrate.exec()
 
     def onNewTaxon(self):
         oNewTaxonDialog = NewTaxonDialog(self.oConnector, self)
-        oNewTaxonDialog.exec_()
+        oNewTaxonDialog.exec()
 
     def onSetStatusBarMessage(self, sMassage='Ready'):
         """ Method create Status Bar on main window of program GUI. """
@@ -247,7 +246,7 @@ class MainWindow(QMainWindow):
         if oComboBox is not None:
             oCompleter = QCompleter(lTaxonList, oComboBox)
             oComboBox.setCompleter(oCompleter)
-        ok = oInputDialog.exec_()
+        ok = oInputDialog.exec()
         if ok:
             sTaxonName = oInputDialog.textValue()
             oTaxonInfo = self.get_page_taxon_info(sTaxonName)

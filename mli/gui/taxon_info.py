@@ -17,8 +17,7 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from gettext import gettext as _
-
-from PyQt5.QtWidgets import QTextBrowser
+from PyQt6.QtWidgets import QTextBrowser
 
 from mli.lib.str import HTMLDoc
 

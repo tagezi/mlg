@@ -17,9 +17,8 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from gettext import gettext as _
-
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QComboBox, QDialog, QHBoxLayout, QVBoxLayout, \
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QComboBox, QDialog, QHBoxLayout, QVBoxLayout, \
     QLabel, QLineEdit, QPushButton, QTextEdit
 
 
@@ -46,7 +45,7 @@ class ADialogApplyButtons(QDialog):
         self.oButtonCancel.setFixedWidth(80)
 
         self.oHLayoutButtons.addWidget(self.oButtonApply,
-                                       alignment=Qt.AlignRight)
+                                       alignment=Qt.AlignmentFlag.AlignRight)
         self.oHLayoutButtons.addWidget(self.oButtonOk)
         self.oHLayoutButtons.addWidget(self.oButtonCancel)
 

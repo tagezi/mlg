@@ -36,7 +36,7 @@ actions.
 """
 
 from gettext import gettext as _
-from PyQt5.QtWidgets import QMessageBox
+from PyQt6.QtWidgets import QMessageBox
 
 
 def warning_no_synonyms(sName):

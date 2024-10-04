@@ -16,7 +16,7 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout
+from PyQt6.QtWidgets import QWidget, QTabWidget, QVBoxLayout
 
 
 class CentralTabWidget(QTabWidget):
@@ -25,8 +25,8 @@ class CentralTabWidget(QTabWidget):
         self.oTab = None
 
         self.setMovable(True)
-        self.setTabPosition(QTabWidget.South)
-        self.setTabShape(QTabWidget.Triangular)
+        self.setTabPosition(QTabWidget.TabPosition.South)
+        self.setTabShape(QTabWidget.TabShape.Triangular)
         self.setTabsClosable(True)
 
         self.connect_actions()

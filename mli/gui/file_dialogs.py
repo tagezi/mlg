@@ -17,8 +17,7 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtWidgets import QPushButton, QLabel, QFileDialog
+from PyQt6.QtWidgets import QFileDialog
 
 
 class OpenFileDialog(QFileDialog):
@@ -31,7 +30,7 @@ class OpenFileDialog(QFileDialog):
 
     def exec(self):
         fFileName = []
-        if self.exec_():
+        if self.exec():
             fFileName = self.selectedFiles()
         if fFileName:
             return fFileName
@@ -50,7 +49,7 @@ class OpenDirDialog(QFileDialog):
 
     def exec(self):
         fFileName = []
-        if self.exec_():
+        if self.exec():
             fFileName = self.selectedFiles()
         if fFileName:
             return fFileName

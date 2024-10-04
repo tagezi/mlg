@@ -17,8 +17,7 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from gettext import gettext as _
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QVBoxLayout
+from PyQt6.QtWidgets import QVBoxLayout
 
 from mli.gui.dialog_elements import ADialogApplyButtons, HComboBox, HLineEdit
 from mli.gui.message_box import warning_this_exist
@@ -71,7 +70,7 @@ class EditColor(AColor):
         """ Creating a dialog window. """
         super().init_UI()
         self.setWindowTitle(_('Edit color.'))
-        self.setModal(Qt.ApplicationModal)
+        self.setModal(True)
 
         self.oComboColors.set_combo_list(
             sorted(self.create_colors_list('Colors')))
@@ -138,7 +137,7 @@ class NewColor(AColor):
         """ Creating a dialog window. """
         super().init_UI()
         self.setWindowTitle(_('Add new color.'))
-        self.setModal(Qt.ApplicationModal)
+        self.setModal(True)
 
         oVLayout = QVBoxLayout()
         oVLayout.addLayout(self.oLineEditlName)

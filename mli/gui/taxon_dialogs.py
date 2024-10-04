@@ -17,8 +17,7 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from gettext import gettext as _
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout
+from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout
 
 from mli.gui.dialog_elements import ADialogApplyButtons, VComboBox, VLineEdit
 from mli.gui.message_box import warning_no_synonyms, warning_lat_name,\
@@ -264,7 +263,7 @@ class EditSynonymDialog(ATaxonDialog):
         """ Creating a dialog window. """
         super().init_UI()
         self.setWindowTitle(_('Editing an existing taxon'))
-        self.setModal(Qt.ApplicationModal)
+        self.setModal(True)
 
         self.oLineEditLatName.set_label(_('New synonym name:'))
         self.oComboMainTaxon.set_text(_('New main taxon:'))
@@ -317,7 +316,7 @@ class EditTaxonDialog(ATaxonDialog):
         """ Creating a dialog window. """
         super().init_UI()
         self.setWindowTitle(_('Editing of a taxon'))
-        self.setModal(Qt.ApplicationModal)
+        self.setModal(True)
 
         oVLayout = QVBoxLayout()
         oVLayout.addLayout(self.oComboTaxNames)
@@ -346,7 +345,7 @@ class NewTaxonDialog(ATaxonDialog):
         """ Creating a dialog window. """
         super().init_UI()
         self.setWindowTitle(_('Add new taxon to tree'))
-        self.setModal(Qt.ApplicationModal)
+        self.setModal(True)
 
         oVLayout = QVBoxLayout()
         oVLayout.addLayout(self.oComboMainTaxon)

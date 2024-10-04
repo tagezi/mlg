@@ -16,8 +16,7 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QHBoxLayout, QLineEdit
+from PyQt6.QtWidgets import QPushButton, QVBoxLayout, QHBoxLayout, QLineEdit
 
 from mli.gui.dialog_elements import ADialogApplyButtons
 from mli.gui.file_dialogs import OpenFileDialog
@@ -36,7 +35,7 @@ class SettingDialog(ADialogApplyButtons):
 
     def init_UI(self):
         self.setWindowTitle('Setting')
-        self.setModal(Qt.ApplicationModal)
+        self.setModal(True)
         self.oButtonOpenFile = QPushButton('...', self)
         sFileNameDB = self.oConfigProgram.get_config_value('DB', 'db_path')
 

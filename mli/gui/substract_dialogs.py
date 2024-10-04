@@ -17,9 +17,7 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from gettext import gettext as _
-
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QVBoxLayout
+from PyQt6.QtWidgets import QVBoxLayout
 
 from mli.gui.dialog_elements import ADialogApplyButtons, HComboBox, HLineEdit
 
@@ -35,7 +33,7 @@ class EditSubstrateDialog(ADialogApplyButtons):
     def init_UI(self):
         """ Creating a dialog window. """
         self.setWindowTitle(_('Edit substrate...'))
-        self.setModal(Qt.ApplicationModal)
+        self.setModal(True)
 
         self.oComboSubstrateLevel = HComboBox(_('Old substrate name:'))
         self.oLineEditSubstrate = HLineEdit(_('New substrate name:'))
@@ -93,7 +91,7 @@ class NewSubstrateDialog(ADialogApplyButtons):
     def init_UI(self):
         """ Creating a dialog window. """
         self.setWindowTitle(_('Add new substrate...'))
-        self.setModal(Qt.ApplicationModal)
+        self.setModal(True)
 
         self.oComboSubstrateLevel = HComboBox(_('Old substrate name:'))
         self.oLineEditSubstrate = HLineEdit(_('New substrate name:'))
